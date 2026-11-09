@@ -1,0 +1,60 @@
+{
+  "dry_powder_usd": 400000,
+  "default_clip_usd": 380000,
+  "nyc_short_term_tax_rate": 0.545,
+  "default_coc_dilution_buffer_pct": 1.5,
+  "sgov_ticker": "SGOV",
+  "watchlist": [
+    {
+      "ticker": "U",
+      "company_name": "Unity Software",
+      "leak_timestamp": "2026-11-06T16:52:00-05:00",
+      "rumor_headline": "Reuters (Nov 6, 2026): Silver Lake & Saudi PIF approached Unity for ~$25B take-private; advisor hired. STATUS: Early/Exploratory \u2014 DO NOT TRADE until final per-share price leaks.",
+      "input_mode": "EV_BILLIONS",
+      "rumored_value": 25.0,
+      "buyer_type": "Silver Lake & Saudi PIF",
+      "gate_notes": "Reuters (Nov 6, 2026): Silver Lake & Saudi PIF approached Unity for ~$25B take-private; advisor hired. STATUS: Early/Exploratory \u2014 DO NOT TRADE until final per-share price leaks."
+    },
+    {
+      "ticker": "HELE",
+      "company_name": "Helen of Troy",
+      "leak_timestamp": "2026-11-03T16:30:00-05:00",
+      "rumor_headline": "Nov 2026: Empower Brands (Oaktree + Spectrum) submitted $37.00/sh ($1.6B EV) all-cash bid; board rejected. STATUS: Watch for sweetened friendly agreement leak.",
+      "input_mode": "PER_SHARE",
+      "rumored_value": 37.0,
+      "buyer_type": "Empower Brands (Oaktree + Spectrum)",
+      "gate_notes": "Nov 2026: Empower Brands (Oaktree + Spectrum) submitted $37.00/sh ($1.6B EV) all-cash bid; board rejected. STATUS: Watch for sweetened friendly agreement leak."
+    },
+    {
+      "ticker": "WEN",
+      "company_name": "The Wendy's Co.",
+      "leak_timestamp": "2026-10-28T16:24:00-05:00",
+      "rumor_headline": "Oct 28, 2026: Trian & Sixth Street submitted $7.35/sh ($1.4B) non-binding offer; under Special Committee review. STATUS: Watch for sweetened board-agreed price leak.",
+      "input_mode": "PER_SHARE",
+      "rumored_value": 7.35,
+      "buyer_type": "Trian & Sixth Street",
+      "gate_notes": "Oct 28, 2026: Trian & Sixth Street submitted $7.35/sh ($1.4B) non-binding offer; under Special Committee review. STATUS: Watch for sweetened board-agreed price leak."
+    },
+    {
+      "ticker": "RYTM",
+      "company_name": "Rhythm Pharmaceuticals",
+      "leak_timestamp": "2026-11-05T16:15:00-05:00",
+      "rumor_headline": "WSJ (Nov 2026): AstraZeneca approached Rhythm around ~$124/sh (~$10B). STATUS: Unconfirmed stage \u2014 watch for advanced talks confirmation.",
+      "input_mode": "PER_SHARE",
+      "rumored_value": 124.0,
+      "buyer_type": "AstraZeneca",
+      "gate_notes": "WSJ (Nov 2026): AstraZeneca approached Rhythm around ~$124/sh (~$10B). STATUS: Unconfirmed stage \u2014 watch for advanced talks confirmation."
+    },
+    {
+      "ticker": "GPN",
+      "company_name": "Global Payments",
+      "leak_timestamp": "2026-10-30T16:40:00-05:00",
+      "rumor_headline": "FT/Reuters (Oct 30, 2026): CD&R and GTCR in early-stage joint take-private talks. STATUS: Early stage \u2014 wait for debt lock & final price leak.",
+      "input_mode": "UNPRICED",
+      "rumored_value": null,
+      "buyer_type": "CD&R and GTCR",
+      "gate_notes": "FT/Reuters (Oct 30, 2026): CD&R and GTCR in early-stage joint take-private talks. STATUS: Early stage \u2014 wait for debt lock & final price leak."
+    }
+  ],
+  "max_actionable_leak_age_hours": 4.0
+}
