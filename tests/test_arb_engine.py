@@ -11,6 +11,7 @@ from arb_engine import (
     EST_TZ,
     GATEKEEPER_RULES,
     STRATEGY_BENCHMARKS,
+    _build_opportunity,
     _extract_ticker_and_deal_value,
     calculate_deal_mechanics,
     calculate_hft_cooldown,
@@ -729,3 +730,33 @@ def test_biopharma_bolt_on_backtest_and_live_rytm_audit() -> None:
 
 
 
+
+
+def test_scanner_biotech_signal_rechecks_92pct_ceiling_at_live_price() -> None:
+    """A 6/6 biotech audit is only actionable while the live price is at or under the 92% max buy price."""
+    audit = run_biopharma_backtest()["live_rytm_audit"]
+    base_row = {
+        "ticker": "RYTM",
+        "company_name": "Rhythm Pharmaceuticals, Inc.",
+        "verdict": "PASS_HOT",
+        "is_stale_leak": True,
+        "leak_age_human": "5.9d ago",
+    }
+
+    under = _build_opportunity({**base_row, "extended_hours_price": 113.0, "regular_market_price": 113.0}, audit)
+    assert under["biotech_signal"]["is_actionable"] is True
+    assert under["biotech_signal"]["gates_passed"] == 6
+    assert (under["decision_key"], under["decision_label"]) == ("go", "Actionable")
+    assert "4-hour news rule doesn't apply" in under["decision_text"]
+
+    over = _build_opportunity({**base_row, "extended_hours_price": 114.2, "regular_market_price": 114.2}, audit)
+    signal = over["biotech_signal"]
+    assert signal["is_actionable"] is False
+    assert signal["label"] == "Biotech M&A rumor · price above max buy"
+    assert signal["gates_passed"] == 5
+    assert [c["passed"] for c in signal["checks"]].index(False) == 4
+    assert (over["decision_key"], over["decision_label"]) == ("wait", "Wait for dip")
+    assert "$114.20 price is above the $114.08 max buy price" in over["decision_text"]
+
+    other = _build_opportunity({**base_row, "ticker": "GPN", "extended_hours_price": 80.0}, None)
+    assert other["biotech_signal"] is None

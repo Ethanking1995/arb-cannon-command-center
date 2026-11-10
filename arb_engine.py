@@ -1464,6 +1464,11 @@ def fetch_extended_hours_quote(
                     "session_type": session_type,
                 }
             )
+            prev_close = info.get("regularMarketPreviousClose") or info.get(
+                "previousClose"
+            )
+            if prev_close:
+                base_quote["previous_close"] = round(float(prev_close), 2)
             reg_f = float(base_quote["regular_market_price"])
             ext_f = float(base_quote["extended_hours_price"])
             base_quote["extended_change_pct"] = (
@@ -2389,4 +2394,428 @@ def get_dashboard_payload(use_live_network: bool = True) -> Dict[str, Any]:
         "default_calculation": default_calc,
         "hft_cooldown": calculate_hft_cooldown("16:18"),
         "biopharma_backtest": run_biopharma_backtest(),
+    }
+
+
+# ==============================================================================
+# 6. OVERNIGHT SCANNER (GET /api/scanner, GET /api/price-history)
+# ==============================================================================
+
+PRICE_HISTORY_RANGES: Dict[str, Tuple[str, str]] = {
+    "1D": ("1d", "5m"),
+    "5D": ("5d", "30m"),
+    "1M": ("1mo", "1d"),
+}
+
+_PRICE_HISTORY_CACHE: Dict[Tuple[str, str], Tuple[float, Dict[str, Any]]] = {}
+
+LIQUIDITY_TIERS_USD: Tuple[Tuple[float, str], ...] = (
+    (1_000_000.0, "High"),
+    (300_000.0, "Medium"),
+)
+
+BIOTECH_NAME_PATTERN = re.compile(
+    r"pharma|therapeutic|bio|genetic|medicine|oncology", re.IGNORECASE
+)
+
+_MONTH_DAY_PATTERN = re.compile(
+    r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2})\b"
+)
+
+OPPORTUNITY_STATUS: Dict[str, str] = {
+    "PASS_HOT": "open",
+    "WARN_TIGHT": "tight",
+    "FAIL_TAKE_UNDER": "take_under",
+    "AWAITING_PRICE_LEAK": "monitoring",
+}
+
+# status_key -> (short pill label, one-sentence plain-English hover hint)
+OPPORTUNITY_STATUS_TEXT: Dict[str, Tuple[str, str]] = {
+    "open": (
+        "Worth a look",
+        "The stock trades well below the rumored buyout price, so there's room to profit if the deal happens.",
+    ),
+    "tight": (
+        "Too little upside",
+        "The stock is already close to the rumored buyout price, so there's not enough left to gain to justify the risk.",
+    ),
+    "take_under": (
+        "Priced above offer",
+        "The stock already trades above what the buyer is reportedly paying, so a deal wouldn't pay off.",
+    ),
+    "monitoring": (
+        "No price yet",
+        "There's talk of a buyout, but no one has reported a price per share yet, so we can't tell if it's worth buying.",
+    ),
+    "filed": (
+        "Deal announced",
+        "The buyout has been officially announced in an SEC filing, so the early-rumor opportunity has passed.",
+    ),
+}
+
+# biopharma gate id prefix -> short plain-English checklist label for the scanner
+BIOTECH_GATE_LABELS: Dict[str, str] = {
+    "BIO_GATE_1": "Named big-pharma buyer with a specific price",
+    "BIO_GATE_2": "Approved drug props up the stock if talks fail",
+    "BIO_GATE_3": "Clean ownership and drug rights",
+    "BIO_GATE_4": "Second bidder could push the price higher",
+    "BIO_GATE_5": "Buying at or below 92% of the offer",
+    "BIO_GATE_6": "Small position with a set time limit",
+}
+
+_BIOTECH_GATE_PREFIX = re.compile(r"^BIO_GATE_\d+")
+
+_STATUS_SORT_RANK = {"open": 0, "tight": 1, "monitoring": 2, "take_under": 3, "filed": 4}
+
+
+def fetch_price_history(
+    ticker: str, range_key: str = "1D", use_live_yf: bool = True
+) -> Dict[str, Any]:
+    """
+    Return price bars plus a running VWAP for the scanner chart. Returns an empty
+    point list (never synthetic bars) when yfinance is unavailable or offline.
+    """
+    tkr = ticker.upper().strip()
+    rk = range_key.upper().strip()
+    if rk not in PRICE_HISTORY_RANGES:
+        raise ValueError(
+            f"Unsupported range '{range_key}'. Use one of: {', '.join(PRICE_HISTORY_RANGES)}."
+        )
+    period, interval = PRICE_HISTORY_RANGES[rk]
+    result: Dict[str, Any] = {
+        "ticker": tkr,
+        "range": rk,
+        "interval": interval,
+        "points": [],
+        "source": "unavailable",
+    }
+    if not use_live_yf or yf is None:
+        return result
+
+    now_ts = dt.datetime.now(EST_TZ).timestamp()
+    cached = _PRICE_HISTORY_CACHE.get((tkr, rk))
+    if cached and (now_ts - cached[0]) < 60.0:
+        return dict(cached[1])
+
+    try:
+        hist = yf.Ticker(tkr).history(
+            period=period, interval=interval, prepost=(rk != "1M")
+        )
+    except Exception as exc:
+        logger.debug("yfinance price history fallback for %s: %s", tkr, exc)
+        return result
+    if hist is None or hist.empty:
+        return result
+
+    cum_pv = 0.0
+    cum_vol = 0.0
+    points: List[Dict[str, Any]] = []
+    for ts, row in hist.iterrows():
+        close = float(row.get("Close", float("nan")))
+        if not math.isfinite(close) or close <= 0:
+            continue
+        high = float(row.get("High", close))
+        low = float(row.get("Low", close))
+        vol = float(row.get("Volume", 0.0))
+        if not math.isfinite(vol) or vol < 0:
+            vol = 0.0
+        cum_pv += ((high + low + close) / 3.0) * vol
+        cum_vol += vol
+        vwap = cum_pv / cum_vol if cum_vol > 0 else close
+        points.append(
+            {
+                "t": ts.to_pydatetime().astimezone(EST_TZ).isoformat(),
+                "price": round(close, 2),
+                "vwap": round(vwap, 2),
+            }
+        )
+
+    if points:
+        result.update({"points": points, "source": "yfinance"})
+        _PRICE_HISTORY_CACHE[(tkr, rk)] = (now_ts, dict(result))
+    return result
+
+
+def _pct_move(target: Optional[float], entry: float) -> Optional[float]:
+    if target is None or entry <= 0:
+        return None
+    return round((float(target) / entry - 1.0) * 100.0, 2)
+
+
+def _rumored_window_label(text: str) -> Optional[str]:
+    dates = [f"{m} {d}" for m, d in _MONTH_DAY_PATTERN.findall(text or "")]
+    if not dates:
+        return None
+    return dates[0] if len(dates) == 1 else f"{dates[0]} – {dates[1]}"
+
+
+def _liquidity_label(max_clip_usd: Optional[float]) -> str:
+    clip = float(max_clip_usd or 0.0)
+    for floor_usd, label in LIQUIDITY_TIERS_USD:
+        if clip >= floor_usd:
+            return label
+    return "Low"
+
+
+def _share_price_label(value: float) -> str:
+    return f"${value:,.0f}" if float(value).is_integer() else f"${value:,.2f}"
+
+
+def _biotech_signal(audit: Dict[str, Any], status_key: str, entry: float) -> Dict[str, Any]:
+    base = float(audit["base_cash_bid_per_share"])
+    ceiling = float(audit.get("hard_ceiling_92pct") or round(base * 0.92, 2))
+    checks = []
+    for gate in audit.get("gate_checks") or []:
+        gate_key = (_BIOTECH_GATE_PREFIX.match(str(gate.get("id", ""))) or [""])[0]
+        passed = bool(gate.get("passed"))
+        detail = gate.get("detail", "")
+        # The audit models the held lot; the 92% ceiling must hold for the live price too.
+        if gate_key == "BIO_GATE_5" and entry > 0:
+            passed = passed and entry <= ceiling
+            detail = (
+                f"Live price ${entry:.2f} = {entry / base * 100.0:.1f}% of the ${base:.2f} offer "
+                f"(max buy price ${ceiling:.2f}). Model: {detail}"
+            )
+        checks.append(
+            {
+                "label": BIOTECH_GATE_LABELS.get(gate_key, gate.get("title", "")),
+                "passed": passed,
+                "detail": detail,
+            }
+        )
+    gates_passed = sum(1 for c in checks if c["passed"])
+    gates_total = len(checks) or int(audit.get("total_gates_count") or 0)
+    is_actionable = (
+        bool(audit.get("all_biopharma_gates_passed"))
+        and gates_passed == gates_total
+        and status_key == "open"
+    )
+    if is_actionable:
+        label = "Actionable biotech M&A rumor"
+    elif gates_passed == gates_total - 1 and entry > ceiling:
+        label = "Biotech M&A rumor · price above max buy"
+    else:
+        label = "Biotech M&A rumor · not actionable"
+    return {
+        "is_actionable": is_actionable,
+        "label": label,
+        "gates_passed": gates_passed,
+        "gates_total": gates_total,
+        "buyer": audit.get("named_pharma_suitor"),
+        "hold_window": audit.get("expected_hold_clock"),
+        "max_entry_price": ceiling,
+        "checks": checks,
+    }
+
+
+def _biotech_decision(
+    audit: Dict[str, Any], signal: Dict[str, Any], entry: float
+) -> Optional[Tuple[str, str, str]]:
+    buyer_name = str(audit.get("named_pharma_suitor") or "A big-pharma buyer").split(" (")[0]
+    base = float(audit["base_cash_bid_per_share"])
+    sweetened = float(audit.get("sweetened_ceiling_per_share") or base)
+    ceiling = float(signal["max_entry_price"])
+    if signal["is_actionable"]:
+        clauses = [f"{buyer_name} has a reported {_share_price_label(base)}/sh offer"]
+        if sweetened > base:
+            clauses.append(f"a second bidder may raise it toward {_share_price_label(sweetened)}")
+        clauses.append(
+            f"the {_share_price_label(entry)} entry is at or under the "
+            f"{_share_price_label(ceiling)} max buy price"
+        )
+        return (
+            "go",
+            "Actionable",
+            f"Passes all {signal['gates_total']} biotech checks: {', '.join(clauses[:-1])}, "
+            f"and {clauses[-1]}. Biotech deals take 1–4 weeks, so the 4-hour news rule doesn't apply.",
+        )
+    if signal["gates_passed"] == signal["gates_total"] - 1 and entry > ceiling:
+        return (
+            "wait",
+            "Wait for dip",
+            f"Passes {signal['gates_passed']} of {signal['gates_total']} biotech checks, but the "
+            f"{_share_price_label(entry)} price is above the {_share_price_label(ceiling)} max buy price "
+            f"(92% of {buyer_name}'s {_share_price_label(base)} offer). Only buy at or below "
+            f"{_share_price_label(ceiling)}.",
+        )
+    return None
+
+
+def _build_opportunity(
+    row: Dict[str, Any],
+    audit: Optional[Dict[str, Any]],
+    previous_close: Optional[float] = None,
+) -> Dict[str, Any]:
+    tkr = row["ticker"]
+    entry = float(row.get("extended_hours_price") or 0.0)
+    regular = float(row.get("regular_market_price") or 0.0)
+    change_base = float(previous_close or regular)
+    has_8k = bool((row.get("edgar_8k") or {}).get("has_recent_item_1_01"))
+
+    status_key = (
+        "filed" if has_8k else OPPORTUNITY_STATUS.get(row.get("verdict", ""), "monitoring")
+    )
+    status_label, status_hint = OPPORTUNITY_STATUS_TEXT[status_key]
+
+    base_offer = row.get("implied_deal_price")
+    higher_offer: Optional[float] = None
+    floor_price: Optional[float] = None
+    ev_pct: Optional[float] = None
+    rumored_window: Optional[str] = None
+    buyer = row.get("buyer_type") or ""
+
+    if audit is not None:
+        base_offer = float(audit["base_cash_bid_per_share"])
+        higher_offer = float(audit["sweetened_ceiling_per_share"])
+        floor_price = float(audit["fundamental_walkaway_floor"])
+        buyer = audit.get("named_pharma_suitor") or buyer
+        scenarios = (audit.get("live_100k_lot_scenarios") or {}).get("scenarios", [])
+        if entry > 0 and scenarios:
+            ev_pct = round(
+                sum(
+                    (float(s["probability_pct"]) / 100.0)
+                    * (float(s["exit_price"]) / entry - 1.0)
+                    * 100.0
+                    for s in scenarios
+                ),
+                2,
+            )
+        windows = audit.get("deal_timeline_windows") or []
+        if windows:
+            rumored_window = _rumored_window_label(windows[0].get("target_dates", ""))
+
+    upside_low = _pct_move(base_offer, entry)
+    upside_high = _pct_move(higher_offer, entry)
+    downside = _pct_move(floor_price, entry)
+    best_upside = upside_high if upside_high is not None else upside_low
+    reward_to_risk = (
+        round(best_upside / abs(downside), 2)
+        if best_upside is not None and downside not in (None, 0.0)
+        else None
+    )
+
+    biotech_signal = _biotech_signal(audit, status_key, entry) if audit is not None else None
+    biotech_decision = (
+        _biotech_decision(audit, biotech_signal, entry)
+        if biotech_signal is not None and status_key == "open"
+        else None
+    )
+
+    age = (row.get("leak_age_human") or "at an unknown time").split(" (")[0]
+    if biotech_decision is not None:
+        decision = biotech_decision
+    elif status_key == "filed":
+        decision = ("avoid", "Avoid", "A definitive agreement is already on file, so the pre-announcement window has closed.")
+    elif status_key == "take_under":
+        decision = ("avoid", "Avoid", f"The implied deal value (${float(base_offer or 0):.2f}) is below the ${entry:.2f} market price.")
+    elif status_key == "tight":
+        decision = ("avoid", "Pass", f"The {float(upside_low or 0):+.1f}% spread is below the 5.5% minimum entry threshold.")
+    elif status_key == "monitoring":
+        decision = ("wait", "Wait", "No per-share price has leaked yet, so there is nothing to size.")
+    elif row.get("is_stale_leak"):
+        decision = ("review", "Review", f"Attractive asymmetry, but the rumor is unconfirmed and the leak broke {age}.")
+    else:
+        decision = ("go", "Go", "The spread is open inside the 4-hour leak window.")
+
+    analysis_params: Dict[str, Any] = {"ticker": tkr}
+    if row.get("rumored_value") is not None:
+        analysis_params.update(
+            {"mode": row.get("input_mode"), "value": row.get("rumored_value")}
+        )
+
+    return {
+        "ticker": tkr,
+        "company_name": row.get("company_name") or tkr,
+        "sector": "Biotech"
+        if audit is not None or BIOTECH_NAME_PATTERN.search(row.get("company_name") or "")
+        else "Other",
+        "status_key": status_key,
+        "status_label": status_label,
+        "status_hint": status_hint,
+        "entry_price": round(entry, 2),
+        "regular_market_price": round(regular, 2),
+        "previous_close": previous_close,
+        "change_pct": _pct_move(entry, change_base) if change_base > 0 else None,
+        "base_offer": None if base_offer is None else round(float(base_offer), 2),
+        "higher_offer": higher_offer,
+        "floor_price": floor_price,
+        "upside_low_pct": upside_low,
+        "upside_high_pct": upside_high,
+        "downside_pct": downside,
+        "ev_pct": ev_pct,
+        "reward_to_risk": reward_to_risk,
+        "liquidity_label": _liquidity_label(row.get("max_clip_10pct_volume_usd")),
+        "max_clip_usd": row.get("max_clip_10pct_volume_usd"),
+        "catalyst": "8-K filed" if has_8k else "Rumor",
+        "rumored_window": rumored_window,
+        "leak_timestamp_est": row.get("leak_timestamp_est"),
+        "leak_age_human": row.get("leak_age_human"),
+        "leak_age_hours": row.get("leak_age_hours"),
+        "is_stale_leak": bool(row.get("is_stale_leak")),
+        "decision_key": decision[0],
+        "decision_label": decision[1],
+        "decision_text": decision[2],
+        "rumor_headline": row.get("rumor_headline", ""),
+        "buyer": buyer,
+        "biotech_signal": biotech_signal,
+        "analysis_url": "/terminal?" + urllib.parse.urlencode(analysis_params),
+    }
+
+
+def get_scanner_payload(use_live_network: bool = True) -> Dict[str, Any]:
+    """Assemble the Overnight Scanner payload: KPI strip, ranked opportunities, wires, and performance."""
+    watchlist_rows = evaluate_watchlist(use_live_network=use_live_network)
+    backtest = run_biopharma_backtest()
+    audit = backtest.get("live_rytm_audit") or {}
+    audit_ticker = str(audit.get("ticker", "")).upper()
+
+    opportunities = [
+        _build_opportunity(
+            row,
+            audit if row["ticker"] == audit_ticker else None,
+            fetch_extended_hours_quote(
+                row["ticker"], use_live_yf=use_live_network
+            ).get("previous_close"),
+        )
+        for row in watchlist_rows
+    ]
+    opportunities.sort(
+        key=lambda o: (
+            _STATUS_SORT_RANK.get(o["status_key"], 9),
+            -(o["upside_high_pct"] or o["upside_low_pct"] or -1e9),
+        )
+    )
+
+    wires = scan_ma_wires(
+        use_live_rss=use_live_network, include_curated_fallback=not use_live_network
+    )
+    period_label = STRATEGY_BENCHMARKS["period_label"].split(" (")[0]
+
+    return {
+        "timestamp_est": dt.datetime.now(EST_TZ).strftime("%Y-%m-%d %H:%M:%S EST"),
+        "generated_at": dt.datetime.now(EST_TZ).isoformat(),
+        "kpis": {
+            "active_candidates": len(opportunities),
+            "fresh_last_24h": sum(
+                1 for o in opportunities if (o["leak_age_hours"] or 1e9) <= 24.0
+            ),
+            "actionable_setups": sum(1 for o in opportunities if o["status_key"] == "open"),
+            "actionable_biotech": sum(
+                1 for o in opportunities if (o["biotech_signal"] or {}).get("is_actionable")
+            ),
+            "backtest_win_rate_pct": STRATEGY_BENCHMARKS["filtered_win_rate_pct"],
+            "backtest_period_label": period_label,
+            "avg_overnight_move_pct": STRATEGY_BENCHMARKS["avg_net_spread_captured_pct"],
+        },
+        "opportunities": opportunities,
+        "wire_items": wires,
+        "performance": {
+            "period_label": STRATEGY_BENCHMARKS["period_label"],
+            "annual_pnl_table": STRATEGY_BENCHMARKS["annual_pnl_table"],
+            "cumulative_3yr_filtered_usd": STRATEGY_BENCHMARKS["cumulative_3yr_filtered_usd"],
+            "cumulative_3yr_unfiltered_usd": STRATEGY_BENCHMARKS["cumulative_3yr_unfiltered_usd"],
+            "cumulative_3yr_sgov_usd": STRATEGY_BENCHMARKS["cumulative_3yr_sgov_usd"],
+            "biopharma_period": backtest.get("period_covered"),
+            "biopharma_filtered": backtest.get("filtered_6_gate_metrics"),
+        },
     }
