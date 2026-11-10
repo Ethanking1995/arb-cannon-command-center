@@ -23,6 +23,10 @@ from arb_engine import (
     passes_strict_ma_headline_filter,
     scan_ma_wires,
 )
+from biopharma_leak_backtest import (
+    evaluate_biopharma_bolt_on_candidate,
+    run_biopharma_backtest,
+)
 from nightly_mailer import build_subject_line, generate_and_send_nightly_report
 
 
@@ -578,6 +582,77 @@ def test_strict_rss_filter_no_fabricated_prices_and_verified_watchlist() -> None
     assert wl_eval["GPN"]["gross_spread_pct"] is None
     assert wl_eval["GPN"]["verdict"] == "AWAITING_PRICE_LEAK"
     assert wl_eval["GPN"]["tranche_ladder"] == []
+
+
+def test_biopharma_bolt_on_backtest_and_live_rytm_audit() -> None:
+    """
+    Verify the 2023–2026 Historical Biopharma Pre-Announcement Leak Backtest (13 events)
+    and the 6-Gate Biopharma Bolt-On Mode for $RYTM:
+      - Unfiltered 13 events include walk-aways ($CYTK -16.69%, $BBIO -12.24%, $APLS -12.20%)
+      - 6-Gate Filtered events (MRTX, KRTX, ITCI, SWTX, BPMC, VRNA) achieve 100.0% win rate
+      - $CYTK walk-away is blocked by BIO_GATE_1 (unapproved drug with pending FDA REMS/NDA risk)
+      - $RYTM clears 6/6 Biopharma Bolt-On Gates with 10.0% / 12.5% / 15.0% tranche ladder
+    """
+    bt = run_biopharma_backtest(standard_biopharma_clip_usd=190000.0)
+    assert bt["unfiltered_metrics"]["total_events"] == 13
+    assert bt["unfiltered_metrics"]["wins"] == 10
+    assert bt["unfiltered_metrics"]["losses_or_walkaways"] == 3
+    assert bt["unfiltered_metrics"]["win_rate_pct"] == 76.9
+
+    fg = bt["filtered_6_gate_metrics"]
+    assert fg["qualified_events"] == 6
+    assert fg["wins"] == 6
+    assert fg["losses_or_walkaways"] == 0
+    assert fg["win_rate_pct"] == 100.0
+    assert fg["avg_return_per_trade_pct"] > 12.0
+
+    by_tkr = {e["ticker"]: e for e in bt["historical_events"]}
+    assert by_tkr["CYTK"]["cleared_6_biopharma_gates"] is False
+    assert by_tkr["CYTK"]["realized_return_pct"] == -16.69
+    assert by_tkr["SWTX"]["cleared_6_biopharma_gates"] is True
+    assert by_tkr["VRNA"]["cleared_6_biopharma_gates"] is True
+    assert by_tkr["BPMC"]["cleared_6_biopharma_gates"] is True
+
+    # Verify $RYTM live audit via calculate_deal_mechanics in BIOPHARMA_BOLT_ON mode
+    rytm_calc = calculate_deal_mechanics(
+        ticker="RYTM",
+        input_mode="PER_SHARE",
+        value=124.0,
+        clip_usd=190000.0,
+        coc_dilution_pct=1.5,
+        use_live_network=False,
+        strategy_mode="BIOPHARMA_BOLT_ON",
+        sweetened_ceiling_per_share=134.0,
+    )
+    assert rytm_calc["strategy_mode"] == "BIOPHARMA_BOLT_ON"
+    assert [t["discount_pct"] for t in rytm_calc["tranche_ladder"]] == [
+        10.0,
+        12.5,
+        15.0,
+    ]
+    bio_audit = rytm_calc["biopharma_bolt_on_audit"]
+    assert bio_audit is not None
+    assert bio_audit["all_biopharma_gates_passed"] is True
+    assert bio_audit["passed_gates_count"] == 6
+    assert bio_audit["verdict"] == "BIO_PASS_HOT"
+    assert (
+        bio_audit["pnl_summary"]["ira_sweetened_bid_net_profit_usd"]
+        > bio_audit["pnl_summary"]["ira_base_bid_net_profit_usd"]
+    )
+
+    # Verify CYTK fails BIO_GATE_1 when evaluated directly
+    cytk_audit = evaluate_biopharma_bolt_on_candidate(
+        ticker="CYTK",
+        current_price=101.97,
+        unaffected_price=89.30,
+        base_cash_bid_per_share=115.00,
+        sweetened_ceiling_per_share=115.00,
+        deal_ev_billions=10.5,
+        fda_approved_commercial_anchor=False,
+    )
+    assert cytk_audit["all_biopharma_gates_passed"] is False
+    assert cytk_audit["verdict"] == "BIO_WARN_GATES"
+
 
 
 

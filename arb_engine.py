@@ -24,6 +24,13 @@ from zoneinfo import ZoneInfo
 import requests
 from dotenv import load_dotenv
 
+from biopharma_leak_backtest import (
+    BIOPHARMA_GATEKEEPER_RULES,
+    HISTORICAL_BIOPHARMA_LEAKS,
+    evaluate_biopharma_bolt_on_candidate,
+    run_biopharma_backtest,
+)
+
 try:
     import yfinance as yf
 except ImportError:  # pragma: no cover
@@ -256,6 +263,19 @@ PRESET_SCENARIOS: Dict[str, Dict[str, Any]] = {
         "clip_usd": 380000,
         "coc_dilution_pct": 1.5,
         "description": "CD&R / GTCR $24B EV rumor demonstrating $16.34B net debt haircut ($7.66B implied equity = $28.45/sh vs ~$99.21 market -> FAIL_TAKE_UNDER)",
+    },
+    "RYTM_BIOPHARMA_BOLT_ON": {
+        "preset_id": "RYTM_BIOPHARMA_BOLT_ON",
+        "button_label": "🧬 Biopharma Bolt-On: RYTM $124 Base -> $134 Sweetened",
+        "ticker": "RYTM",
+        "input_mode": "PER_SHARE",
+        "rumored_value": 124.0,
+        "sweetened_ceiling_per_share": 134.0,
+        "unaffected_price": 86.44,
+        "clip_usd": 190000,
+        "coc_dilution_pct": 1.5,
+        "strategy_mode": "BIOPHARMA_BOLT_ON",
+        "description": "AstraZeneca (Alexion) $124/sh initial approach sweetened toward $134/sh w/ milestones; 6/6 Biopharma Gates Passed (+10.2% Base / +19.1% Sweetened)",
     },
 }
 
@@ -1685,6 +1705,13 @@ def calculate_deal_mechanics(
     use_live_network: bool = True,
     leak_timestamp: Optional[str] = None,
     simulate_fresh_leak: bool = False,
+    strategy_mode: str = "PE_ALL_CASH",
+    sweetened_ceiling_per_share: Optional[float] = None,
+    unaffected_price: Optional[float] = None,
+    fda_approved_commercial_anchor: bool = True,
+    commercial_drug_name: Optional[str] = None,
+    named_pharma_suitor: Optional[str] = None,
+    zero_moa_overlap: bool = True,
 ) -> Dict[str, Any]:
     """
     60-Second SEC EDGAR XBRL Net-Debt & Tranche Calculator.
@@ -1692,12 +1719,14 @@ def calculate_deal_mechanics(
     Supports:
       - input_mode = "EV_BILLIONS": value is Rumored Enterprise Value in $ Billions (e.g., 1.3 -> $1.3B)
       - input_mode = "PER_SHARE": value is explicit Cash Buyout Price Per Share in $ (e.g., 8.00 -> $8.00/sh)
+      - strategy_mode = "PE_ALL_CASH" (default 5.5%/6.5%/8.0% ladder) or "BIOPHARMA_BOLT_ON" (10.0%/12.5%/15.0% ladder + 6-Gate Biopharma audit)
 
     Enforces <=4.0h Leak Freshness Gate, GATE_2 (8-K Dead Window check), GATE_6_NET_DEBT_AUDIT,
     GATE_7_LIQUIDITY_AND_TRANCHES, and Dual Tax-Regime P&L math.
     """
     tkr = ticker.upper().strip()
     mode = input_mode.upper().strip()
+    strat_mode = (strategy_mode or "PE_ALL_CASH").upper().strip()
     if mode not in ("EV_BILLIONS", "PER_SHARE"):
         raise ValueError(
             f"Invalid input_mode '{input_mode}'. Must be 'EV_BILLIONS' or 'PER_SHARE'."
@@ -1820,14 +1849,20 @@ def calculate_deal_mechanics(
         )
 
     # 4. GATE_7: 3-Tranche Limit Order Ladder
-    # Tranche 1: 40% of Clip ($152,000 at $380k) | 5.5% Gross Discount -> P_deal / 1.055
-    # Tranche 2: 35% of Clip ($133,000 at $380k) | 6.5% Gross Discount -> P_deal / 1.065
-    # Tranche 3: 25% of Clip ($95,000 at $380k)  | 8.0% Gross Discount -> P_deal / 1.080
-    tranche_specs = [
-        {"tranche": 1, "weight": 0.40, "discount_pct": 5.5, "divisor": 1.055},
-        {"tranche": 2, "weight": 0.35, "discount_pct": 6.5, "divisor": 1.065},
-        {"tranche": 3, "weight": 0.25, "discount_pct": 8.0, "divisor": 1.080},
-    ]
+    # PE_ALL_CASH Mode: 5.5%, 6.5%, 8.0% discounts
+    # BIOPHARMA_BOLT_ON Mode: 10.0%, 12.5%, 15.0% discounts to Base Cash Bid
+    if strat_mode == "BIOPHARMA_BOLT_ON":
+        tranche_specs = [
+            {"tranche": 1, "weight": 0.40, "discount_pct": 10.0, "divisor": 1.100},
+            {"tranche": 2, "weight": 0.35, "discount_pct": 12.5, "divisor": 1.125},
+            {"tranche": 3, "weight": 0.25, "discount_pct": 15.0, "divisor": 1.150},
+        ]
+    else:
+        tranche_specs = [
+            {"tranche": 1, "weight": 0.40, "discount_pct": 5.5, "divisor": 1.055},
+            {"tranche": 2, "weight": 0.35, "discount_pct": 6.5, "divisor": 1.065},
+            {"tranche": 3, "weight": 0.25, "discount_pct": 8.0, "divisor": 1.080},
+        ]
 
     tranches: List[Dict[str, Any]] = []
     total_allocated_usd = 0.0
@@ -1897,14 +1932,54 @@ def calculate_deal_mechanics(
         (total_deployed_usd / total_shares) if total_shares > 0 else 0.0
     )
 
+    biopharma_audit: Optional[Dict[str, Any]] = None
+    if strat_mode == "BIOPHARMA_BOLT_ON" or tkr == "RYTM":
+        eff_sweetened = (
+            float(sweetened_ceiling_per_share)
+            if sweetened_ceiling_per_share is not None
+            else (134.00 if tkr == "RYTM" else round(implied_buyout_per_share * 1.08, 2))
+        )
+        eff_unaffected = (
+            float(unaffected_price)
+            if unaffected_price is not None
+            else (86.44 if tkr == "RYTM" else round(extended_price * 0.80, 2))
+        )
+        eff_drug = commercial_drug_name or (
+            "Imcivree (setmelanotide) — FDA-approved (incl. Mar 2026 aHO expansion)"
+            if tkr == "RYTM"
+            else "FDA-Approved Commercial Flagship Asset"
+        )
+        eff_suitor = named_pharma_suitor or (
+            "AstraZeneca (via Alexion Rare Disease)"
+            if tkr == "RYTM"
+            else "Tier-1 Big Pharma Suitor"
+        )
+        biopharma_audit = evaluate_biopharma_bolt_on_candidate(
+            ticker=tkr,
+            current_price=extended_price,
+            unaffected_price=eff_unaffected,
+            base_cash_bid_per_share=implied_buyout_per_share,
+            sweetened_ceiling_per_share=eff_sweetened,
+            deal_ev_billions=rumored_ev_usd / 1e9,
+            fda_approved_commercial_anchor=fda_approved_commercial_anchor,
+            commercial_drug_name=eff_drug,
+            named_pharma_suitor=eff_suitor,
+            zero_moa_overlap=zero_moa_overlap,
+            bid_sweetening_or_cvr=eff_sweetened > implied_buyout_per_share,
+            clip_usd=float(clip_usd),
+            nyc_tax_rate=nyc_tax_rate,
+        )
+
     return {
         "ticker": tkr,
         "company_name": bs.get("company_name") or quote.get("company_name") or tkr,
         "cik": bs.get("cik", "0000000000"),
+        "strategy_mode": strat_mode,
         "input_mode": mode,
         "input_value": float(value),
         "clip_usd": float(clip_usd),
         "coc_dilution_pct": float(coc_dilution_pct),
+        "biopharma_bolt_on_audit": biopharma_audit,
         "balance_sheet_waterfall": {
             "filing_source": bs.get("filing_form", "SEC EDGAR XBRL"),
             "filing_date": bs.get("filing_date", "Latest"),
@@ -2277,4 +2352,5 @@ def get_dashboard_payload(use_live_network: bool = True) -> Dict[str, Any]:
         "watchlist": watchlist_rows,
         "default_calculation": default_calc,
         "hft_cooldown": calculate_hft_cooldown("16:18"),
+        "biopharma_backtest": run_biopharma_backtest(),
     }

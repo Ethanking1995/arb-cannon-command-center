@@ -24,6 +24,10 @@ from arb_engine import (
     modify_watchlist,
     scan_ma_wires,
 )
+from biopharma_leak_backtest import (
+    evaluate_biopharma_bolt_on_candidate,
+    run_biopharma_backtest,
+)
 from nightly_mailer import generate_and_send_nightly_report
 
 app = FastAPI(
@@ -69,6 +73,33 @@ class CalculateRequest(BaseModel):
         default=False,
         description="Simulate a fresh (<4h) leak window to test staging on historical benchmarks",
     )
+    strategy_mode: str = Field(
+        default="PE_ALL_CASH",
+        description="'PE_ALL_CASH' (5.5%/6.5%/8.0% ladder) or 'BIOPHARMA_BOLT_ON' (10.0%/12.5%/15.0% ladder)",
+    )
+    sweetened_ceiling_per_share: Optional[float] = Field(
+        default=None,
+        description="Optional sweetened/CVR ceiling price per share in Biopharma Bolt-On mode",
+    )
+
+
+class BiopharmaEvaluateRequest(BaseModel):
+    ticker: str = Field(default="RYTM")
+    current_price: float = Field(default=112.50)
+    unaffected_price: float = Field(default=86.44)
+    base_cash_bid_per_share: float = Field(default=124.00)
+    sweetened_ceiling_per_share: float = Field(default=134.00)
+    deal_ev_billions: float = Field(default=10.0)
+    fda_approved_commercial_anchor: bool = Field(default=True)
+    commercial_drug_name: str = Field(
+        default="Imcivree (setmelanotide) — FDA-approved (incl. Mar 2026 aHO expansion)"
+    )
+    named_pharma_suitor: str = Field(
+        default="AstraZeneca (via Alexion Rare Disease)"
+    )
+    zero_moa_overlap: bool = Field(default=True)
+    bid_sweetening_or_cvr: bool = Field(default=True)
+    clip_usd: float = Field(default=190000.0)
 
 
 class ScanRequest(BaseModel):
@@ -127,10 +158,37 @@ def api_calculate(req: CalculateRequest) -> Dict[str, Any]:
             use_live_network=req.use_live_network,
             leak_timestamp=req.leak_timestamp,
             simulate_fresh_leak=req.simulate_fresh_leak,
+            strategy_mode=req.strategy_mode,
+            sweetened_ceiling_per_share=req.sweetened_ceiling_per_share,
         )
         return result
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/api/biopharma-backtest")
+def api_get_biopharma_backtest() -> Dict[str, Any]:
+    """Return the 2023–2026 Historical Biopharma Pre-Announcement Leak Backtest & Live $RYTM Audit."""
+    return run_biopharma_backtest()
+
+
+@app.post("/api/biopharma-evaluate")
+def api_evaluate_biopharma(req: BiopharmaEvaluateRequest) -> Dict[str, Any]:
+    """Evaluate a Biopharma Bolt-On M&A candidate against the 6-Gate Biopharma Framework."""
+    return evaluate_biopharma_bolt_on_candidate(
+        ticker=req.ticker,
+        current_price=req.current_price,
+        unaffected_price=req.unaffected_price,
+        base_cash_bid_per_share=req.base_cash_bid_per_share,
+        sweetened_ceiling_per_share=req.sweetened_ceiling_per_share,
+        deal_ev_billions=req.deal_ev_billions,
+        fda_approved_commercial_anchor=req.fda_approved_commercial_anchor,
+        commercial_drug_name=req.commercial_drug_name,
+        named_pharma_suitor=req.named_pharma_suitor,
+        zero_moa_overlap=req.zero_moa_overlap,
+        bid_sweetening_or_cvr=req.bid_sweetening_or_cvr,
+        clip_usd=req.clip_usd,
+    )
 
 
 @app.post("/api/scan")
@@ -1047,14 +1105,23 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
               <button class="btn btn-sm btn-secondary" onclick="loadPreset('U', 'EV_BILLIONS', 25.0, 380000, 1.5)">
                 [⏳ Stale Benchmark: U $25B EV]
               </button>
-              <button class="btn btn-sm btn-secondary" onclick="loadPreset('GPN', 'EV_BILLIONS', 24.0, 380000, 1.5)">
+              <button class="btn btn-sm btn-secondary" onclick="loadPreset('GPN', 'EV_BILLIONS', 24.0, 380000, 1.5, 'PE_ALL_CASH')">
                 [⏳ Stale Benchmark: GPN $24B EV]
               </button>
+              <button class="btn btn-sm btn-primary" style="border-color:var(--cyan);" onclick="loadPreset('RYTM', 'PER_SHARE', 124.0, 190000, 1.5, 'BIOPHARMA_BOLT_ON', 134.0)">
+                [🧬 Biopharma Bolt-On: RYTM $124 Base &rarr; $134 Sweetened]
+              </button>
             </div>
-            <label class="mono" style="font-size:11px;color:var(--cyan);display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(56,189,248,0.1);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.35);">
-              <input type="checkbox" id="chk-simulate-fresh" onchange="runCalculation()" style="accent-color:var(--emerald);" />
-              ⚡ Simulate Fresh &lt;4h Leak Window
-            </label>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <select id="inp-strategy-mode" class="form-control" style="font-size:11px;padding:4px 8px;width:auto;border-color:var(--cyan);" onchange="onStrategyModeChange()">
+                <option value="PE_ALL_CASH">🏢 Strategy Mode: PE All-Cash LBO (5.5% / 6.5% / 8.0% Ladder | $380k Clip)</option>
+                <option value="BIOPHARMA_BOLT_ON">🧬 Strategy Mode: Biopharma Bolt-On (10.0% / 12.5% / 15.0% Ladder | $190k 50% Clip)</option>
+              </select>
+              <label class="mono" style="font-size:11px;color:var(--cyan);display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(56,189,248,0.1);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.35);">
+                <input type="checkbox" id="chk-simulate-fresh" onchange="runCalculation()" style="accent-color:var(--emerald);" />
+                ⚡ Simulate Fresh &lt;4h Leak Window
+              </label>
+            </div>
           </div>
 
           <!-- Calculator Input Controls -->
@@ -1106,6 +1173,11 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
           <div id="calc-verdict-banner" class="verdict-banner verdict-warn">
             <span id="calc-verdict-text">⚠️ POST-8-K / TIGHT SPREAD: +1.34% Gross Spread (Form 8-K Item 1.01 Filed 2026-10-13 — Leak Window Closed)</span>
             <span id="calc-price-summary">AH: $5.97 &rarr; Implied Deal: $6.05/sh</span>
+          </div>
+
+          <!-- Biopharma Bolt-On 6-Gate & Sweetened/CVR Callout (Visible when Biopharma Bolt-On Mode or $RYTM is active) -->
+          <div id="calc-biopharma-banner" style="display:none;padding:10px 14px;border-radius:6px;margin-bottom:12px;border:1px solid var(--cyan);background:rgba(56,189,248,0.1);">
+            <!-- Populated by JS -->
           </div>
 
           <!-- Waterfall + Tax Regime Comparison -->
@@ -1281,6 +1353,117 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
 
     </div>
 
+    <!-- PANEL 5: BIOPHARMA BOLT-ON PRE-ANNOUNCEMENT MODE & 2023–2026 HISTORICAL BACKTEST (13 TIER-1 LEAKS) -->
+    <section class="card" style="border-color:rgba(56,189,248,0.45);">
+      <div class="card-header" style="background:linear-gradient(90deg, rgba(15,23,42,0.98) 0%, rgba(6,78,59,0.35) 100%);">
+        <div class="card-title">
+          <span style="color:var(--cyan);">🧬 PANEL 5: BIOPHARMA BOLT-ON PRE-ANNOUNCEMENT MODE &amp; 2023–2026 HISTORICAL BACKTEST (13 TIER-1 LEAKS)</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span class="badge badge-emerald" id="bio-bt-winrate-badge">6-GATE FILTERED WIN RATE: 100.0% (6W / 0L)</span>
+          <span class="badge badge-amber" id="bio-bt-spread-badge">AVG PRE-8-K SPREAD: +13.50%</span>
+          <button class="btn btn-sm btn-primary" onclick="loadPreset('RYTM', 'PER_SHARE', 124.0, 190000, 1.5, 'BIOPHARMA_BOLT_ON', 134.0)">
+            ⚡ Stage $RYTM ($124 Base &rarr; $134 Sweetened) in Calculator &uarr;
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <!-- Biopharma Strategy Telemetry vs. Unfiltered Control Comparison -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;">
+          <div class="sub-panel" style="border-color:rgba(16,185,129,0.45);background:rgba(16,185,129,0.06);">
+            <div class="sub-panel-title" style="color:#34D399;">6-Gate Filtered Biopharma Win Rate</div>
+            <div class="mono" style="font-size:20px;font-weight:700;color:var(--emerald);" id="bio-kpi-filtered-wr">100.0% (6W / 0L)</div>
+            <div class="mono" style="font-size:11px;color:var(--text-secondary);margin-top:2px;">
+              vs. Unfiltered All 13 Leaks: <strong style="color:var(--amber);" id="bio-kpi-unfiltered-wr">76.9% (10W / 3L)</strong>
+            </div>
+          </div>
+          <div class="sub-panel">
+            <div class="sub-panel-title">Avg Pre-8-K Spread Captured</div>
+            <div class="mono" style="font-size:20px;font-weight:700;color:var(--cyan);" id="bio-kpi-avg-spread">+13.50%</div>
+            <div class="mono" style="font-size:11px;color:var(--text-secondary);margin-top:2px;">
+              Avg Hold: <strong>1.5 Trading Days</strong> (+ CVR Kickers on $MRTX, $BPMC)
+            </div>
+          </div>
+          <div class="sub-panel">
+            <div class="sub-panel-title">Cumulative IRA 0%-Tax Profit (6 Trades)</div>
+            <div class="mono" style="font-size:20px;font-weight:700;color:var(--emerald);" id="bio-kpi-cum-pnl">+$153,832 ($190k Clip)</div>
+            <div class="mono" style="font-size:11px;color:var(--text-secondary);margin-top:2px;">
+              +$307,663 at $380k Full Clip | Avg +$25,639 / trade
+            </div>
+          </div>
+          <div class="sub-panel" style="border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.05);">
+            <div class="sub-panel-title" style="color:#FCA5A5;">Walk-Away Trap Avoided by BIO_GATE_1</div>
+            <div class="mono" style="font-size:20px;font-weight:700;color:var(--crimson);">$CYTK (-16.69%)</div>
+            <div class="mono" style="font-size:11px;color:var(--text-secondary);margin-top:2px;">
+              Blocked pre-NDA / unapproved clinical &amp; unnamed rumors ($CYTK, $BBIO, $APLS)
+            </div>
+          </div>
+        </div>
+
+        <!-- Live $RYTM & Historical Case Study Interactive 6-Gate Inspector -->
+        <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:14px;margin-bottom:14px;">
+          <div class="sub-panel" style="border-color:rgba(56,189,248,0.4);">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+              <div class="sub-panel-title" style="margin:0;color:var(--cyan);">
+                🔬 LIVE BIOPHARMA 6-GATE AUDITOR (DEFAULT: $RYTM / ASTRAZENECA-ALEXION)
+              </div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                <button class="btn btn-sm btn-primary" onclick="loadBiopharmaCaseStudy('RYTM')">🧬 Live: $RYTM</button>
+                <button class="btn btn-sm" onclick="loadBiopharmaCaseStudy('SWTX')">✅ $SWTX (+15.3%)</button>
+                <button class="btn btn-sm" onclick="loadBiopharmaCaseStudy('VRNA')">✅ $VRNA (+11.4%)</button>
+                <button class="btn btn-sm" onclick="loadBiopharmaCaseStudy('BPMC')">✅ $BPMC (+12.2%+CVR)</button>
+                <button class="btn btn-sm" style="border-color:var(--crimson);color:#FCA5A5;" onclick="loadBiopharmaCaseStudy('CYTK')">🚨 Trap: $CYTK (-16.7%)</button>
+              </div>
+            </div>
+            <div id="bio-live-audit-card">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="sub-panel">
+            <div class="sub-panel-title" style="color:var(--emerald);">
+              📐 BIOPHARMA 3-TRANCHE LIMIT LADDER (10.0% / 12.5% / 15.0% DISCOUNT TO BASE CASH BID | $190K 50% CLIP)
+            </div>
+            <div id="bio-live-tranche-card">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 13-Event Historical Biopharma Pre-Announcement Leak Table (2023–2026) -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+          <span class="mono" style="font-size:11.5px;font-weight:700;color:var(--text-primary);">
+            📚 2023–2026 TIER-1 BIOPHARMA PRE-ANNOUNCEMENT LEAK BACKTEST LEDGER (13 VERIFIED EVENTS — CONVERTED vs. WALK-AWAYS)
+          </span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-sm" onclick="filterBiopharmaTable('ALL')">All 13 Leaks</button>
+            <button class="btn btn-sm btn-primary" onclick="filterBiopharmaTable('QUALIFIED')">✅ 6-Gate Qualified Only (6)</button>
+            <button class="btn btn-sm" onclick="filterBiopharmaTable('FILTERED')">❌ Filtered Out / Walk-Aways (7)</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;border:1px solid var(--border-hairline);border-radius:6px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Leak Date &amp; Target</th>
+                <th>Reported Suitor &amp; Commercial Anchor</th>
+                <th class="text-right">Unaffected &rarr; Settled Entry</th>
+                <th class="text-right">8-K / Exit Price</th>
+                <th class="text-right">Realized Return</th>
+                <th class="text-right">IRA P&amp;L ($190k Clip)</th>
+                <th>6-Gate Audit Status &amp; Disqualification Reason</th>
+              </tr>
+            </thead>
+            <tbody id="bio-backtest-tbody" class="mono">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
   </main>
 
   <!-- MODAL FOR 5:00 PM EMAIL REPORT PREVIEW -->
@@ -1309,6 +1492,9 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
       gatekeeperRules: [],
       checkedGates: new Set(),
       currentCalculation: null,
+      biopharmaBacktest: null,
+      biopharmaFilter: 'ALL',
+      sweetenedCeilingOverride: null,
     };
 
     function fmtUSD(val, decimals = 0) {
@@ -1327,26 +1513,29 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
       STATE.watchlist = data.watchlist || [];
       STATE.gatekeeperRules = data.gatekeeper_rules || [];
       STATE.currentCalculation = data.default_calculation;
+      STATE.biopharmaBacktest = data.biopharma_backtest || null;
 
       renderTelemetry(data.telemetry);
       renderWireTable();
       renderGatekeeperGrid();
       renderWatchlistTable();
       renderCalculation(data.default_calculation);
+      renderBiopharmaBacktestPanel();
       updateCooldownTimer();
 
       // Support deep-linking from /scan page (?ticker=U&mode=EV_BILLIONS&value=25&sim_fresh=1)
       const params = new URLSearchParams(window.location.search);
       if (params.get('ticker')) {
         const tkr = params.get('ticker').toUpperCase();
-        const mode = params.get('mode') || 'EV_BILLIONS';
-        const val = parseFloat(params.get('value')) || 1.3;
-        const clip = parseFloat(params.get('clip')) || 380000;
+        const mode = params.get('mode') || (tkr === 'RYTM' ? 'PER_SHARE' : 'EV_BILLIONS');
+        const val = parseFloat(params.get('value')) || (tkr === 'RYTM' ? 124.0 : 1.3);
+        const clip = parseFloat(params.get('clip')) || (tkr === 'RYTM' ? 190000 : 380000);
+        const strat = tkr === 'RYTM' ? 'BIOPHARMA_BOLT_ON' : 'PE_ALL_CASH';
         if (params.get('sim_fresh') === '1') {
           const chk = document.getElementById('chk-simulate-fresh');
           if (chk) chk.checked = true;
         }
-        await loadPreset(tkr, mode, val, clip, 1.5);
+        await loadPreset(tkr, mode, val, clip, 1.5, strat, tkr === 'RYTM' ? 134.0 : null);
       }
     }
 
@@ -1456,24 +1645,45 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
       }
     }
 
-    async function loadPreset(ticker, mode, value, clipUsd = 380000, cocPct = 1.5) {
+    async function loadPreset(ticker, mode, value, clipUsd = 380000, cocPct = 1.5, strategyMode = null, sweetenedCeiling = null) {
       document.getElementById('inp-ticker').value = ticker;
       document.getElementById('inp-mode').value = mode;
       document.getElementById('inp-value').value = value;
       document.getElementById('inp-clip').value = clipUsd;
       document.getElementById('inp-coc').value = cocPct;
+      const stratSel = document.getElementById('inp-strategy-mode');
+      if (stratSel) {
+        stratSel.value = strategyMode || (ticker.toUpperCase() === 'RYTM' ? 'BIOPHARMA_BOLT_ON' : 'PE_ALL_CASH');
+      }
+      STATE.sweetenedCeilingOverride = sweetenedCeiling;
+      await runCalculation();
+    }
+
+    async function onStrategyModeChange() {
+      const stratSel = document.getElementById('inp-strategy-mode');
+      const modeVal = stratSel ? stratSel.value : 'PE_ALL_CASH';
+      const clipInput = document.getElementById('inp-clip');
+      if (modeVal === 'BIOPHARMA_BOLT_ON' && parseFloat(clipInput.value) === 380000) {
+        clipInput.value = 190000;
+      } else if (modeVal === 'PE_ALL_CASH' && parseFloat(clipInput.value) === 190000) {
+        clipInput.value = 380000;
+      }
       await runCalculation();
     }
 
     async function runCalculation() {
       const simFresh = Boolean(document.getElementById('chk-simulate-fresh')?.checked);
+      const stratMode = document.getElementById('inp-strategy-mode')?.value || 'PE_ALL_CASH';
+      const tkrVal = document.getElementById('inp-ticker').value.trim().toUpperCase();
       const payload = {
-        ticker: document.getElementById('inp-ticker').value.trim().toUpperCase(),
+        ticker: tkrVal,
         input_mode: document.getElementById('inp-mode').value,
         value: parseFloat(document.getElementById('inp-value').value) || 0,
         clip_usd: parseFloat(document.getElementById('inp-clip').value) || 380000,
         coc_dilution_pct: parseFloat(document.getElementById('inp-coc').value) || 1.5,
         simulate_fresh_leak: simFresh,
+        strategy_mode: stratMode,
+        sweetened_ceiling_per_share: tkrVal === 'RYTM' ? (STATE.sweetenedCeilingOverride || 134.0) : STATE.sweetenedCeilingOverride,
       };
       const res = await fetch('/api/calculate', {
         method: 'POST',
@@ -1529,6 +1739,31 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
       document.getElementById('calc-verdict-text').textContent = ms.verdict_label;
       document.getElementById('calc-price-summary').textContent =
         `Reg: $${ms.regular_market_price.toFixed(2)} | AH: $${ms.extended_hours_price.toFixed(2)} → Implied Cash Buyout: $${ms.implied_cash_buyout_per_share.toFixed(2)}/sh (Net: ${ms.net_spread_pct >= 0 ? '+' : ''}${ms.net_spread_pct.toFixed(2)}%)`;
+
+      // Biopharma Bolt-On Banner (when Biopharma Bolt-On mode or $RYTM is active)
+      const bioBanner = document.getElementById('calc-biopharma-banner');
+      if (bioBanner) {
+        const bio = calc.biopharma_bolt_on_audit;
+        if (bio && (calc.strategy_mode === 'BIOPHARMA_BOLT_ON' || calc.ticker === 'RYTM')) {
+          bioBanner.style.display = 'block';
+          bioBanner.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
+              <span class="mono" style="font-size:12px;font-weight:700;color:var(--cyan);">
+                🧬 BIOPHARMA BOLT-ON 6-GATE MODE ACTIVE (${bio.passed_gates_count}/${bio.total_gates_count} GATES CLEARED) — ${bio.named_pharma_suitor}
+              </span>
+              <span class="badge ${bio.all_biopharma_gates_passed ? 'badge-emerald' : 'badge-amber'}">
+                ${bio.verdict} | Base $${bio.base_cash_bid_per_share.toFixed(2)} (${bio.base_spread_pct >= 0 ? '+' : ''}${bio.base_spread_pct.toFixed(2)}%) &rarr; Sweetened/CVR $${bio.sweetened_ceiling_per_share.toFixed(2)} (${bio.sweetened_spread_pct >= 0 ? '+' : ''}${bio.sweetened_spread_pct.toFixed(2)}%)
+              </span>
+            </div>
+            <div class="mono" style="font-size:11px;color:var(--text-primary);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <span>Commercial Anchor: <strong style="color:var(--emerald);">${bio.commercial_drug_name}</strong></span>
+              <span>IRA Profit @ Base ($${bio.base_cash_bid_per_share}): <strong style="color:var(--emerald);">+${fmtUSD(bio.pnl_summary.ira_base_bid_net_profit_usd)}</strong> | @ Sweetened ($${bio.sweetened_ceiling_per_share}): <strong style="color:var(--cyan);">+${fmtUSD(bio.pnl_summary.ira_sweetened_bid_net_profit_usd)}</strong></span>
+            </div>
+          `;
+        } else {
+          bioBanner.style.display = 'none';
+        }
+      }
 
       // Balance-Sheet Waterfall
       const wfContainer = document.getElementById('waterfall-rows');
@@ -1806,6 +2041,228 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
 
     function closeEmailModal() {
       document.getElementById('email-modal').classList.remove('open');
+    }
+
+    function renderBiopharmaAuditCards(audit) {
+      if (!audit) return;
+      const auditEl = document.getElementById('bio-live-audit-card');
+      const trancheEl = document.getElementById('bio-live-tranche-card');
+      if (!auditEl || !trancheEl) return;
+
+      const badgeCls = audit.all_biopharma_gates_passed ? 'badge-emerald' : 'badge-crimson';
+      const gatesHtml = (audit.gate_checks || []).map(g => `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:5px 8px;border-bottom:1px solid var(--border-hairline);font-size:11.5px;">
+          <div>
+            <span class="mono" style="font-weight:700;color:${g.passed ? 'var(--emerald)' : 'var(--crimson)'};">
+              ${g.passed ? '✅' : '❌'} [${g.id.replace('_FDA_COMMERCIAL_ANCHOR','').replace('_NAMED_SUITOR_AND_PRICE','').replace('_BOLT_ON_EV_SWEET_SPOT','').replace('_ZERO_MOA_ANTITRUST_OVERLAP','').replace('_SPREAD_VS_UNAFFECTED_FLOOR','').replace('_HALF_CLIP_TRANCHE_LADDER','')}]
+            </span>
+            <strong style="color:var(--text-primary);margin-left:4px;">${g.title}:</strong>
+            <div style="color:var(--text-secondary);font-size:11px;margin-top:1px;">${g.detail}</div>
+          </div>
+          <span class="badge ${g.passed ? 'badge-emerald' : 'badge-crimson'}">${g.passed ? 'PASS' : 'FAIL'}</span>
+        </div>
+      `).join('');
+
+      auditEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(15,23,42,0.85);border-radius:5px;border:1px solid var(--border-hairline);margin-bottom:8px;">
+          <div>
+            <span class="mono" style="font-size:15px;font-weight:700;color:var(--cyan);">$${audit.ticker}</span>
+            <span class="mono" style="font-size:11.5px;color:var(--text-secondary);margin-left:6px;">
+              Suitor: <strong style="color:var(--text-primary);">${audit.named_pharma_suitor}</strong> | EV: $${audit.deal_ev_billions.toFixed(1)}B
+            </span>
+          </div>
+          <span class="badge ${badgeCls}">${audit.verdict} (${audit.passed_gates_count}/${audit.total_gates_count} GATES)</span>
+        </div>
+        <div class="mono" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;font-size:11px;background:var(--bg-canvas);padding:7px 9px;border-radius:4px;border:1px solid var(--border-hairline);">
+          <div>
+            <span style="color:var(--text-muted);font-size:10px;display:block;">SETTLED PRICE</span>
+            <strong>$${audit.current_price.toFixed(2)}</strong>
+          </div>
+          <div>
+            <span style="color:var(--text-muted);font-size:10px;display:block;">BASE CASH BID</span>
+            <strong style="color:var(--emerald);">$${audit.base_cash_bid_per_share.toFixed(2)} (${audit.base_spread_pct >= 0 ? '+' : ''}${audit.base_spread_pct.toFixed(2)}%)</strong>
+          </div>
+          <div>
+            <span style="color:var(--text-muted);font-size:10px;display:block;">SWEETENED / CVR</span>
+            <strong style="color:var(--cyan);">$${audit.sweetened_ceiling_per_share.toFixed(2)} (${audit.sweetened_spread_pct >= 0 ? '+' : ''}${audit.sweetened_spread_pct.toFixed(2)}%)</strong>
+          </div>
+          <div>
+            <span style="color:var(--text-muted);font-size:10px;display:block;">UNAFFECTED FLOOR</span>
+            <strong style="color:var(--amber);">$${audit.unaffected_price.toFixed(2)} (${audit.downside_to_unaffected_pct.toFixed(1)}%)</strong>
+          </div>
+        </div>
+        <div style="border:1px solid var(--border-hairline);border-radius:5px;overflow:hidden;">
+          ${gatesHtml}
+        </div>
+      `;
+
+      const pnl = audit.pnl_summary || {};
+      const rowsHtml = (audit.tranche_ladder || []).map(t => `
+        <tr>
+          <td>
+            <strong style="color:var(--cyan);">T${t.tranche_number}</strong>
+            <span style="color:var(--text-secondary);">(${t.weight_pct}% | -${t.target_discount_pct.toFixed(1)}% Disc)</span>
+          </td>
+          <td class="text-right">${fmtUSD(t.allocation_usd)}</td>
+          <td class="text-right" style="color:var(--emerald);font-weight:700;">$${t.limit_price.toFixed(2)}</td>
+          <td class="text-right">${t.shares.toLocaleString()} sh</td>
+          <td class="text-right" style="color:var(--emerald);">+${fmtUSD(t.base_bid_profit_usd)}</td>
+          <td class="text-right" style="color:var(--cyan);font-weight:700;">+${fmtUSD(t.sweetened_bid_profit_usd)}</td>
+        </tr>
+      `).join('');
+
+      trancheEl.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <div class="tax-box tax-ira" style="margin:0;">
+            <div class="mono" style="font-size:10.5px;color:#34D399;">IRA 0%-TAX @ BASE ($${audit.base_cash_bid_per_share.toFixed(2)}/sh)</div>
+            <div class="mono" style="font-size:18px;font-weight:700;color:var(--emerald);">+${fmtUSD(pnl.ira_base_bid_net_profit_usd)}</div>
+            <div class="mono" style="font-size:10.5px;color:var(--text-secondary);">NYC 54.5% Tax: +${fmtUSD(pnl.nyc_base_bid_net_profit_usd)}</div>
+          </div>
+          <div class="tax-box" style="margin:0;background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.4);">
+            <div class="mono" style="font-size:10.5px;color:var(--cyan);">IRA 0%-TAX @ SWEETENED ($${audit.sweetened_ceiling_per_share.toFixed(2)}/sh)</div>
+            <div class="mono" style="font-size:18px;font-weight:700;color:var(--cyan);">+${fmtUSD(pnl.ira_sweetened_bid_net_profit_usd)}</div>
+            <div class="mono" style="font-size:10.5px;color:var(--text-secondary);">NYC 54.5% Tax: +${fmtUSD(pnl.nyc_sweetened_bid_net_profit_usd)}</div>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Tranche</th>
+              <th class="text-right">Allocation</th>
+              <th class="text-right">Limit Px</th>
+              <th class="text-right">Shares</th>
+              <th class="text-right">Base Profit</th>
+              <th class="text-right">Sweetened Profit</th>
+            </tr>
+          </thead>
+          <tbody class="mono">
+            ${rowsHtml}
+          </tbody>
+        </table>
+        <div class="mono" style="margin-top:8px;font-size:11px;color:var(--text-secondary);display:flex;justify-content:space-between;flex-wrap:wrap;">
+          <span>Total Deployed: <strong>${fmtUSD(pnl.total_deployed_usd)}</strong> (${(pnl.total_shares || 0).toLocaleString()} sh)</span>
+          <span>Walk-Away Risk to Unaffected ($${audit.unaffected_price.toFixed(2)}): <strong style="color:var(--crimson);">${fmtUSD(pnl.walkaway_downside_to_unaffected_usd)}</strong></span>
+        </div>
+      `;
+    }
+
+    async function loadBiopharmaCaseStudy(ticker) {
+      const presets = {
+        RYTM: {
+          ticker: 'RYTM', current_price: 112.50, unaffected_price: 86.44,
+          base_cash_bid_per_share: 124.00, sweetened_ceiling_per_share: 134.00,
+          deal_ev_billions: 10.0, fda_approved_commercial_anchor: true,
+          commercial_drug_name: 'Imcivree (setmelanotide) — FDA-approved (incl. Mar 2026 aHO expansion)',
+          named_pharma_suitor: 'AstraZeneca (via Alexion Rare Disease)',
+          zero_moa_overlap: true, bid_sweetening_or_cvr: true, clip_usd: 190000
+        },
+        SWTX: {
+          ticker: 'SWTX', current_price: 40.20, unaffected_price: 37.30,
+          base_cash_bid_per_share: 47.00, sweetened_ceiling_per_share: 47.00,
+          deal_ev_billions: 3.9, fda_approved_commercial_anchor: true,
+          commercial_drug_name: 'Ogsiveo & Gomekli — FDA-approved rare oncology commercial drugs',
+          named_pharma_suitor: 'Merck KGaA (Completed $47.00/sh Cash Buyout)',
+          zero_moa_overlap: true, bid_sweetening_or_cvr: true, clip_usd: 190000
+        },
+        VRNA: {
+          ticker: 'VRNA', current_price: 94.80, unaffected_price: 86.86,
+          base_cash_bid_per_share: 107.00, sweetened_ceiling_per_share: 107.00,
+          deal_ev_billions: 10.0, fda_approved_commercial_anchor: true,
+          commercial_drug_name: 'Ohtuvayre (ensifentrine) — FDA-approved commercial COPD drug',
+          named_pharma_suitor: 'Merck & Co. (Completed $107.00/sh Cash Buyout)',
+          zero_moa_overlap: true, bid_sweetening_or_cvr: true, clip_usd: 190000
+        },
+        BPMC: {
+          ticker: 'BPMC', current_price: 114.20, unaffected_price: 101.35,
+          base_cash_bid_per_share: 129.00, sweetened_ceiling_per_share: 135.00,
+          deal_ev_billions: 9.5, fda_approved_commercial_anchor: true,
+          commercial_drug_name: 'Ayvakit (avapritinib) — FDA-approved commercial mastocytosis franchise',
+          named_pharma_suitor: 'Sanofi (Completed $129.00/sh Cash + $6.00 CVR)',
+          zero_moa_overlap: true, bid_sweetening_or_cvr: true, clip_usd: 190000
+        },
+        CYTK: {
+          ticker: 'CYTK', current_price: 101.97, unaffected_price: 89.30,
+          base_cash_bid_per_share: 115.00, sweetened_ceiling_per_share: 115.00,
+          deal_ev_billions: 10.5, fda_approved_commercial_anchor: false,
+          commercial_drug_name: 'FAIL BIO_GATE_1: Aficamten was pre-NDA / unapproved with FDA REMS friction',
+          named_pharma_suitor: 'Novartis (WALKED AWAY Jan 11, 2024 -> Closed $84.95, -16.69%)',
+          zero_moa_overlap: true, bid_sweetening_or_cvr: false, clip_usd: 190000
+        }
+      };
+      const reqBody = presets[ticker] || presets.RYTM;
+      const res = await fetch('/api/biopharma-evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reqBody),
+      });
+      const audit = await res.json();
+      renderBiopharmaAuditCards(audit);
+    }
+
+    function filterBiopharmaTable(mode) {
+      STATE.biopharmaFilter = mode;
+      renderBiopharmaBacktestPanel();
+    }
+
+    function renderBiopharmaBacktestPanel() {
+      const bt = STATE.biopharmaBacktest;
+      if (!bt) return;
+      renderBiopharmaAuditCards(bt.live_rytm_audit);
+
+      const tbody = document.getElementById('bio-backtest-tbody');
+      if (!tbody) return;
+      let events = bt.historical_events || [];
+      if (STATE.biopharmaFilter === 'QUALIFIED') {
+        events = events.filter(e => e.cleared_6_biopharma_gates);
+      } else if (STATE.biopharmaFilter === 'FILTERED') {
+        events = events.filter(e => !e.cleared_6_biopharma_gates);
+      }
+
+      tbody.innerHTML = events.map(ev => {
+        const isPos = ev.realized_return_pct > 0;
+        const retCls = isPos ? 'var(--emerald)' : 'var(--crimson)';
+        const gateBadge = ev.cleared_6_biopharma_gates
+          ? '<span class="badge badge-emerald">✅ CLEARED ALL 6 GATES</span>'
+          : '<span class="badge badge-amber">❌ FILTERED BY GATES</span>';
+        const rowBorder = ev.cleared_6_biopharma_gates
+          ? 'border-left:3px solid var(--emerald);background:rgba(16,185,129,0.03);'
+          : (isPos ? 'border-left:3px solid var(--amber);' : 'border-left:3px solid var(--crimson);background:rgba(239,68,68,0.05);');
+        const cvrTag = ev.cvr_per_share > 0 ? ` <span class="badge badge-emerald">+$${ev.cvr_per_share.toFixed(0)} CVR</span>` : '';
+
+        return `
+          <tr style="${rowBorder}">
+            <td>
+              <strong style="color:var(--cyan);font-size:13px;">$${ev.ticker}</strong>
+              <span style="color:var(--text-primary);font-family:var(--font-sans);font-size:11.5px;margin-left:4px;">${ev.company_name}</span>
+              <div style="font-size:10.5px;color:var(--text-muted);">${ev.leak_date} &rarr; ${ev.resolution_date} (${ev.hold_trading_days}d) | ${ev.leak_source}</div>
+            </td>
+            <td style="font-family:var(--font-sans);font-size:11.5px;">
+              <strong>${ev.buyer}</strong> (${fmtUSD(ev.deal_ev_billions * 1e9).replace(',000,000,000','B')})
+              <div style="font-size:11px;color:${ev.fda_approved_commercial_anchor ? '#34D399' : '#FCA5A5'};margin-top:2px;">
+                ${ev.fda_approved_commercial_anchor ? '🟢 Commercial:' : '🚨 Pre-FDA Clinical:'} ${ev.commercial_drug_note}
+              </div>
+            </td>
+            <td class="text-right">
+              <span style="color:var(--text-secondary);">$${ev.unaffected_price.toFixed(2)}</span> &rarr;
+              <strong>$${ev.settled_post_leak_entry_price.toFixed(2)}</strong>
+            </td>
+            <td class="text-right">
+              <strong>$${ev.resolution_price.toFixed(2)}</strong>
+              ${ev.final_deal_cash_per_share ? `<div style="font-size:10.5px;color:var(--emerald);">Deal: $${ev.final_deal_cash_per_share.toFixed(2)}/sh${cvrTag}</div>` : '<div style="font-size:10.5px;color:var(--crimson);">WALK-AWAY / NO DEAL</div>'}
+            </td>
+            <td class="text-right" style="font-weight:700;color:${retCls};">
+              ${ev.realized_return_pct >= 0 ? '+' : ''}${ev.realized_return_pct.toFixed(2)}%
+            </td>
+            <td class="text-right" style="font-weight:700;color:${retCls};">
+              ${ev.ira_0pct_pnl_usd >= 0 ? '+' : ''}${fmtUSD(ev.ira_0pct_pnl_usd)}
+            </td>
+            <td style="font-family:var(--font-sans);font-size:11px;">
+              ${gateBadge}
+              <div style="color:var(--text-secondary);margin-top:3px;">${ev.disqualification_note}</div>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     window.addEventListener('DOMContentLoaded', initDashboard);

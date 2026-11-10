@@ -175,3 +175,56 @@ def test_post_api_fire_email() -> None:
     assert "Arb Cannon 5PM Sweep" in data["subject"]
     assert "<html" in data["html_content"].lower()
     assert "GATE_1_PLUMBING" in data["html_content"]
+
+
+def test_biopharma_bolt_on_endpoints() -> None:
+    """Verify GET /api/biopharma-backtest, POST /api/biopharma-evaluate, and BIOPHARMA_BOLT_ON calculator mode."""
+    bt_resp = client.get("/api/biopharma-backtest")
+    assert bt_resp.status_code == 200
+    bt_data = bt_resp.json()
+    assert bt_data["unfiltered_metrics"]["total_events"] == 13
+    assert bt_data["filtered_6_gate_metrics"]["win_rate_pct"] == 100.0
+    assert bt_data["live_rytm_audit"]["ticker"] == "RYTM"
+    assert bt_data["live_rytm_audit"]["all_biopharma_gates_passed"] is True
+
+    eval_resp = client.post(
+        "/api/biopharma-evaluate",
+        json={
+            "ticker": "RYTM",
+            "current_price": 112.50,
+            "unaffected_price": 86.44,
+            "base_cash_bid_per_share": 124.00,
+            "sweetened_ceiling_per_share": 134.00,
+            "deal_ev_billions": 10.0,
+            "fda_approved_commercial_anchor": True,
+            "clip_usd": 190000.0,
+        },
+    )
+    assert eval_resp.status_code == 200
+    eval_data = eval_resp.json()
+    assert eval_data["verdict"] == "BIO_PASS_HOT"
+    assert eval_data["passed_gates_count"] == 6
+
+    calc_resp = client.post(
+        "/api/calculate",
+        json={
+            "ticker": "RYTM",
+            "input_mode": "PER_SHARE",
+            "value": 124.0,
+            "clip_usd": 190000.0,
+            "coc_dilution_pct": 1.5,
+            "use_live_network": False,
+            "strategy_mode": "BIOPHARMA_BOLT_ON",
+            "sweetened_ceiling_per_share": 134.0,
+        },
+    )
+    assert calc_resp.status_code == 200
+    calc_data = calc_resp.json()
+    assert calc_data["strategy_mode"] == "BIOPHARMA_BOLT_ON"
+    assert [t["discount_pct"] for t in calc_data["tranche_ladder"]] == [
+        10.0,
+        12.5,
+        15.0,
+    ]
+    assert calc_data["biopharma_bolt_on_audit"]["all_biopharma_gates_passed"] is True
+
