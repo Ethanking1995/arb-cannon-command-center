@@ -182,29 +182,39 @@ def test_biopharma_bolt_on_endpoints() -> None:
     bt_resp = client.get("/api/biopharma-backtest")
     assert bt_resp.status_code == 200
     bt_data = bt_resp.json()
-    assert bt_data["unfiltered_metrics"]["total_events"] == 17
-    assert bt_data["unfiltered_metrics"]["win_rate_pct"] == 47.1
-    assert bt_data["unfiltered_metrics"]["median_return_per_trade_pct"] == -3.65
-    assert bt_data["filtered_6_gate_metrics"]["qualified_events"] == 7
-    assert bt_data["filtered_6_gate_metrics"]["win_rate_pct"] == 85.7
-    assert bt_data["filtered_6_gate_metrics"]["median_return_per_trade_pct"] == 19.86
-    assert bt_data["filtered_6_gate_metrics"]["expected_hold_clock"] == "10–45 days"
+    assert bt_data["unfiltered_metrics"]["total_events"] == 30
+    assert bt_data["unfiltered_metrics"]["win_rate_pct"] == 46.7
+    assert bt_data["unfiltered_metrics"]["median_return_per_trade_pct"] == -4.46
+    assert bt_data["broad_commercial_metrics"]["total_events"] == 20
+    assert bt_data["broad_commercial_metrics"]["win_rate_pct"] == 60.0
+    assert bt_data["filtered_6_gate_metrics"]["qualified_events"] == 16
+    assert bt_data["filtered_6_gate_metrics"]["wins"] == 12
+    assert bt_data["filtered_6_gate_metrics"]["losses_or_walkaways"] == 4
+    assert bt_data["filtered_6_gate_metrics"]["win_rate_pct"] == 75.0
+    assert bt_data["filtered_6_gate_metrics"]["winner_median_spread_pct"] == 17.72
+    assert bt_data["filtered_6_gate_metrics"]["expected_hold_clock"] == "7–20 trading days (10–45d auction window)"
     assert len(bt_data["purged_untradable_weekend_gaps"]) == 4
     assert bt_data["live_rytm_audit"]["ticker"] == "RYTM"
     assert bt_data["live_rytm_audit"]["hard_ceiling_92pct"] == 114.08
     assert bt_data["live_rytm_audit"]["all_biopharma_gates_passed"] is True
+    assert bt_data["live_rytm_audit"]["live_100k_lot_scenarios"]["shares"] == 885
+    assert bt_data["live_rytm_audit"]["live_100k_lot_scenarios"]["probability_weighted_ev_usd"] == 6195.0
+    assert len(bt_data["live_rytm_audit"]["deal_timeline_windows"]) == 3
 
     eval_resp = client.post(
         "/api/biopharma-evaluate",
         json={
             "ticker": "RYTM",
-            "current_price": 112.50,
+            "current_price": 113.00,
             "unaffected_price": 86.44,
+            "walk_away_floor_price": 92.00,
             "base_cash_bid_per_share": 124.00,
             "sweetened_ceiling_per_share": 134.00,
             "deal_ev_billions": 10.0,
             "fda_approved_commercial_anchor": True,
             "clip_usd": 190000.0,
+            "live_position_usd": 100000.0,
+            "live_position_entry_price": 113.00,
         },
     )
     assert eval_resp.status_code == 200
@@ -212,6 +222,7 @@ def test_biopharma_bolt_on_endpoints() -> None:
     assert eval_data["verdict"] == "BIO_PASS_HOT"
     assert eval_data["passed_gates_count"] == 6
     assert eval_data["hard_ceiling_92pct"] == 114.08
+    assert eval_data["live_100k_lot_scenarios"]["shares"] == 885
     assert [t["limit_price"] for t in eval_data["tranche_ladder"]] == [
         112.73,
         110.22,

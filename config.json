@@ -38,12 +38,12 @@
     {
       "ticker": "RYTM",
       "company_name": "Rhythm Pharmaceuticals",
-      "leak_timestamp": "2026-11-05T16:15:00-05:00",
+      "leak_timestamp": "2026-11-04T16:15:00-05:00",
       "rumor_headline": "WSJ (Nov 2026): AstraZeneca approached Rhythm around ~$124/sh (~$10B). STATUS: Unconfirmed stage \u2014 watch for advanced talks confirmation.",
       "input_mode": "PER_SHARE",
       "rumored_value": 124.0,
       "buyer_type": "AstraZeneca + Reported 2nd Bidder",
-      "gate_notes": "WSJ/Reuters (Nov 2026): AstraZeneca approached Rhythm around ~$124/sh (~$10B across ~80.6M sh) 48h after Nov 2 $750M KKR/Blackstone facility & 1% LG Chem royalty buydown ($92.1M Q3 Imcivree, +29% QoQ); 2nd bidder reported. Hard 92% Ceiling: $114.08 | IRA Ladder: $112.73 / $110.22 / $107.83 (10\u201345d Clock)."
+      "gate_notes": "WSJ/Reuters (Nov 4, 2026): AstraZeneca approached Rhythm around ~$124/sh (~$10B) + reported 2nd bidder ($134/sh target). Live $100k lot @ $113.00 (885 sh, 91.1% <= $114.08 92% cap): +$9,735 @ $124 (35%) | +$18,585 @ $134 (40%) | -$18,585 @ $92 walk-away floor ($89\u2013$95, 25% = -0.46% of $4M NW). Primary 8-K Window (55%): Mon Nov 16 or Mon Nov 23."
     },
     {
       "ticker": "GPN",

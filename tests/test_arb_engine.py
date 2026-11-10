@@ -586,32 +586,44 @@ def test_strict_rss_filter_no_fabricated_prices_and_verified_watchlist() -> None
 
 def test_biopharma_bolt_on_backtest_and_live_rytm_audit() -> None:
     """
-    Verify the Survivorship-Bias-Free 17-Event Tradable Biopharma M&A Backtest (Tab 2)
-    and the 6-Gate Biopharma Contested Auction Mode for $RYTM:
+    Verify the Full 30-Event Un-Biased Tradable Biopharma M&A Backtest (2022–2026)
+    and the User's Live $100,000 @ $113.00 (~885 Shares) $RYTM Position Audit:
       - 4 untradable weekend/overnight gaps ($KRTX, $ITCI, $BPMC, $VRNA) are purged into
         purged_untradable_weekend_gaps and excluded from historical_events
-      - Unfiltered 17 tradable events: 47.1% win rate (8W / 9L), -3.65% strict deal-window median
-      - 7 Gated Regime A setups ($HZNP, $SGEN, $SAGE, $RNA, $MTSR, $CDTX, $RVMD):
-        85.7% (6W / 1L) conversion rate, +19.86% median spread, 8–82d range (10–45d clock)
+      - Unfiltered 30 tradable events: 46.7% win rate (14W / 16L), -4.46% strict deal-window median
+      - Broad Commercial / Pivotal cohort (N = 20, incl. unpriced $BMRN, $ALNY, $FOLD, $ACAD):
+        60.0% (12W / 8L) conversion rate
+      - Named Pharma Suitor + Specific Leaked Dollar Bid + Entry <= 92% Anchor (N = 16):
+        75.0% (12W / 4L) true un-biased conversion rate (+17.72% winner median spread)
       - Hard Gate 5 (`entry_pct_of_anchor <= 0.92`) blocks $VTYX (121.6%), $SWTX (108.0%), $MRTX (100.3%)
-      - $RYTM ($112.50 open = 90.7% of $124 floor <= $114.08 hard 92% ceiling) clears 6/6 gates
-        with $112.73 / $110.22 / $107.83 limit ladder
+      - Live $100,000 @ $113.00 (885 shares) on $RYTM:
+        * Scenario 1 ($124.00 Base, 35% Prob): +$9,735.00 (+9.73%)
+        * Scenario 2 ($134.00 Sweetened, 40% Prob): +$18,585.00 (+18.58%)
+        * Scenario 3 ($92.00 Fundamental Walk-Away Floor [$89–$95], 25% Prob): -$18,585.00 (-0.46% of $4M NW)
+        * Probability-Weighted EV: +$6,195.00 (+6.19%)
     """
-    bt = run_biopharma_backtest(standard_biopharma_clip_usd=190000.0)
-    assert bt["unfiltered_metrics"]["total_events"] == 17
-    assert bt["unfiltered_metrics"]["wins"] == 8
-    assert bt["unfiltered_metrics"]["losses_or_walkaways"] == 9
-    assert bt["unfiltered_metrics"]["win_rate_pct"] == 47.1
-    assert bt["unfiltered_metrics"]["median_return_per_trade_pct"] == -3.65
+    bt = run_biopharma_backtest(standard_biopharma_clip_usd=100000.0)
+    assert bt["unfiltered_metrics"]["total_events"] == 30
+    assert bt["unfiltered_metrics"]["wins"] == 14
+    assert bt["unfiltered_metrics"]["losses_or_walkaways"] == 16
+    assert bt["unfiltered_metrics"]["win_rate_pct"] == 46.7
+    assert bt["unfiltered_metrics"]["median_return_per_trade_pct"] == -4.46
+
+    bc = bt["broad_commercial_metrics"]
+    assert bc["total_events"] == 20
+    assert bc["wins"] == 12
+    assert bc["losses_or_walkaways"] == 8
+    assert bc["win_rate_pct"] == 60.0
 
     fg = bt["filtered_6_gate_metrics"]
-    assert fg["qualified_events"] == 7
-    assert fg["wins"] == 6
-    assert fg["losses_or_walkaways"] == 1
-    assert fg["win_rate_pct"] == 85.7
-    assert fg["median_return_per_trade_pct"] == 19.86
-    assert fg["expected_hold_clock"] == "10–45 days"
-    assert fg["hold_days_range"] == "8–82 days"
+    assert fg["qualified_events"] == 16
+    assert fg["wins"] == 12
+    assert fg["losses_or_walkaways"] == 4
+    assert fg["win_rate_pct"] == 75.0
+    assert fg["winner_median_spread_pct"] == 17.72
+    assert fg["median_return_per_trade_pct"] == 15.01
+    assert fg["expected_hold_clock"] == "7–20 trading days (10–45d auction window)"
+    assert fg["hold_days_range"] == "2–82 days"
     assert fg["lone_break_standalone_recovery_pct"] == 68.9
 
     # Verify the 4 untradable weekend/overnight gaps are purged from historical_events
@@ -620,11 +632,32 @@ def test_biopharma_bolt_on_backtest_and_live_rytm_audit() -> None:
     by_tkr = {e["ticker"]: e for e in bt["historical_events"]}
     assert purged_tickers.isdisjoint(set(by_tkr.keys()))
 
-    # Verify the 7 qualified Regime A setups
+    # Verify all 16 qualified Named-Buyer + Dollar-Bid setups (12 winners + 4 walk-aways)
     qualified_tickers = [
         e["ticker"] for e in bt["historical_events"] if e["cleared_6_biopharma_gates"]
     ]
-    assert qualified_tickers == ["HZNP", "SGEN", "SAGE", "RNA", "MTSR", "CDTX", "RVMD"]
+    assert qualified_tickers == [
+        "GBT",
+        "HZNP",
+        "SGEN",
+        "RETA",
+        "IMGN",
+        "CBAY",
+        "DCPH",
+        "SAGE",
+        "RNA",
+        "MTSR",
+        "AVDL",
+        "CDTX",
+        "RVMD",
+        "CYTK",
+        "MLTX",
+        "PTGX",
+    ]
+    assert by_tkr["GBT"]["realized_return_pct"] == 8.73
+    assert by_tkr["BMRN"]["realized_return_pct"] == -20.0
+    assert by_tkr["ALNY"]["realized_return_pct"] == -15.0
+    assert by_tkr["VKTX"]["realized_return_pct"] == -45.0
 
     # Verify >92% anchor chases ($VTYX, $SWTX, $MRTX) fail Gate 5
     assert by_tkr["VTYX"]["passes_anchor_92pct_gate"] is False
@@ -637,6 +670,17 @@ def test_biopharma_bolt_on_backtest_and_live_rytm_audit() -> None:
     # Verify Regime B radar contains RYTM, SRRK, COGT
     reg_b_tickers = [r["ticker"] for r in bt["regime_b_pre_leak_radar"]]
     assert reg_b_tickers == ["RYTM", "SRRK", "COGT"]
+
+    # Verify Live $100,000 @ $113.00 (885 shares) $RYTM scenario matrix and formalization windows
+    live_lot = bt["live_rytm_audit"]["live_100k_lot_scenarios"]
+    assert live_lot["shares"] == 885
+    assert live_lot["entry_price"] == 113.00
+    assert live_lot["scenarios"][0]["ira_0pct_tax_pnl_usd"] == 9735.0
+    assert live_lot["scenarios"][1]["ira_0pct_tax_pnl_usd"] == 18585.0
+    assert live_lot["scenarios"][2]["ira_0pct_tax_pnl_usd"] == -18585.0
+    assert live_lot["scenarios"][2]["pct_of_4m_net_worth"] == -0.46
+    assert live_lot["probability_weighted_ev_usd"] == 6195.0
+    assert len(bt["live_rytm_audit"]["deal_timeline_windows"]) == 3
 
     # Verify $RYTM live audit via calculate_deal_mechanics in BIOPHARMA_BOLT_ON mode
     rytm_calc = calculate_deal_mechanics(

@@ -266,16 +266,19 @@ PRESET_SCENARIOS: Dict[str, Dict[str, Any]] = {
     },
     "RYTM_BIOPHARMA_BOLT_ON": {
         "preset_id": "RYTM_BIOPHARMA_BOLT_ON",
-        "button_label": "🧬 Biopharma Bolt-On: RYTM $124 Base -> $134 Sweetened",
+        "button_label": "🧬 Biopharma Bolt-On: RYTM $100k @ $113 -> $124 / $134",
         "ticker": "RYTM",
         "input_mode": "PER_SHARE",
         "rumored_value": 124.0,
         "sweetened_ceiling_per_share": 134.0,
         "unaffected_price": 86.44,
+        "walk_away_floor_price": 92.00,
+        "live_position_usd": 100000.0,
+        "live_position_entry_price": 113.00,
         "clip_usd": 190000,
         "coc_dilution_pct": 1.5,
         "strategy_mode": "BIOPHARMA_BOLT_ON",
-        "description": "AstraZeneca (Alexion) $124/sh initial approach sweetened toward $134/sh w/ milestones; 6/6 Biopharma Gates Passed (+10.2% Base / +19.1% Sweetened)",
+        "description": "AstraZeneca $124/sh base -> $134/sh 2-bidder target (75.0% [12W/4L] Named-Bid conversion; $100k @ $113 = +$9,735 @ $124 / +$18,585 @ $134 / -$18,585 @ $92 floor; Nov 16/23 primary 8-K window)",
     },
 }
 
@@ -303,7 +306,7 @@ KNOWN_LEAK_TIMESTAMPS: Dict[str, str] = {
     "WEN": "2026-10-28T16:24:00-05:00",
     "U": "2026-11-06T16:52:00-05:00",
     "HELE": "2026-11-03T16:30:00-05:00",
-    "RYTM": "2026-11-05T16:15:00-05:00",
+    "RYTM": "2026-11-04T16:15:00-05:00",
     "GPN": "2026-10-30T16:40:00-05:00",
 }
 
@@ -485,11 +488,11 @@ CURATED_MARKET_QUOTES: Dict[str, Dict[str, Any]] = {
     "RYTM": {
         "ticker": "RYTM",
         "company_name": "Rhythm Pharmaceuticals",
-        "regular_market_price": 112.28,
-        "extended_hours_price": 112.50,
+        "regular_market_price": 113.00,
+        "extended_hours_price": 113.00,
         "extended_hours_share_volume": 165000,
-        "extended_hours_dollar_volume": 18562500.0,
-        "max_clip_10pct_volume_usd": 1856250.0,
+        "extended_hours_dollar_volume": 18645000.0,
+        "max_clip_10pct_volume_usd": 1864500.0,
         "session_type": "POST_MARKET",
         "annual_yield_pct": 0.0,
     },
@@ -1979,6 +1982,7 @@ def calculate_deal_mechanics(
             ticker=tkr,
             current_price=extended_price,
             unaffected_price=eff_unaffected,
+            walk_away_floor_price=92.00 if tkr == "RYTM" else round(eff_unaffected * 1.06, 2),
             base_cash_bid_per_share=implied_buyout_per_share,
             sweetened_ceiling_per_share=eff_sweetened,
             deal_ev_billions=rumored_ev_usd / 1e9,
@@ -1988,6 +1992,8 @@ def calculate_deal_mechanics(
             zero_moa_overlap=zero_moa_overlap,
             bid_sweetening_or_cvr=eff_sweetened > implied_buyout_per_share,
             clip_usd=float(clip_usd),
+            live_position_usd=100000.0,
+            live_position_entry_price=113.00 if tkr == "RYTM" else extended_price,
             nyc_tax_rate=nyc_tax_rate,
         )
 
