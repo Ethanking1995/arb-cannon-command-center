@@ -26,7 +26,14 @@ def test_get_root_terminal_html() -> None:
     html = resp.text
     assert "M&amp;A LEAK ARBITRAGE COMMAND CENTER" in html
     assert "SCAN M&amp;A WIRES &amp; REFRESH EXTENDED-HOURS QUOTES" in html
+    assert "BIOTECH M&amp;A RUMOR COMMAND CENTER" in html
+    assert "btn-biotech-mode-toggle" in html
+    assert "toggleBiotechCommandCenter()" in html
     assert "FIRE 5:00 PM EMAIL REPORT NOW" in html
+
+    bio_resp = client.get("/biotech")
+    assert bio_resp.status_code == 200
+    assert "btn-biotech-mode-toggle" in bio_resp.text
     assert "Stale Benchmark: BMBL $1.3B EV" in html
     assert "Stale Benchmark: WEN $8.00/sh" in html
     assert "Stale Benchmark: U $25B EV" in html

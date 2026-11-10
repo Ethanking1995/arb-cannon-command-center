@@ -435,6 +435,34 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
       background-color: #334155;
     }
 
+    .btn-biotech {
+      background: linear-gradient(135deg, rgba(14, 116, 144, 0.45) 0%, rgba(6, 78, 59, 0.55) 100%);
+      border-color: var(--cyan);
+      color: #E0F2FE;
+    }
+
+    .btn-biotech:hover {
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.65) 0%, rgba(4, 120, 87, 0.75) 100%);
+      border-color: #7DD3FC;
+    }
+
+    .btn-biotech.active {
+      background: linear-gradient(135deg, #0284C7 0%, #059669 100%);
+      border-color: #38BDF8;
+      color: #FFFFFF;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.45);
+    }
+
+    .mode-toggle-group {
+      display: inline-flex;
+      align-items: center;
+      background-color: var(--bg-elevated);
+      border: 1px solid var(--border-accent);
+      border-radius: 6px;
+      padding: 2px;
+      gap: 4px;
+    }
+
     .btn-sm {
       padding: 4px 9px;
       font-size: 11px;
@@ -927,6 +955,14 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
     </div>
 
     <div class="command-actions">
+      <div class="mode-toggle-group" role="group" aria-label="Command Center Mode Toggle">
+        <button class="btn btn-sm btn-primary" id="btn-pe-mode-toggle" onclick="toggleBiotechCommandCenter(false)" title="Standard PE All-Cash M&A Leak Arbitrage Command Center">
+          🏢 PE ALL-CASH ARB
+        </button>
+        <button class="btn btn-sm btn-biotech" id="btn-biotech-mode-toggle" onclick="toggleBiotechCommandCenter()" title="Toggle Biotech M&A Rumor Command Center ($RYTM $100k Tracker, Regime B Radar & 30-Event Backtest)">
+          🧬 BIOTECH M&amp;A RUMOR COMMAND CENTER
+        </button>
+      </div>
       <button class="btn btn-primary" id="btn-scan-wires" onclick="triggerWireScan()">
         📡 SCAN M&amp;A WIRES &amp; REFRESH EXTENDED-HOURS QUOTES
       </button>
@@ -936,10 +972,10 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
     </div>
   </header>
 
-  <main class="workspace">
+  <main class="workspace" id="main-workspace">
 
     <!-- HEADER PANEL: STRATEGY TELEMETRY & 3-YEAR BACKTEST BENCHMARKS (2024-2026 YTD) -->
-    <section class="card">
+    <section class="card" id="panel-pe-benchmarks">
       <div class="card-header">
         <div class="card-title">
           <span>📊 STRATEGY TELEMETRY &amp; 3-YEAR HISTORICAL BACKTEST BENCHMARKS (2024–2026 YTD | 46 LEAK EVENTS)</span>
@@ -1032,7 +1068,7 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
     </section>
 
     <!-- MAIN 2-COLUMN WORKSPACE: PANEL 1 (WIRES) + PANEL 2 (60s SEC XBRL CALCULATOR) -->
-    <div class="main-grid">
+    <div class="main-grid" id="panel-wires-and-calc">
 
       <!-- PANEL 1: LIVE M&A LEAK WIRE SCANNER & EDGAR ITEM 1.01 MONITOR -->
       <section class="card">
@@ -1246,7 +1282,7 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
     </div>
 
     <!-- BOTTOM 2-COLUMN GRID: PANEL 3 (8-POINT GATEKEEPER & HFT TIMER) + PANEL 4 (WATCHLIST) -->
-    <div class="main-grid">
+    <div class="main-grid" id="panel-gates-and-watchlist">
 
       <!-- PANEL 3: INTERACTIVE 8-POINT PRE-TRADE GATEKEEPER & POST-HEADLINE HFT COOLDOWN TIMER -->
       <section class="card">
@@ -1360,15 +1396,18 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
     </div>
 
     <!-- PANEL 5: BIOPHARMA TWO-REGIME PRE-ANNOUNCEMENT ENGINE & FULL 30-EVENT UN-BIASED BACKTEST (2022–2026) -->
-    <section class="card" style="border-color:rgba(56,189,248,0.45);">
+    <section class="card" id="panel-biopharma-command-center" style="border-color:rgba(56,189,248,0.45);">
       <div class="card-header" style="background:linear-gradient(90deg, rgba(15,23,42,0.98) 0%, rgba(6,78,59,0.35) 100%);">
         <div class="card-title">
-          <span style="color:var(--cyan);">🧬 PANEL 5: BIOPHARMA TWO-REGIME PRE-ANNOUNCEMENT ENGINE &amp; FULL 30-EVENT UN-BIASED BACKTEST (2022–2026)</span>
+          <span style="color:var(--cyan);">🧬 BIOTECH M&amp;A RUMOR COMMAND CENTER // TWO-REGIME ENGINE &amp; 30-EVENT UN-BIASED BACKTEST (2022–2026)</span>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <span class="badge badge-emerald" id="bio-bt-winrate-badge">NAMED-BID CONVERSION: 75.0% (12W / 4L | N=16)</span>
           <span class="badge badge-amber" id="bio-bt-spread-badge">BROAD COMMERCIAL: 60.0% (12W / 8L | N=20) | UNFILTERED: 46.7% (N=30)</span>
           <span class="badge badge-neutral" style="border:1px solid var(--cyan);color:var(--cyan);">LIVE $100K @ $113.00 (885 SH) &le; $114.08 HARD 92% CAP</span>
+          <button class="btn btn-sm btn-biotech" id="btn-biotech-focus-only" onclick="toggleBiotechFocusOnly()">
+            🔬 Biotech Focus View (Hide PE Panels)
+          </button>
           <button class="btn btn-sm btn-primary" onclick="loadPreset('RYTM', 'PER_SHARE', 124.0, 190000, 1.5, 'BIOPHARMA_BOLT_ON', 134.0)">
             ⚡ Stage $RYTM ($100k @ $113.00 Held | Hard Ceiling $114.08) &uarr;
           </button>
@@ -1529,6 +1568,8 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
       biopharmaBacktest: null,
       biopharmaFilter: 'ALL',
       sweetenedCeilingOverride: null,
+      biotechModeActive: false,
+      biotechFocusOnly: false,
     };
 
     function fmtUSD(val, decimals = 0) {
@@ -1538,6 +1579,68 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals
       });
+    }
+
+    async function toggleBiotechCommandCenter(forceState = null) {
+      const nextState = forceState !== null ? Boolean(forceState) : !STATE.biotechModeActive;
+      STATE.biotechModeActive = nextState;
+
+      const bioPanel = document.getElementById('panel-biopharma-command-center');
+      const peBench = document.getElementById('panel-pe-benchmarks');
+      const wiresCalc = document.getElementById('panel-wires-and-calc');
+      const gatesWl = document.getElementById('panel-gates-and-watchlist');
+      const btnBio = document.getElementById('btn-biotech-mode-toggle');
+      const btnPe = document.getElementById('btn-pe-mode-toggle');
+
+      if (nextState) {
+        if (bioPanel) bioPanel.style.order = '-10';
+        if (wiresCalc) wiresCalc.style.order = '-5';
+        if (btnBio) {
+          btnBio.classList.add('active');
+          btnBio.textContent = '🧬 BIOTECH M&A RUMOR COMMAND CENTER [ACTIVE]';
+        }
+        if (btnPe) {
+          btnPe.classList.remove('btn-primary');
+        }
+        // Automatically stage $RYTM ($124 Base -> $134 Sweetened, $100k @ $113 lot) in Biopharma Bolt-On mode
+        await loadPreset('RYTM', 'PER_SHARE', 124.0, 190000, 1.5, 'BIOPHARMA_BOLT_ON', 134.0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        STATE.biotechFocusOnly = false;
+        if (bioPanel) bioPanel.style.order = '0';
+        if (wiresCalc) wiresCalc.style.order = '0';
+        if (peBench) peBench.style.display = '';
+        if (gatesWl) gatesWl.style.display = '';
+        if (btnBio) {
+          btnBio.classList.remove('active');
+          btnBio.textContent = '🧬 BIOTECH M&A RUMOR COMMAND CENTER';
+        }
+        if (btnPe) {
+          btnPe.classList.add('btn-primary');
+        }
+        const focusBtn = document.getElementById('btn-biotech-focus-only');
+        if (focusBtn) focusBtn.textContent = '🔬 Biotech Focus View (Hide PE Panels)';
+      }
+    }
+
+    function toggleBiotechFocusOnly() {
+      STATE.biotechFocusOnly = !STATE.biotechFocusOnly;
+      const peBench = document.getElementById('panel-pe-benchmarks');
+      const gatesWl = document.getElementById('panel-gates-and-watchlist');
+      const focusBtn = document.getElementById('btn-biotech-focus-only');
+
+      if (STATE.biotechFocusOnly) {
+        if (!STATE.biotechModeActive) {
+          toggleBiotechCommandCenter(true);
+        }
+        if (peBench) peBench.style.display = 'none';
+        if (gatesWl) gatesWl.style.display = 'none';
+        if (focusBtn) focusBtn.textContent = '📊 Show All PE + Biotech Panels';
+      } else {
+        if (peBench) peBench.style.display = '';
+        if (gatesWl) gatesWl.style.display = '';
+        if (focusBtn) focusBtn.textContent = '🔬 Biotech Focus View (Hide PE Panels)';
+      }
     }
 
     async function initDashboard() {
@@ -1557,9 +1660,11 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
       renderBiopharmaBacktestPanel();
       updateCooldownTimer();
 
-      // Support deep-linking from /scan page (?ticker=U&mode=EV_BILLIONS&value=25&sim_fresh=1)
+      // Support deep-linking from /scan page (?ticker=U&mode=EV_BILLIONS&value=25&sim_fresh=1) or /biotech (?mode=biotech)
       const params = new URLSearchParams(window.location.search);
-      if (params.get('ticker')) {
+      if (window.location.pathname === '/biotech' || params.get('view') === 'biotech' || params.get('mode') === 'biotech') {
+        await toggleBiotechCommandCenter(true);
+      } else if (params.get('ticker')) {
         const tkr = params.get('ticker').toUpperCase();
         const mode = params.get('mode') || (tkr === 'RYTM' ? 'PER_SHARE' : 'EV_BILLIONS');
         const val = parseFloat(params.get('value')) || (tkr === 'RYTM' ? 124.0 : 1.3);
@@ -1569,7 +1674,11 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
           const chk = document.getElementById('chk-simulate-fresh');
           if (chk) chk.checked = true;
         }
-        await loadPreset(tkr, mode, val, clip, 1.5, strat, tkr === 'RYTM' ? 134.0 : null);
+        if (tkr === 'RYTM') {
+          await toggleBiotechCommandCenter(true);
+        } else {
+          await loadPreset(tkr, mode, val, clip, 1.5, strat, null);
+        }
       }
     }
 
@@ -2420,6 +2529,12 @@ def get_terminal_ui() -> HTMLResponse:
     return HTMLResponse(content=TERMINAL_HTML, status_code=200)
 
 
+@app.get("/biotech", response_class=HTMLResponse)
+def get_biotech_terminal_ui() -> HTMLResponse:
+    """Serve the Arb Cannon terminal toggled directly into Biotech M&A Rumor Command Center mode."""
+    return HTMLResponse(content=TERMINAL_HTML, status_code=200)
+
+
 SCAN_PAGE_HTML = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2744,7 +2859,10 @@ SCAN_PAGE_HTML = r"""<!DOCTYPE html>
         </div>
       </div>
     </div>
-    <div style="display:flex;gap:10px;">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="/biotech" class="btn" style="border-color:var(--cyan);color:#E0F2FE;background:linear-gradient(135deg, rgba(14,116,144,0.45) 0%, rgba(6,78,59,0.55) 100%);">
+        🧬 BIOTECH M&amp;A RUMOR COMMAND CENTER ($RYTM $100K)
+      </a>
       <button class="btn btn-primary" id="btn-rescan" onclick="executeDeepScan()">
         🔄 RE-RUN LIVE M&amp;A DEEP SCAN
       </button>
