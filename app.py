@@ -1,9 +1,10 @@
 """
 Arb Cannon: M&A Leak Arbitrage Command Center — FastAPI Web Server & Trading Terminal UI (app.py)
 
-Serves the dark-mode institutional trading terminal at http://127.0.0.1:8000 and provides
-REST endpoints for M&A wire scanning, SEC EDGAR XBRL Net-Debt & 3-Tranche Limit Order
-calculations, Watchlist management, and 5:00 PM EST Email Report generation.
+Serves the Biotech M&A Overnight Scanner at http://127.0.0.1:8000, the dark-mode
+institutional trading terminal at /terminal, and REST endpoints for M&A wire scanning,
+SEC EDGAR XBRL Net-Debt & 3-Tranche Limit Order calculations, Watchlist management,
+and 5:00 PM EST Email Report generation.
 """
 
 from __future__ import annotations
@@ -17,10 +18,15 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from arb_engine import (
+    GATEKEEPER_RULES,
+    STRATEGY_BENCHMARKS,
+    STRATEGY_THESIS,
     calculate_deal_mechanics,
     calculate_hft_cooldown,
     evaluate_watchlist,
+    fetch_price_history,
     get_dashboard_payload,
+    get_scanner_payload,
     modify_watchlist,
     scan_ma_wires,
 )
@@ -28,7 +34,11 @@ from biopharma_leak_backtest import (
     evaluate_biopharma_bolt_on_candidate,
     run_biopharma_backtest,
 )
+from backtest_ui import BACKTEST_HTML
+from biotech_ui import BIOTECH_HTML
 from nightly_mailer import generate_and_send_nightly_report
+from research_ui import RESEARCH_HTML
+from scanner_ui import SCANNER_HTML
 
 app = FastAPI(
     title="Arb Cannon: M&A Leak Arbitrage Command Center",
@@ -147,6 +157,23 @@ def api_get_dashboard(use_live_network: bool = True) -> Dict[str, Any]:
     return get_dashboard_payload(use_live_network=use_live_network)
 
 
+@app.get("/api/scanner")
+def api_get_scanner(use_live_network: bool = True) -> Dict[str, Any]:
+    """Return KPIs, ranked opportunities, wires, and performance for the Overnight Scanner."""
+    return get_scanner_payload(use_live_network=use_live_network)
+
+
+@app.get("/api/price-history")
+def api_get_price_history(
+    ticker: str, range: str = "1D", use_live_network: bool = True
+) -> Dict[str, Any]:
+    """Return price bars with a running VWAP for the Overnight Scanner chart."""
+    try:
+        return fetch_price_history(ticker, range, use_live_yf=use_live_network)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 @app.post("/api/calculate")
 def api_calculate(req: CalculateRequest) -> Dict[str, Any]:
     """Run the 60-Second SEC EDGAR XBRL Net-Debt & 3-Tranche Limit Calculator."""
@@ -173,6 +200,19 @@ def api_calculate(req: CalculateRequest) -> Dict[str, Any]:
 def api_get_biopharma_backtest() -> Dict[str, Any]:
     """Return the 2023–2026 Historical Biopharma Pre-Announcement Leak Backtest & Live $RYTM Audit."""
     return run_biopharma_backtest()
+
+
+@app.get("/api/backtest")
+def api_get_backtest() -> Dict[str, Any]:
+    """Return the biopharma 6-gate backtest and the PE all-cash strategy benchmarks for /backtest."""
+    return {
+        "biopharma": run_biopharma_backtest(),
+        "pe": {
+            "benchmarks": STRATEGY_BENCHMARKS,
+            "gatekeeper_rules": GATEKEEPER_RULES,
+            "thesis": STRATEGY_THESIS,
+        },
+    }
 
 
 @app.post("/api/biopharma-evaluate")
@@ -2524,6 +2564,30 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
 
 
 @app.get("/", response_class=HTMLResponse)
+def get_scanner_ui() -> HTMLResponse:
+    """Serve the Biotech M&A Overnight Scanner."""
+    return HTMLResponse(content=SCANNER_HTML, status_code=200)
+
+
+@app.get("/biotech-rumors", response_class=HTMLResponse)
+def get_biotech_rumors_ui() -> HTMLResponse:
+    """Serve the Biotech M&A Rumors page (live rumor audit, pre-rumor radar, rumor checker)."""
+    return HTMLResponse(content=BIOTECH_HTML, status_code=200)
+
+
+@app.get("/research", response_class=HTMLResponse)
+def get_research_ui() -> HTMLResponse:
+    """Serve the M&A Wire & SEC EDGAR Research page."""
+    return HTMLResponse(content=RESEARCH_HTML, status_code=200)
+
+
+@app.get("/backtest", response_class=HTMLResponse)
+def get_backtest_ui() -> HTMLResponse:
+    """Serve the Strategy Backtests page."""
+    return HTMLResponse(content=BACKTEST_HTML, status_code=200)
+
+
+@app.get("/terminal", response_class=HTMLResponse)
 def get_terminal_ui() -> HTMLResponse:
     """Serve the Arb Cannon institutional trading terminal HTML interface."""
     return HTMLResponse(content=TERMINAL_HTML, status_code=200)
@@ -2866,7 +2930,7 @@ SCAN_PAGE_HTML = r"""<!DOCTYPE html>
       <button class="btn btn-primary" id="btn-rescan" onclick="executeDeepScan()">
         🔄 RE-RUN LIVE M&amp;A DEEP SCAN
       </button>
-      <a href="/" class="btn">
+      <a href="/terminal" class="btn">
         &larr; BACK TO COMMAND CENTER
       </a>
     </div>
@@ -3132,8 +3196,8 @@ SCAN_PAGE_HTML = r"""<!DOCTYPE html>
         ? 'AWAITING_PRICE_LEAK'
         : `${row.verdict} (${row.gross_spread_pct >= 0 ? '+' : ''}${Number(row.gross_spread_pct).toFixed(2)}%)`;
       const calcUrl = isUnpriced
-        ? `/?ticker=${encodeURIComponent(row.ticker)}`
-        : `/?ticker=${encodeURIComponent(row.ticker)}&mode=${encodeURIComponent(row.input_mode)}&value=${encodeURIComponent(row.rumored_value)}`;
+        ? `/terminal?ticker=${encodeURIComponent(row.ticker)}`
+        : `/terminal?ticker=${encodeURIComponent(row.ticker)}&mode=${encodeURIComponent(row.input_mode)}&value=${encodeURIComponent(row.rumored_value)}`;
       const cardBorder = row.is_stale_leak ? 'border:1px solid rgba(245,158,11,0.45);' : 'border:1px solid rgba(16,185,129,0.5);';
 
       return `
@@ -3269,7 +3333,7 @@ SCAN_PAGE_HTML = r"""<!DOCTYPE html>
 
         const hasExplicitVal = item.detected_ticker && item.suggested_input_mode && item.suggested_value !== null && item.suggested_value !== undefined;
         const calcUrl = hasExplicitVal
-          ? `/?ticker=${encodeURIComponent(item.detected_ticker)}&mode=${encodeURIComponent(item.suggested_input_mode)}&value=${encodeURIComponent(item.suggested_value)}&clip=${Math.round(380000 * (item.recommended_clip_multiplier || 1))}`
+          ? `/terminal?ticker=${encodeURIComponent(item.detected_ticker)}&mode=${encodeURIComponent(item.suggested_input_mode)}&value=${encodeURIComponent(item.suggested_value)}&clip=${Math.round(380000 * (item.recommended_clip_multiplier || 1))}`
           : item.link;
 
         const rowStyle = item.is_stale_leak

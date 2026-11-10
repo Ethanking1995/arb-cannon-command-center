@@ -2,7 +2,10 @@
 FastAPI Endpoint Integration Tests (tests/test_app_endpoints.py)
 
 Verifies:
-  - GET /
+  - GET / (Overnight Scanner), GET /biotech-rumors, GET /research, GET /backtest, and GET /terminal
+  - GET /api/backtest
+  - GET /api/scanner
+  - GET /api/price-history
   - GET /api/dashboard
   - POST /api/calculate (EV_BILLIONS, PER_SHARE, Take-Under Trap, Live $5.97 BMBL price)
   - POST /api/scan
@@ -19,9 +22,136 @@ from app import app
 client = TestClient(app)
 
 
-def test_get_root_terminal_html() -> None:
-    """Verify GET / returns HTTP 200 and renders the institutional trading terminal UI with <=4h Stale Leak Separation."""
+def test_get_root_scanner_html() -> None:
+    """Verify GET / serves the Overnight Scanner wired to /api/scanner and /api/price-history."""
     resp = client.get("/")
+    assert resp.status_code == 200
+    html = resp.text
+    assert "Biotech M&amp;A Overnight Scanner" in html
+    assert "/api/scanner" in html
+    assert "/api/price-history" in html
+    assert "Overnight Position (Simulation)" in html
+    assert "Research &amp; Evidence" in html
+
+
+def test_get_api_scanner() -> None:
+    """Verify GET /api/scanner ranks the RYTM biopharma setup first with its modeled scenarios."""
+    resp = client.get("/api/scanner?use_live_network=false")
+    assert resp.status_code == 200
+    data = resp.json()
+    kpis = data["kpis"]
+    assert kpis["active_candidates"] == 5
+    assert kpis["actionable_setups"] == 1
+    assert kpis["actionable_biotech"] == 1
+    assert kpis["backtest_win_rate_pct"] == 84.2
+    assert kpis["avg_overnight_move_pct"] == 5.8
+
+    top = data["opportunities"][0]
+    assert top["ticker"] == "RYTM"
+    assert top["sector"] == "Biotech"
+    assert top["status_key"] == "open"
+    assert top["decision_key"] == "go"
+    assert top["decision_label"] == "Actionable"
+    assert "Passes all 6 biotech checks" in top["decision_text"]
+    assert "$114.08 max buy price" in top["decision_text"]
+    signal = top["biotech_signal"]
+    assert signal["is_actionable"] is True
+    assert signal["label"] == "Actionable biotech M&A rumor"
+    assert signal["gates_passed"] == 6
+    assert signal["gates_total"] == 6
+    assert signal["max_entry_price"] == 114.08
+    assert signal["buyer"].startswith("AstraZeneca")
+    assert len(signal["checks"]) == 6
+    assert all(c["passed"] and c["label"] and c["detail"] for c in signal["checks"])
+    assert signal["checks"][0]["label"] == "Named big-pharma buyer with a specific price"
+    assert top["base_offer"] == 124.0
+    assert top["higher_offer"] == 134.0
+    assert top["floor_price"] == 92.0
+    assert top["upside_low_pct"] == 9.73
+    assert top["upside_high_pct"] == 18.58
+    assert top["downside_pct"] == -18.58
+    assert top["ev_pct"] == 6.19
+    assert top["rumored_window"] == "Nov 16 – Nov 23"
+    assert top["analysis_url"].startswith("/terminal?ticker=RYTM")
+
+    gpn = next(o for o in data["opportunities"] if o["ticker"] == "GPN")
+    assert gpn["base_offer"] is None
+    assert gpn["ev_pct"] is None
+    assert gpn["decision_label"] == "Wait"
+    assert gpn["biotech_signal"] is None
+    assert len(data["wire_items"]) >= 4
+    assert len(data["performance"]["annual_pnl_table"]) == 3
+
+
+def test_get_api_price_history() -> None:
+    """Verify GET /api/price-history validates the range and never fabricates bars offline."""
+    resp = client.get("/api/price-history?ticker=rytm&range=5D&use_live_network=false")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["ticker"] == "RYTM"
+    assert data["range"] == "5D"
+    assert data["points"] == []
+    assert data["source"] == "unavailable"
+
+    bad = client.get("/api/price-history?ticker=RYTM&range=10Y&use_live_network=false")
+    assert bad.status_code == 400
+
+
+def test_get_research_and_backtest_pages() -> None:
+    """Verify /research and /backtest serve the light shell wired to their data endpoints."""
+    research = client.get("/research")
+    assert research.status_code == 200
+    assert "M&amp;A Wire &amp; EDGAR Research" in research.text
+    assert "/api/scan" in research.text
+    assert 'class="nav-item active" href="/research"' in research.text
+    assert "const STATUS_TEXT" in research.text
+
+    backtest = client.get("/backtest")
+    assert backtest.status_code == 200
+    assert "Strategy Backtests" in backtest.text
+    assert "/api/backtest" in backtest.text
+    assert 'class="nav-item active" href="/backtest"' in backtest.text
+
+    scanner = client.get("/")
+    assert 'href="/research"' in scanner.text
+    assert 'href="/backtest"' in scanner.text
+
+
+def test_get_biotech_rumors_page() -> None:
+    """Verify /biotech-rumors serves the light shell wired to the biopharma endpoints and is linked from every sidebar."""
+    resp = client.get("/biotech-rumors")
+    assert resp.status_code == 200
+    html = resp.text
+    assert "Biotech M&amp;A Rumors" in html
+    assert "/api/biopharma-backtest" in html
+    assert "/api/biopharma-evaluate" in html
+    assert "/api/scanner" in html
+    assert 'class="nav-item active" href="/biotech-rumors"' in html
+    assert 'href="/biotech"' in html
+
+    for path in ("/", "/research", "/backtest"):
+        page = client.get(path)
+        assert page.status_code == 200
+        assert 'class="nav-item" href="/biotech-rumors"' in page.text, path
+
+
+def test_get_api_backtest() -> None:
+    """Verify GET /api/backtest bundles the biopharma backtest with the PE benchmarks and 8 gates."""
+    resp = client.get("/api/backtest")
+    assert resp.status_code == 200
+    data = resp.json()
+    bio = data["biopharma"]
+    assert len(bio["historical_events"]) == 30
+    assert bio["filtered_6_gate_metrics"]["win_rate_pct"] == 75.0
+    assert len(bio["gatekeeper_rules"]) == 6
+    assert data["pe"]["benchmarks"]["filtered_win_rate_pct"] == 84.2
+    assert len(data["pe"]["gatekeeper_rules"]) == 8
+    assert "alpha_window" in data["pe"]["thesis"]
+
+
+def test_get_terminal_html() -> None:
+    """Verify GET /terminal returns HTTP 200 and renders the institutional trading terminal UI with <=4h Stale Leak Separation."""
+    resp = client.get("/terminal")
     assert resp.status_code == 200
     html = resp.text
     assert "M&amp;A LEAK ARBITRAGE COMMAND CENTER" in html
