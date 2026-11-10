@@ -1826,11 +1826,32 @@ def calculate_deal_mechanics(
         else 0.0
     )
 
+    entry_pct_of_anchor = (
+        round(extended_price / implied_buyout_per_share, 4)
+        if implied_buyout_per_share > 0
+        else 1.0
+    )
+    hard_ceiling_92pct = round(implied_buyout_per_share * 0.92, 2)
+
     if is_take_under_trap:
         verdict = "FAIL_TAKE_UNDER"
         verdict_label = (
             f"🚨 HARD FAIL: TAKE-UNDER TRAP (${implied_buyout_per_share:.2f}/sh Implied <= ${extended_price:.2f} Market Price)"
         )
+    elif strat_mode == "BIOPHARMA_BOLT_ON":
+        if entry_pct_of_anchor <= 0.92:
+            verdict = "PASS_HOT"
+            verdict_label = (
+                f"🟢 BIO_PASS_HOT (REGIME A AUCTION): ${extended_price:.2f} = {entry_pct_of_anchor * 100:.1f}% of "
+                f"${implied_buyout_per_share:.2f} Anchor (<= 92% Hard Ceiling ${hard_ceiling_92pct:.2f} | "
+                f"+{gross_spread_pct:.2f}% Base Spread | 10–45d Clock)"
+            )
+        else:
+            verdict = "WARN_TIGHT"
+            verdict_label = (
+                f"🚨 BIO_GATE_5 CEILING BREACH: ${extended_price:.2f} = {entry_pct_of_anchor * 100:.1f}% of "
+                f"${implied_buyout_per_share:.2f} Anchor (> 92.0% Hard Ceiling ${hard_ceiling_92pct:.2f} — Do Not Overpay)"
+            )
     elif has_8k_101 and current_price_override is None and gross_spread_pct < 5.5:
         verdict = "WARN_TIGHT"
         verdict_label = (
@@ -1945,12 +1966,12 @@ def calculate_deal_mechanics(
             else (86.44 if tkr == "RYTM" else round(extended_price * 0.80, 2))
         )
         eff_drug = commercial_drug_name or (
-            "Imcivree (setmelanotide) — FDA-approved (incl. Mar 2026 aHO expansion)"
+            "Imcivree ($92.1M Q3 rev, +29% QoQ) + Nov 2 $750M KKR/Blackstone facility & 1% LG Chem royalty buydown"
             if tkr == "RYTM"
-            else "FDA-Approved Commercial Flagship Asset"
+            else "FDA-Approved Commercial Flagship Asset + Non-Dilutive Runway"
         )
         eff_suitor = named_pharma_suitor or (
-            "AstraZeneca (via Alexion Rare Disease)"
+            "AstraZeneca ($124/sh Offer) + Reported 2nd Bidder ($134–$145+ Target)"
             if tkr == "RYTM"
             else "Tier-1 Big Pharma Suitor"
         )
@@ -2002,6 +2023,15 @@ def calculate_deal_mechanics(
             "extended_change_pct": quote.get("extended_change_pct", 0.0),
             "implied_cash_buyout_per_share": round(implied_buyout_per_share, 2),
             "implied_cash_buyout_per_share_exact": implied_buyout_per_share,
+            "entry_pct_of_anchor": entry_pct_of_anchor,
+            "entry_pct_of_anchor_display": round(entry_pct_of_anchor * 100.0, 1),
+            "hard_ceiling_92pct": hard_ceiling_92pct,
+            "passes_anchor_92pct_gate": entry_pct_of_anchor <= 0.92,
+            "expected_hold_clock": (
+                "10–45 Days (8–82d Contested Auction Range)"
+                if strat_mode == "BIOPHARMA_BOLT_ON"
+                else "48–72 Hours (8-K Morning Wave)"
+            ),
             "gross_spread_per_share": round(
                 implied_buyout_per_share - extended_price, 2
             ),
