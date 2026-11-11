@@ -26,4 +26,10 @@ python nightly_mailer.py --dry-run
 
 # Launch FastAPI Command Center on http://127.0.0.1:8088
 uvicorn app:app --host 127.0.0.1 --port 8088 --reload
+
+# Launch NVDA Intraday Signal Monitor on http://127.0.0.1:9879
+uvicorn server:app --app-dir nvda_signal_monitor --host 127.0.0.1 --port 9879 --reload
 ```
+
+### NVDA Intraday Signal Monitor (Port 9879)
+For full strategy details, tailwind gates (`CRWV` / `SOXL`), and real-time audio/visual alert instructions, see [`nvda_signal_monitor/README.md`](nvda_signal_monitor/README.md).
