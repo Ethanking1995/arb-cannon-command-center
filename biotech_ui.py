@@ -182,15 +182,15 @@ _SCRIPT = r"""
     ['Approved drug props up the stock if talks fail', 'A drug that is already approved and selling keeps the stock from collapsing if the buyer walks away.'],
     ['Clean ownership and drug rights', 'The company owns its drug rights outright, with no partner or royalty strings that could scare a buyer off.'],
     ['Second bidder could push the price higher', 'A rejected first offer or a rival bidder makes a higher final price more likely.'],
-    ['Buying at or below 92% of the offer', 'Only buy when the price leaves at least an 8% gain to the offer.'],
-    ['Small position with a set time limit', 'Keep the bet small and sell if no deal is announced within about 20 trading days.'],
+    ['Buying at or below 92% of the offer', 'Hard ceiling is 92% of the offer; for strong positive EV at the 55.6% base rate, aim to add at or below 87%.'],
+    ['Small position with a bimodal time limit', 'Exit immediately if talks end; otherwise hold through the JPM window up to the 59 trading day hard stop (Feb 1, 2027).'],
   ];
   const SCENARIO_TEXT = ['Deal closes at the offer', 'Bidding war raises the price', 'Talks fail, stock drops to the floor'];
   const LADDER_TEXT = ['Buy now', 'Buy on a pullback', 'Buy on a deeper pullback'];
   const WINDOW_TEXT = [
-    ['Most likely window', 'past deals', 'Most past deals were announced in this window, usually on a Monday before the market opens. A news story saying the buyer is "nearing a deal" often comes a few days earlier.'],
-    ['If a bidding war starts', 'past deals', 'If a second buyer needs more time to look at the books, signing tends to slip a few weeks, often at a higher price.'],
-    ['Give-up date', 'rumors stalled', 'If there is no new news and no deal filing by these dates, sell and move the money back to cash.'],
+    ['Fast confirmatory window (Days 8–13 TD)', 'wins', 'All fast unconfirmed press leaks ($GBT 1d, $HZNP 9d, $SGEN 11d) signed within 11 trading days. On Nov 23, hold into Regime 2 only if price stays at or above $99.70 (>50% of rumor gap preserved).'],
+    ['Contested / JPM Healthcare window (Days 45–57 TD)', 'wins', 'Contested non-binding approaches ($SWTX 53d, $RNA 57d — longest unconfirmed press rumor) required 11–12 weeks of manufacturing/IP diligence. Aligns directly with JPM Healthcare Conference (Jan 11–14, 2027).'],
+    ['Hard give-up date & break rule (Day 59 TD)', 'rumors failed', 'Exit 100% immediately on any Tier-1 "talks ended" headline ($CYTK 3d, $RVMD 12d). Otherwise hard time-stop on Mon Feb 1, 2027 (59 TDs) unless Rhythm announces a formal Board Strategic Review ($SAGE 97d).'],
   ];
   const VERDICTS = {
     BIO_PASS_HOT: ['go', 'Ready to buy'],
@@ -227,7 +227,7 @@ _SCRIPT = r"""
       let fact = '';
       if (i === 0 && ctx.suitor) fact = `Buyer: ${ctx.suitor}`;
       if (i === 1) fact = c.passed ? `If talks fail, the stock should hold around ${fmtPx(ctx.floor)}.` : 'No approved drug, so the stock could fall back to its pre-rumor price or lower.';
-      if (i === 4 && isNum(ctx.price) && isNum(ctx.base) && ctx.base > 0) fact = `${fmtPx(ctx.price)} is ${(ctx.price / ctx.base * 100).toFixed(1)}% of the ${fmtPx(ctx.base)} offer. Max buy price: ${fmtPx(ctx.ceiling)}.`;
+      if (i === 4 && isNum(ctx.price) && isNum(ctx.base) && ctx.base > 0) fact = `${fmtPx(ctx.price)} is ${(ctx.price / ctx.base * 100).toFixed(1)}% of the ${fmtPx(ctx.base)} offer. Max buy price: ${fmtPx(ctx.ceiling)}${isNum(ctx.evAddCeiling) ? ` · +EV add zone: ≤ ${fmtPx(ctx.evAddCeiling)} (87%)` : ''}.`;
       return { label: c.label || label, hint, fact, passed: !!c.passed, detail: c.detail || '' };
     });
   }
@@ -366,7 +366,7 @@ _SCRIPT = r"""
 
   function renderBacktest() {
     const f = STATE.bt.filtered_6_gate_metrics || {};
-    document.getElementById('kpi-win').textContent = isNum(f.win_rate_pct) ? f.win_rate_pct.toFixed(0) + '%' : '—';
+    document.getElementById('kpi-win').textContent = isNum(f.win_rate_pct) ? f.win_rate_pct.toFixed(1) + '%' : '—';
     document.getElementById('kpi-win-note').textContent = isNum(f.wins) ? `(${f.wins}W / ${f.losses_or_walkaways}L)` : '';
     document.getElementById('kpi-winner').textContent = fmtPct(f.winner_median_spread_pct, 1);
     document.getElementById('kpi-hold').textContent = shortHold(f.expected_hold_clock) || '—';
@@ -442,7 +442,7 @@ _SCRIPT = r"""
 
       <div class="sub-title">What Could Happen to Your ${fmtUsdPlain(lot.position_usd)}</div>
       ${scenarioTable(lot)}
-      <div class="note">Hold the ${fmtUsdPlain(lot.position_usd)} position, but don't buy more above the max buy price of <strong>${fmtPx(a.hard_ceiling_92pct)}</strong>. If talks fail, the expected loss is about ${isNum(lot.walkaway_pct_of_4m_net_worth) ? lot.walkaway_pct_of_4m_net_worth.toFixed(2) + '% of a $4M portfolio' : 'the walk-away row above'}.</div>
+      <div class="note">At the audited <strong>55.6% (5W/4L)</strong> pre-8K conversion rate, your ${fmtPx(lot.entry_price)} entry is near-breakeven EV (<strong>${fmtUsd(lot.probability_weighted_ev_usd)} / ${fmtPct(lot.probability_weighted_ev_pct, 2)}</strong>). Hold the ${fmtUsdPlain(lot.position_usd)} lot for JPM / 2-bidder upside, never chase above <strong>${fmtPx(a.hard_ceiling_92pct)}</strong> (92%), and only add on pullbacks at or below <strong>${fmtPx(a.positive_ev_87pct_ceiling || a.base_cash_bid_per_share * 0.87)}</strong> (87%). Walk-away risk is ${isNum(lot.walkaway_pct_of_4m_net_worth) ? Math.abs(lot.walkaway_pct_of_4m_net_worth).toFixed(2) + '% of a $4M portfolio' : 'capped by sizing'}.</div>
 
       <div class="sub-title">3-Step Buy Plan</div>
       <p class="pane-note">Spread buys across three limit orders so pullbacks lower your average price.</p>
@@ -451,7 +451,7 @@ _SCRIPT = r"""
     const rows = sig && sig.checks && sig.checks.length ? sig.checks : a.gate_checks;
     const passed = rows ? rows.filter((c) => c.passed).length : 0;
     const total = rows ? rows.length : 0;
-    const ctx = { suitor: a.named_pharma_suitor, floor: a.fundamental_walkaway_floor, price, base: a.base_cash_bid_per_share, ceiling: a.hard_ceiling_92pct };
+    const ctx = { suitor: a.named_pharma_suitor, floor: a.fundamental_walkaway_floor, price, base: a.base_cash_bid_per_share, ceiling: a.hard_ceiling_92pct, evAddCeiling: a.positive_ev_87pct_ceiling };
     const checkedNote = sig
       ? `Checked at today's price of ${fmtPx(price)}. Your ${fmtPx(a.current_price)} entry passed ${a.passed_gates_count} of ${a.total_gates_count}.`
       : `Checked at your ${fmtPx(a.current_price)} entry price.`;

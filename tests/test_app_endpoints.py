@@ -70,7 +70,7 @@ def test_get_api_scanner() -> None:
     assert top["upside_low_pct"] == 9.73
     assert top["upside_high_pct"] == 18.58
     assert top["downside_pct"] == -18.58
-    assert top["ev_pct"] == 6.19
+    assert top["ev_pct"] == 0.31
     assert top["rumored_window"] == "Nov 16 – Nov 23"
     assert top["analysis_url"].startswith("/terminal?ticker=RYTM")
 
@@ -141,8 +141,9 @@ def test_get_api_backtest() -> None:
     assert resp.status_code == 200
     data = resp.json()
     bio = data["biopharma"]
-    assert len(bio["historical_events"]) == 30
-    assert bio["filtered_6_gate_metrics"]["win_rate_pct"] == 75.0
+    assert len(bio["historical_events"]) == 25
+    assert bio["filtered_6_gate_metrics"]["win_rate_pct"] == 55.6
+    assert len(bio["purged_untradable_weekend_gaps"]) == 9
     assert len(bio["gatekeeper_rules"]) == 6
     assert data["pe"]["benchmarks"]["filtered_win_rate_pct"] == 84.2
     assert len(data["pe"]["gatekeeper_rules"]) == 8
@@ -319,23 +320,25 @@ def test_biopharma_bolt_on_endpoints() -> None:
     bt_resp = client.get("/api/biopharma-backtest")
     assert bt_resp.status_code == 200
     bt_data = bt_resp.json()
-    assert bt_data["unfiltered_metrics"]["total_events"] == 30
-    assert bt_data["unfiltered_metrics"]["win_rate_pct"] == 46.7
-    assert bt_data["unfiltered_metrics"]["median_return_per_trade_pct"] == -4.46
-    assert bt_data["broad_commercial_metrics"]["total_events"] == 20
-    assert bt_data["broad_commercial_metrics"]["win_rate_pct"] == 60.0
-    assert bt_data["filtered_6_gate_metrics"]["qualified_events"] == 16
-    assert bt_data["filtered_6_gate_metrics"]["wins"] == 12
+    assert bt_data["unfiltered_metrics"]["total_events"] == 25
+    assert bt_data["unfiltered_metrics"]["win_rate_pct"] == 36.0
+    assert bt_data["unfiltered_metrics"]["median_return_per_trade_pct"] == -11.20
+    assert bt_data["broad_commercial_metrics"]["total_events"] == 13
+    assert bt_data["broad_commercial_metrics"]["win_rate_pct"] == 38.5
+    assert bt_data["broad_commercial_metrics"]["median_return_per_trade_pct"] == -11.64
+    assert bt_data["filtered_6_gate_metrics"]["qualified_events"] == 9
+    assert bt_data["filtered_6_gate_metrics"]["wins"] == 5
     assert bt_data["filtered_6_gate_metrics"]["losses_or_walkaways"] == 4
-    assert bt_data["filtered_6_gate_metrics"]["win_rate_pct"] == 75.0
-    assert bt_data["filtered_6_gate_metrics"]["winner_median_spread_pct"] == 17.72
-    assert bt_data["filtered_6_gate_metrics"]["expected_hold_clock"] == "7–20 trading days (10–45d auction window)"
-    assert len(bt_data["purged_untradable_weekend_gaps"]) == 4
+    assert bt_data["filtered_6_gate_metrics"]["win_rate_pct"] == 55.6
+    assert bt_data["filtered_6_gate_metrics"]["winner_median_spread_pct"] == 19.86
+    assert bt_data["filtered_6_gate_metrics"]["expected_hold_clock"] == "1–57 trading days (Bimodal: 1–11d fast | 53–57d contested)"
+    assert len(bt_data["purged_untradable_weekend_gaps"]) == 9
     assert bt_data["live_rytm_audit"]["ticker"] == "RYTM"
     assert bt_data["live_rytm_audit"]["hard_ceiling_92pct"] == 114.08
+    assert bt_data["live_rytm_audit"]["positive_ev_87pct_ceiling"] == 107.88
     assert bt_data["live_rytm_audit"]["all_biopharma_gates_passed"] is True
     assert bt_data["live_rytm_audit"]["live_100k_lot_scenarios"]["shares"] == 885
-    assert bt_data["live_rytm_audit"]["live_100k_lot_scenarios"]["probability_weighted_ev_usd"] == 6195.0
+    assert bt_data["live_rytm_audit"]["live_100k_lot_scenarios"]["probability_weighted_ev_usd"] == 311.52
     assert len(bt_data["live_rytm_audit"]["deal_timeline_windows"]) == 3
 
     eval_resp = client.post(

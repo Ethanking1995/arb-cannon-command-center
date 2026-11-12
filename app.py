@@ -1435,16 +1435,16 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
 
     </div>
 
-    <!-- PANEL 5: BIOPHARMA TWO-REGIME PRE-ANNOUNCEMENT ENGINE & FULL 30-EVENT UN-BIASED BACKTEST (2022–2026) -->
+    <!-- PANEL 5: BIOPHARMA TWO-REGIME PRE-ANNOUNCEMENT ENGINE & FORENSICALLY AUDITED 25-EVENT BACKTEST (2022–2026) -->
     <section class="card" id="panel-biopharma-command-center" style="border-color:rgba(56,189,248,0.45);">
       <div class="card-header" style="background:linear-gradient(90deg, rgba(15,23,42,0.98) 0%, rgba(6,78,59,0.35) 100%);">
         <div class="card-title">
-          <span style="color:var(--cyan);">🧬 BIOTECH M&amp;A RUMOR COMMAND CENTER // TWO-REGIME ENGINE &amp; 30-EVENT UN-BIASED BACKTEST (2022–2026)</span>
+          <span style="color:var(--cyan);">🧬 BIOTECH M&amp;A RUMOR COMMAND CENTER // TWO-REGIME ENGINE &amp; 25-EVENT AUDITED BACKTEST (2022–2026)</span>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <span class="badge badge-emerald" id="bio-bt-winrate-badge">NAMED-BID CONVERSION: 75.0% (12W / 4L | N=16)</span>
-          <span class="badge badge-amber" id="bio-bt-spread-badge">BROAD COMMERCIAL: 60.0% (12W / 8L | N=20) | UNFILTERED: 46.7% (N=30)</span>
-          <span class="badge badge-neutral" style="border:1px solid var(--cyan);color:var(--cyan);">LIVE $100K @ $113.00 (885 SH) &le; $114.08 HARD 92% CAP</span>
+          <span class="badge badge-amber" id="bio-bt-winrate-badge">6-GATE PRE-8K CONVERSION: 55.6% (5W / 4L | N=9)</span>
+          <span class="badge badge-neutral" id="bio-bt-spread-badge">BROAD COMMERCIAL: 38.5% (5W / 8L | N=13) | UNFILTERED: 36.0% (N=25)</span>
+          <span class="badge badge-neutral" style="border:1px solid var(--cyan);color:var(--cyan);">LIVE $100K @ $113.00 (885 SH) &le; $114.08 CAP | ADD &le; $107.88 (87%)</span>
           <button class="btn btn-sm btn-biotech" id="btn-biotech-focus-only" onclick="toggleBiotechFocusOnly()">
             🔬 Biotech Focus View (Hide PE Panels)
           </button>
@@ -1457,25 +1457,25 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
 
         <!-- Biopharma Strategy Telemetry vs. Unfiltered Control Comparison -->
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;">
-          <div class="sub-panel" style="border-color:rgba(16,185,129,0.45);background:rgba(16,185,129,0.06);">
-            <div class="sub-panel-title" style="color:#34D399;">Named-Bid Conversion Rate (N=16 Setups)</div>
-            <div class="mono" style="font-size:20px;font-weight:700;color:var(--emerald);" id="bio-kpi-filtered-wr">75.0% (12W / 4L)</div>
+          <div class="sub-panel" style="border-color:rgba(245,158,11,0.45);background:rgba(245,158,11,0.06);">
+            <div class="sub-panel-title" style="color:#FBBF24;">Audited 6-Gate Pre-8K Conversion (N=9 Setups)</div>
+            <div class="mono" style="font-size:20px;font-weight:700;color:var(--amber);" id="bio-kpi-filtered-wr">55.6% (5W / 4L)</div>
             <div class="mono" style="font-size:11px;color:var(--text-secondary);margin-top:2px;">
-              Broad Commercial (N=20): <strong style="color:var(--amber);">60.0%</strong> | All 30 Rumors: <strong style="color:var(--crimson);" id="bio-kpi-unfiltered-wr">46.7% (-4.46% Med)</strong>
+              Broad Commercial (N=13): <strong style="color:var(--amber);" id="bio-kpi-broad-wr">38.5%</strong> | All 25 Rumors: <strong style="color:var(--crimson);" id="bio-kpi-unfiltered-wr">36.0% (-11.20% Med)</strong>
             </div>
           </div>
           <div class="sub-panel" style="border-color:rgba(56,189,248,0.45);background:rgba(56,189,248,0.05);">
             <div class="sub-panel-title" style="color:var(--cyan);">Live $100k @ $113.00 (~885 sh) $RYTM Lot</div>
             <div class="mono" style="font-size:18px;font-weight:700;color:var(--emerald);" id="bio-kpi-avg-spread">+$9,735 @ $124 | +$18,585 @ $134</div>
             <div class="mono" style="font-size:11px;color:var(--text-secondary);margin-top:2px;">
-              Walk-Away $92 Floor (25%): <strong style="color:var(--crimson);">-$18,585 (-0.46% NW)</strong> | EV: <strong style="color:var(--emerald);">+$6,195</strong>
+              Walk-Away $92 Floor (44.4%): <strong style="color:var(--crimson);">-$18,585 (-0.46% NW)</strong> | EV: <strong style="color:var(--amber);">+$312 (+0.31%)</strong>
             </div>
           </div>
           <div class="sub-panel">
-            <div class="sub-panel-title">Expected 8-K Formalization Clock (Day 4 = Nov 10)</div>
-            <div class="mono" style="font-size:17px;font-weight:700;color:var(--emerald);" id="bio-kpi-cum-pnl">Mon Nov 16 or Mon Nov 23 (55%)</div>
+            <div class="sub-panel-title">Bimodal 8-K Exit Policy (Day 5 TD = Nov 11)</div>
+            <div class="mono" style="font-size:17px;font-weight:700;color:var(--emerald);" id="bio-kpi-cum-pnl">Fast Window: Nov 16–23 (8–13 TDs)</div>
             <div class="mono" style="font-size:11px;color:var(--text-secondary);margin-top:2px;">
-              2-Bid Auction (25%): <strong style="color:var(--cyan);">Nov 30–Dec 14</strong> | Time-Stop: <strong style="color:var(--amber);">Dec 7 / Dec 14</strong>
+              JPM / $RNA (45–57 TDs): <strong style="color:var(--cyan);">Jan 11–28</strong> | Hard Stop: <strong style="color:var(--amber);">Feb 1, 2027 (59d)</strong>
             </div>
           </div>
           <div class="sub-panel" style="border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.04);">
@@ -1504,9 +1504,9 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
           </div>
           <div class="sub-panel" style="border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.04);">
             <div class="sub-panel-title" style="color:#FCA5A5;">
-              🚫 4 PURGED UNTRADABLE WEEKEND / OVERNIGHT GAPS (EXCLUDED FROM REGIME A)
+              🚫 9 PURGED UNTRADABLE WEEKEND / OVERNIGHT GAPS (ZERO REGULAR-SESSION ENTRY)
             </div>
-            <div id="bio-purged-gaps-list" class="mono" style="font-size:10.5px;color:var(--text-secondary);line-height:1.45;">
+            <div id="bio-purged-gaps-list" class="mono" style="font-size:10.5px;color:var(--text-secondary);line-height:1.45;max-height:190px;overflow-y:auto;">
               <!-- Populated by JS -->
             </div>
           </div>
@@ -1521,9 +1521,9 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
               </div>
               <div style="display:flex;gap:4px;flex-wrap:wrap;">
                 <button class="btn btn-sm btn-primary" onclick="loadBiopharmaCaseStudy('RYTM')">🧬 Live: $RYTM ($100k @ $113)</button>
-                <button class="btn btn-sm" onclick="loadBiopharmaCaseStudy('GBT')">✅ $GBT (+8.7% in 3d)</button>
-                <button class="btn btn-sm" onclick="loadBiopharmaCaseStudy('RNA')">✅ $RNA (+22.6%)</button>
-                <button class="btn btn-sm" onclick="loadBiopharmaCaseStudy('CDTX')">✅ $CDTX (+19.6%)</button>
+                <button class="btn btn-sm" onclick="loadBiopharmaCaseStudy('GBT')">✅ $GBT (+8.7% in 1 TD)</button>
+                <button class="btn btn-sm" onclick="loadBiopharmaCaseStudy('SGEN')">✅ $SGEN (+21.4% in 11 TDs)</button>
+                <button class="btn btn-sm" onclick="loadBiopharmaCaseStudy('RNA')">✅ $RNA (+24.6% in 57 TDs)</button>
                 <button class="btn btn-sm" style="border-color:var(--amber);color:#FBBF24;" onclick="loadBiopharmaCaseStudy('RVMD')">⚠️ Walk-Away: $RVMD (-19.7% &rarr; +68.9%)</button>
                 <button class="btn btn-sm" style="border-color:var(--crimson);color:#FCA5A5;" onclick="loadBiopharmaCaseStudy('BMRN')">🚨 No-Bid Drift: $BMRN (-20.0%)</button>
                 <button class="btn btn-sm" style="border-color:var(--crimson);color:#FCA5A5;" onclick="loadBiopharmaCaseStudy('VKTX')">🚨 Bleed: $VKTX (-45.0%)</button>
@@ -1536,7 +1536,7 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
 
           <div class="sub-panel">
             <div class="sub-panel-title" style="color:var(--emerald);">
-              📐 $190K IRA 3-TRANCHE LIMIT LADDER ($112.73 / $110.22 / $107.83 | 7–20 TRADING DAY CLOCK)
+              📐 $190K IRA 3-TRANCHE LIMIT LADDER ($112.73 / $110.22 / $107.83 | 1–57 TD BIMODAL CLOCK)
             </div>
             <div id="bio-live-tranche-card">
               <!-- Populated by JS -->
@@ -1544,15 +1544,15 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
           </div>
         </div>
 
-        <!-- 30-Event Verified Tradable Regular-Session Biopharma Cohort Table (2022–2026) -->
+        <!-- 25-Event Forensically Audited Tradable Regular-Session Biopharma Cohort Table (2022–2026) -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
           <span class="mono" style="font-size:11.5px;font-weight:700;color:var(--text-primary);">
-            📚 FULL 30-EVENT UN-BIASED TRADABLE BIOTECH M&amp;A COHORT (2022–2026 — 16 QUALIFIED NAMED-BID [75.0%: 12W / 4L] vs. 14 DISQUALIFIED)
+            📚 FULL 25-EVENT AUDITED TRADABLE BIOTECH M&amp;A COHORT (2022–2026 — 9 QUALIFIED PRE-8K [55.6%: 5W / 4L] vs. 16 DISQUALIFIED)
           </span>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="btn btn-sm" onclick="filterBiopharmaTable('ALL')">All 30 Tradable Rumors (46.7% WR: 14W / 16L | -4.46% Med)</button>
-            <button class="btn btn-sm btn-primary" onclick="filterBiopharmaTable('QUALIFIED')">✅ 16 Qualified Named-Bid Setups (75.0% WR: 12W / 4L | +17.7% Winner Med)</button>
-            <button class="btn btn-sm" onclick="filterBiopharmaTable('FILTERED')">❌ 14 Disqualified (No-Bid Commercial Drifts [$BMRN/$ALNY/$FOLD/$ACAD] / &gt;92% Chase / Clinical)</button>
+            <button class="btn btn-sm" onclick="filterBiopharmaTable('ALL')">All 25 Tradable Rumors (36.0% WR: 9W / 16L | -11.20% Med)</button>
+            <button class="btn btn-sm btn-primary" onclick="filterBiopharmaTable('QUALIFIED')">✅ 9 Qualified 6-Gate Pre-8K Setups (55.6% WR: 5W / 4L | +19.9% Winner Med)</button>
+            <button class="btn btn-sm" onclick="filterBiopharmaTable('FILTERED')">❌ 16 Disqualified (Post-8K Topping [$MTSR/$AVDL] / No-Bid Drifts / &gt;92% Chase / Clinical)</button>
           </div>
         </div>
         <div style="overflow-x:auto;border:1px solid var(--border-hairline);border-radius:6px;">
@@ -1933,7 +1933,7 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
           bioBanner.innerHTML = `
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
               <span class="mono" style="font-size:12px;font-weight:700;color:var(--cyan);">
-                🧬 BIOPHARMA REGIME A CONTESTED AUCTION MODE (${bio.passed_gates_count}/${bio.total_gates_count} GATES | 10–45 DAY CLOCK) — ${bio.named_pharma_suitor}
+                🧬 BIOPHARMA REGIME A CONTESTED AUCTION MODE (${bio.passed_gates_count}/${bio.total_gates_count} GATES | 1–57 TD BIMODAL CLOCK) — ${bio.named_pharma_suitor}
               </span>
               <span class="badge ${bio.all_biopharma_gates_passed ? 'badge-emerald' : 'badge-amber'}">
                 ${bio.verdict} | Open $${bio.current_price.toFixed(2)} = ${bio.entry_pct_of_anchor_display}% of $${bio.base_cash_bid_per_share.toFixed(2)} Floor (Hard 92% Ceiling: $${bio.hard_ceiling_92pct.toFixed(2)})
@@ -2272,7 +2272,7 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
           </div>
           <div>
             <span style="color:var(--text-muted);font-size:10px;display:block;">HOLD CLOCK / FLOOR</span>
-            <strong style="color:var(--emerald);">10–45d | $${audit.unaffected_price.toFixed(2)}</strong>
+            <strong style="color:var(--emerald);">1–57d | $${audit.unaffected_price.toFixed(2)}</strong>
           </div>
         </div>
         <div style="border:1px solid var(--border-hairline);border-radius:5px;overflow:hidden;">
@@ -2325,8 +2325,8 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
           </tbody>
         </table>
         <div class="mono" style="margin-top:8px;font-size:11px;color:var(--text-secondary);display:flex;justify-content:space-between;flex-wrap:wrap;">
-          <span>Hard Gate 5 Ceiling (92% of Anchor): <strong style="color:var(--amber);">$${Number(audit.hard_ceiling_92pct || audit.base_cash_bid_per_share * 0.92).toFixed(2)}</strong></span>
-          <span>Expected Hold Clock: <strong style="color:var(--cyan);">${audit.expected_hold_clock || '10–45 Days'}</strong></span>
+          <span>Hard Gate 5 Ceiling (92% of Anchor): <strong style="color:var(--amber);">$${Number(audit.hard_ceiling_92pct || audit.base_cash_bid_per_share * 0.92).toFixed(2)}</strong>${audit.positive_ev_87pct_ceiling ? ` | +EV Add (&le;87%): <strong style="color:var(--emerald);">$${Number(audit.positive_ev_87pct_ceiling).toFixed(2)}</strong>` : ''}</span>
+          <span>Expected Hold Clock: <strong style="color:var(--cyan);">${audit.expected_hold_clock || '1–57 Trading Days'}</strong></span>
         </div>
       `;
     }
@@ -2346,28 +2346,28 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
           ticker: 'GBT', current_price: 63.00, unaffected_price: 48.00, walk_away_floor_price: 51.00,
           base_cash_bid_per_share: 68.50, sweetened_ceiling_per_share: 68.50,
           deal_ev_billions: 5.4, fda_approved_commercial_anchor: true,
-          commercial_drug_name: 'Oxbryta FDA-approved commercial rare blood disease franchise (Aug 5 WSJ leak -> Aug 8 Pfizer $68.50/sh 8-K)',
-          named_pharma_suitor: 'Pfizer ($68.50/sh All-Cash Buyout in 3 Days — +8.73% Post-Leak)',
+          commercial_drug_name: 'Oxbryta FDA-approved commercial rare blood disease franchise (Thu Aug 4 Bbg / Fri Aug 5 WSJ leak -> Mon Aug 8 Pfizer $68.50/sh 8-K)',
+          named_pharma_suitor: 'Pfizer ($68.50/sh All-Cash Buyout in 1 NYSE TD — +8.73% Post-Leak)',
           zero_moa_overlap: true, bid_sweetening_or_cvr: true, clip_usd: 190000,
           live_position_usd: 100000, live_position_entry_price: 63.00
+        },
+        SGEN: {
+          ticker: 'SGEN', current_price: 188.65, unaffected_price: 161.37, walk_away_floor_price: 165.00,
+          base_cash_bid_per_share: 210.00, sweetened_ceiling_per_share: 229.00,
+          deal_ev_billions: 43.0, fda_approved_commercial_anchor: true,
+          commercial_drug_name: '4 FDA-approved commercial ADCs (Adcetris, Padcev, Tukysa, Tivdak; ~$2B rev) — Sun Feb 26 WSJ leak -> Mon Mar 13 Pfizer $229/sh 8-K',
+          named_pharma_suitor: 'Pfizer ($229.00/sh All-Cash Buyout in 11 NYSE TDs / 15 Cal Days — +21.39% Post-Leak)',
+          zero_moa_overlap: true, bid_sweetening_or_cvr: true, clip_usd: 190000,
+          live_position_usd: 100000, live_position_entry_price: 188.65
         },
         RNA: {
           ticker: 'RNA', current_price: 57.80, unaffected_price: 38.10, walk_away_floor_price: 44.00,
           base_cash_bid_per_share: 64.00, sweetened_ceiling_per_share: 72.00,
           deal_ev_billions: 12.0, fda_approved_commercial_anchor: true,
-          commercial_drug_name: 'Pivotal AOC RNA data + $1.4B cash floor ("Walk-Away Leverage" forced Novartis to $72 + SpinCo)',
-          named_pharma_suitor: 'Novartis (Completed $72.00/sh Cash + SpinCo over 56d)',
+          commercial_drug_name: 'Pivotal AOC RNA data + $1.4B cash floor ("Walk-Away Leverage" forced Novartis to $72 + SpinCo; longest unconfirmed press rumor)',
+          named_pharma_suitor: 'Novartis (Completed $72.00/sh Cash + SpinCo over 57 NYSE TDs / 82 Cal Days)',
           zero_moa_overlap: true, bid_sweetening_or_cvr: true, clip_usd: 190000,
           live_position_usd: 100000, live_position_entry_price: 57.80
-        },
-        CDTX: {
-          ticker: 'CDTX', current_price: 183.50, unaffected_price: 105.99, walk_away_floor_price: 125.00,
-          base_cash_bid_per_share: 202.00, sweetened_ceiling_per_share: 221.50,
-          deal_ev_billions: 9.2, fda_approved_commercial_anchor: true,
-          commercial_drug_name: 'FDA-approved Rezzayo + pivotal CD388 universal flu asset (4-bidder auction)',
-          named_pharma_suitor: 'Merck & Co. (Outbid 3 Rivals -> $221.50/sh Cash in 8d)',
-          zero_moa_overlap: true, bid_sweetening_or_cvr: true, clip_usd: 190000,
-          live_position_usd: 100000, live_position_entry_price: 183.50
         },
         RVMD: {
           ticker: 'RVMD', current_price: 117.63, unaffected_price: 94.50, walk_away_floor_price: 94.47,
@@ -2416,6 +2416,31 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
       const bt = STATE.biopharmaBacktest;
       if (!bt) return;
       renderBiopharmaAuditCards(bt.live_rytm_audit);
+
+      // Dynamically sync top header badges & KPI tiles from audited JSON
+      const fg = bt.filtered_6_gate_metrics || {};
+      const bc = bt.broad_commercial_metrics || {};
+      const uf = bt.unfiltered_metrics || {};
+      const wrBadge = document.getElementById('bio-bt-winrate-badge');
+      if (wrBadge && fg.win_rate_pct !== undefined) {
+        wrBadge.textContent = `6-GATE PRE-8K CONVERSION: ${fg.win_rate_pct.toFixed(1)}% (${fg.wins}W / ${fg.losses_or_walkaways}L | N=${fg.qualified_events})`;
+      }
+      const spBadge = document.getElementById('bio-bt-spread-badge');
+      if (spBadge && bc.win_rate_pct !== undefined && uf.win_rate_pct !== undefined) {
+        spBadge.textContent = `BROAD COMMERCIAL: ${bc.win_rate_pct.toFixed(1)}% (${bc.wins}W / ${bc.losses_or_walkaways}L | N=${bc.total_events}) | UNFILTERED: ${uf.win_rate_pct.toFixed(1)}% (N=${uf.total_events})`;
+      }
+      const kpiFg = document.getElementById('bio-kpi-filtered-wr');
+      if (kpiFg && fg.win_rate_pct !== undefined) {
+        kpiFg.textContent = `${fg.win_rate_pct.toFixed(1)}% (${fg.wins}W / ${fg.losses_or_walkaways}L)`;
+      }
+      const kpiBc = document.getElementById('bio-kpi-broad-wr');
+      if (kpiBc && bc.win_rate_pct !== undefined) {
+        kpiBc.textContent = `${bc.win_rate_pct.toFixed(1)}%`;
+      }
+      const kpiUf = document.getElementById('bio-kpi-unfiltered-wr');
+      if (kpiUf && uf.win_rate_pct !== undefined) {
+        kpiUf.textContent = `${uf.win_rate_pct.toFixed(1)}% (${uf.median_return_per_trade_pct.toFixed(2)}% Med)`;
+      }
 
       // Render Live $100,000 @ $113.00 (~885 Shares) $RYTM Scenario Payoff & Formalization Calendar Strip
       const stripEl = document.getElementById('bio-rytm-100k-strip');
@@ -2523,7 +2548,7 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
             <td>
               <strong style="color:var(--cyan);font-size:13px;">$${ev.ticker}</strong>
               <span style="color:var(--text-primary);font-family:var(--font-sans);font-size:11.5px;margin-left:4px;">${ev.company_name}</span>
-              <div style="font-size:10.5px;color:var(--text-muted);">${ev.leak_date} &rarr; ${ev.resolution_date} (<strong>${ev.hold_trading_days}d hold</strong>) | ${ev.leak_source}</div>
+              <div style="font-size:10.5px;color:var(--text-muted);">${ev.leak_date} &rarr; ${ev.resolution_date} (<strong>${ev.hold_trading_days} TDs${ev.calendar_days ? ` / ${ev.calendar_days} cal d` : ''}</strong>) | ${ev.leak_source}</div>
             </td>
             <td style="font-family:var(--font-sans);font-size:11.5px;">
               <strong>${ev.buyer}</strong> (${fmtUSD(ev.deal_ev_billions * 1e9).replace(',000,000,000','B')})

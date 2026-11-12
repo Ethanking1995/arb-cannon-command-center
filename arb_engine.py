@@ -278,7 +278,7 @@ PRESET_SCENARIOS: Dict[str, Dict[str, Any]] = {
         "clip_usd": 190000,
         "coc_dilution_pct": 1.5,
         "strategy_mode": "BIOPHARMA_BOLT_ON",
-        "description": "AstraZeneca $124/sh base -> $134/sh 2-bidder target (75.0% [12W/4L] Named-Bid conversion; $100k @ $113 = +$9,735 @ $124 / +$18,585 @ $134 / -$18,585 @ $92 floor; Nov 16/23 primary 8-K window)",
+        "description": "AstraZeneca $124/sh base -> $134/sh 2-bidder target (55.6% [5W/4L] audited 6-gate conversion; $100k @ $113 = +$312 [+0.31%] EV; add only <= $107.88 [87%]; Fast Window Nov 16–23 | JPM Jan 11–28 | Hard Stop Feb 1, 2027 [59 TDs])",
     },
 }
 
@@ -1852,7 +1852,7 @@ def calculate_deal_mechanics(
             verdict_label = (
                 f"🟢 BIO_PASS_HOT (REGIME A AUCTION): ${extended_price:.2f} = {entry_pct_of_anchor * 100:.1f}% of "
                 f"${implied_buyout_per_share:.2f} Anchor (<= 92% Hard Ceiling ${hard_ceiling_92pct:.2f} | "
-                f"+{gross_spread_pct:.2f}% Base Spread | 10–45d Clock)"
+                f"+{gross_spread_pct:.2f}% Base Spread | 1–57d Bimodal Clock)"
             )
         else:
             verdict = "WARN_TIGHT"
@@ -2039,7 +2039,7 @@ def calculate_deal_mechanics(
             "hard_ceiling_92pct": hard_ceiling_92pct,
             "passes_anchor_92pct_gate": entry_pct_of_anchor <= 0.92,
             "expected_hold_clock": (
-                "10–45 Days (8–82d Contested Auction Range)"
+                "1–57 Trading Days (Bimodal: 1–11d Fast | 53–57d Contested)"
                 if strat_mode == "BIOPHARMA_BOLT_ON"
                 else "48–72 Hours (8-K Morning Wave)"
             ),
@@ -2627,7 +2627,7 @@ def _biotech_decision(
             "go",
             "Actionable",
             f"Passes all {signal['gates_total']} biotech checks: {', '.join(clauses[:-1])}, "
-            f"and {clauses[-1]}. Biotech deals take 1–4 weeks, so the 4-hour news rule doesn't apply.",
+            f"and {clauses[-1]}. Biotech deals take 1–12 weeks (1–57 trading days), so the 4-hour news rule doesn't apply.",
         )
     if signal["gates_passed"] == signal["gates_total"] - 1 and entry > ceiling:
         return (

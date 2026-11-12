@@ -1,38 +1,34 @@
 """
-Arb Cannon — Full 30-Event Un-Biased Biopharma M&A Pre-Announcement Backtest & $RYTM Position Engine (2022–2026)
+Arb Cannon — Forensically Audited 25-Event Biopharma M&A Pre-Announcement Backtest & $RYTM Engine (2022–2026)
 (biopharma_leak_backtest.py)
 
-Incorporates the complete, non-survivorship-biased 30-Event Tradable Biotech M&A Rumor Universe (2022–2026),
-explicitly including BOTH previously omitted cohorts:
-  A. Omitted Tradable Winners ($GBT -> Pfizer $68.50/sh +8.73% in 3d; $RETA -> Biogen $172.50/sh +15.54%;
-     $IMGN -> AbbVie $31.26/sh +17.05%; $CBAY -> Gilead $32.50/sh +11.42%; $DCPH -> ONO $25.60/sh +14.48%;
-     $AVDL -> Lundbeck $21.00/sh + $2 CVR +12.90%).
-  B. Omitted Tradable Commercial / Late-Stage Walk-Aways & Stalls ($BMRN -20.00%, $ALNY -15.00%,
-     $VKTX -45.00%, $FOLD -14.49%, $ACAD -16.19%, $JANX -5.80%) alongside $RVMD (-19.69% deal window,
-     +68.9% standalone RASONQUE FDA recovery), $CYTK (-16.69%), $VTYX (-17.74%), $SWTX (-12.96%),
-     $MRTX (-3.65% upfront), $BBIO (-12.24%), $APLS (-12.20%), $MLTX (-11.64%), and $PTGX (-5.27%).
-
-True Un-Biased Conversion Base Rates Across the 30 Tradable Events:
-  1. Unfiltered Tradable Biotech Rumors (N = 30):
-     - 46.7% Win Rate (14W / 16L) | -4.46% Strict Deal-Window Median Return
-  2. Broad Commercial / Pivotal Rare-Disease Rumors incl. Unpriced Chatter (N = 20):
-     - 70.0% Conversion Rate (14W / 6L — dragged down by unpriced "exploring options" rumors on
-       $BMRN, $ALNY, $FOLD, $ACAD where no specific dollar bid was leaked).
-  3. Specific Named Pharma Buyer + Specific Leaked Dollar Bid & Entry <= 92% of Anchor (N = 16):
-     - 75.0% Conversion Rate (12W / 4L — 12 converted buyouts: $GBT, $HZNP, $SGEN, $RETA, $IMGN,
-       $CBAY, $DCPH, $SAGE, $RNA, $MTSR, $AVDL, $CDTX vs. 4 named-bid walk-aways/stalls:
-       $RVMD, $CYTK, $MLTX, $PTGX) | +16.30% Median Spread on Winners (+14.95% overall median).
-
-Live $100,000 @ $113.00 (~885 Shares) $RYTM Position & Timeline Audit (Day 4 Post-Leak = Nov 10, 2026):
-  - Scenario 1 ($124.00 Base Cash, ~35% Prob): +$9,735 (+9.7%) tax-free in IRA
-  - Scenario 2 ($134.00 Sweetened 2-Bidder, ~40% Prob): +$18,585 (+18.6%) tax-free in IRA
-  - Scenario 3 (Walk-Away to ~$92.00 Fundamental Floor [$89-$95 range], ~25% Prob): -$18,585
-    (-18.6% on lot = -0.46% of $4M net worth), cushioned by Nov 2-3 Q3 blowout ($92.13M rev,
-    +79.6% YoY / +29% QoQ), $750M KKR/Blackstone facility, and 1% LG Chem royalty buydown.
-  - Expected Formalization Windows:
-    * Window 1 (55% Prob): Mon Nov 16 or Mon Nov 23, 2026 (Pre-Thanksgiving 8-K push)
-    * Window 2 (25% Prob): Mon Nov 30 to Mon Dec 14, 2026 (Contested 2-bidder data-room auction)
-    * Hard Time-Stop: Mon Dec 7 / Dec 14, 2026 (20-25 trading days -> rotate back to $SGOV)
+Forensic Re-Audit Summary (Nov 11, 2026):
+  1. 9 Untradable Overnight / Weekend Gaps Purged (`UNTRADABLE_WEEKEND_OVERNIGHT_GAPS`):
+     Excludes zero-regular-session gaps where no regular-hours entry existed between leak and Form 8-K:
+     $KRTX, $ITCI, $BPMC, $VRNA, PLUS 5 newly caught zero-session gaps ($RETA closed $108.55 Thu Jul 27 ->
+     $172.50 Fri Jul 28 premarket; $IMGN closed $16.06 Wed Nov 29 -> $31.26 Thu Nov 30 premarket; $CBAY
+     closed $25.69 Fri Feb 9 -> $32.50 Mon Feb 12 premarket; $DCPH closed $14.65 Fri Apr 26 -> $25.60 Mon
+     Apr 29 premarket; $CDTX closed $105.99 Thu Nov 13 -> FT after-hours -> $221.50 Fri Nov 14 premarket).
+  2. Post-8K Topping Wars Properly Separated from Pre-8K Rumors:
+     $MTSR (35 TDs post-Sep 22 Pfizer 8-K; also Phase 2b clinical) and $AVDL (20 TDs post-Oct 22 Alkermes
+     8-K) are retained in the 25-event tradable table as `is_pre_8k_rumor=False` so merger-arb topping battles
+     do not artificially inflate pre-announcement rumor conversion rates.
+  3. True Audited Conversion Base Rates Across the 25 Tradable Regular-Session Events:
+     - Unfiltered Tradable Biotech Rumors (N = 25): 36.0% Win Rate (9W / 16L) | -11.20% Median | -2.43% Avg
+     - Broad Commercial / Pivotal Pre-8K Rumors incl. Unpriced Chatter (N = 13): 38.5% Win Rate (5W / 8L)
+     - Strict 6-Gate Pre-8K Named Suitor + Leaked Dollar Bid + <=92% Anchor (N = 9):
+       * 55.6% True Conversion Rate (5W / 4L: $GBT, $HZNP, $SGEN, $SAGE, $RNA vs. $RVMD, $CYTK, $MLTX, $PTGX)
+       * +19.86% Winner Median Spread | +8.73% Overall Median | +4.18% Mean Return per Trade
+  4. Bimodal Rumor-to-Acquisition Clock & $RYTM Exit Policy (Leak = Wed Nov 4, 2026; Day 5 TD = Nov 11, 2026):
+     - Regime 1 (Fast Confirmatory Leak): 1–11 NYSE TDs / 1–15 Cal Days ($GBT 1d, $HZNP 9d, $SGEN 11d)
+     - Dead Zone: ZERO unconfirmed press leaks converted between 12 and 52 NYSE TDs
+     - Regime 2A (Contested Non-Binding Approach): 53–57 NYSE TDs / 77–82 Cal Days ($SWTX 53d, $RNA 57d max)
+     - Regime 2B (Public 13D + Formal Board Strategic Review): 97 NYSE TDs / 140 Cal Days ($SAGE max)
+     - $RYTM Exit Policy:
+       * Immediate Exit on any Tier-1 "talks ended / walked" headline ($CYTK 3d / $RVMD 12d precedent)
+       * Checkpoint 1 (Mon Nov 23, 2026 = 13 TDs): Hold past fast window ONLY if price >= $99.70 (>50% gap kept)
+       * Checkpoint 2 (Mon Jan 11 – Thu Jan 28, 2027 = 45–57 TDs): J.P. Morgan Conf & $RNA 57-TD outer window
+       * Hard Unconfirmed-Rumor Time-Stop: Mon Feb 1, 2027 (59 NYSE TDs / 89 Cal Days -> rotate to $SGOV)
 
 Usage:
     python biopharma_leak_backtest.py
@@ -40,11 +36,12 @@ Usage:
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import math
 import statistics
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 BASE_DIR = Path(__file__).resolve().parent
 BACKTEST_JSON_PATH = BASE_DIR / "biopharma_backtest_report.json"
@@ -57,27 +54,28 @@ BIOPHARMA_GATEKEEPER_RULES: List[Dict[str, str]] = [
     {
         "id": "BIO_GATE_1_NAMED_BUYER_AND_DOLLAR_BID",
         "name": "BIO_GATE_1",
-        "title": "Named Big Pharma Suitor + Specific Leaked Dollar Bid (75.0% Base Rate)",
+        "title": "Pre-8K Unannounced Leak w/ Named Pharma Suitor + Specific Dollar Bid (55.6% Base Rate)",
         "description": (
-            "Tier-1 scoop must identify BOTH a specific Big Pharma suitor AND a concrete dollar "
-            "valuation anchor (e.g., $124/sh AstraZeneca on $RYTM, $68.50 Pfizer on $GBT, $28B Amgen on $HZNP). "
-            "Eliminates generic 'exploring options' rumors ($BMRN -20%, $ALNY -15%, $VKTX -45%)."
+            "Tier-1 pre-8K scoop must identify BOTH a specific Big Pharma suitor AND a concrete dollar "
+            "valuation anchor ($124/sh AstraZeneca on $RYTM, $68.50 Pfizer on $GBT, $108+ Amgen on $HZNP). "
+            "Eliminates generic 'exploring options' chatter ($BMRN -20%, $ALNY -15%, $VKTX -45%) and "
+            "separates post-8K merger-arb topping wars ($MTSR, $AVDL)."
         ),
         "hard_fail": (
-            "Vague 'exploring options / activist sale' chatter with no leaked dollar bid ($BMRN, $ALNY, $FOLD, $ACAD, $VKTX)."
+            "Vague 'exploring options' chatter with no leaked dollar bid ($BMRN, $ALNY, $FOLD, $ACAD, $VKTX)."
         ),
     },
     {
         "id": "BIO_GATE_2_COMMERCIAL_OR_PIVOTAL_FLOOR",
         "name": "BIO_GATE_2",
-        "title": "Commercial Rare-Disease Anchor + Standalone Fundamental Floor ('Walk-Away Cushion')",
+        "title": "Commercial Rare-Disease / Pivotal Anchor + Standalone Fundamental Floor",
         "description": (
-            "Target must have an FDA-approved commercial rare-disease/specialty drug + non-dilutive cash "
-            "runway so a walk-away is cushioned at -16% to -21% ($89–$95 on $RYTM via $92.13M Q3 Imcivree "
-            "+79.6% YoY & $750M KKR/Blackstone facility) rather than a -50% clinical wipeout."
+            "Target must have an FDA-approved commercial rare-disease/specialty drug (or completed pivotal "
+            "registrational data + >$1B cash like $RNA) so a walk-away is cushioned around -13% to -19% "
+            "($89–$95 on $RYTM via $92.13M Q3 Imcivree +79.6% YoY & $750M KKR/Blackstone facility)."
         ),
         "hard_fail": (
-            "Unapproved binary clinical risk with no commercial floor ($CYTK -16.69%, $MLTX -11.64%, $BBIO -12.24%)."
+            "Early/mid-stage binary clinical risk with no commercial revenue cushion ($VKTX -45.0%, $KD -11.2%)."
         ),
     },
     {
@@ -89,130 +87,192 @@ BIOPHARMA_GATEKEEPER_RULES: List[Dict[str, str]] = [
             "encumbrances, like $RYTM buying down LG Chem's bivamelagon royalty to 1%)."
         ),
         "hard_fail": (
-            "Entangled regional/partner co-development rights that block rival bidders ($PTGX / J&J-Takeda -5.27%)."
+            "Co-development ROFRs or heavy debt overhang that deter rival suitors ($BBIO 2023 -12.24%, $PTGX -5.27%)."
         ),
     },
     {
         "id": "BIO_GATE_4_SECOND_BIDDER_OR_SWEETENING",
         "name": "BIO_GATE_4",
-        "title": "Rejected Opening Bid / 2-Bidder Sweetening Tension ($124 -> $134/sh + CVR)",
+        "title": "Rejected Opening Bid / Multi-Bidder Sweetening Tension (4 of 5 Wins Sweetened)",
         "description": (
-            "Target board has rejected an opening bid or attracted a 2nd suitor into the data room "
-            "($GBT, $HZNP, $SGEN, $SAGE, $RNA, $MTSR, $CDTX, $AVDL, and $RYTM w/ AZN + 2nd bidder)."
+            "4 of the 5 genuine pre-8K 6-gate winners ($HZNP, $SGEN, $SAGE, $RNA) closed at a sweetened "
+            "bidding-war price (+18.4% to +22.6%). Without credible 2nd-bidder tension, a 55.6% base rate "
+            "cannot overcome walk-away losses near 91%–92% of the initial bid."
         ),
         "hard_fail": (
-            "Chasing a solo-bidder spike above the deal price ($SWTX Feb 2025 $54 -> $47 = -12.96%; $MRTX $60.20 -> $58 = -3.65%)."
+            "Solo-bidder price cut or headline chase ($SWTX $54 -> $47 = -12.96%; $MRTX $60.20 -> $58 = -3.65%)."
         ),
     },
     {
         "id": "BIO_GATE_5_ENTRY_LE_92PCT_OF_ANCHOR",
         "name": "BIO_GATE_5",
-        "title": "Hard Valuation Anchor Ceiling: entry_pct_of_anchor <= 0.92 ($114.08 Max on $RYTM)",
+        "title": "Hard Ceiling <= 92% ($114.08) | Positive-EV Add Zone <= 87% ($107.88 on $RYTM)",
         "description": (
-            "Entry price MUST NOT exceed 92.0% of the leaked valuation anchor (entry_pct_of_anchor <= 0.92). "
-            "Your $100k lot at $113.00 = 91.1% of $124.00 floor (PASS). Do NOT add above $114.08."
+            "Never pay >92.0% of the leaked valuation anchor ($114.08 hard cap on $RYTM; held $113.00 lot = "
+            "91.1% PASS, near-breakeven +0.31% EV at 55.6% base rate). Only stage fresh/additional capital "
+            "at <=87.0% of anchor ($107.88 on $RYTM) where standalone EV exceeds +5.0%."
         ),
         "hard_fail": (
-            "Overpaying > 92% of anchor ($VTYX $17.02 chase into $14.00 buyout = -17.74%; $MRTX $60.20 = 100.3%; $SWTX $54.00 = 108.0%)."
+            "Overpaying >92% of anchor ($VTYX $17.02 into $14.00 = -17.74%; $SWTX 108.0%; $MRTX 100.3%; $SWAV 93.9%)."
         ),
     },
     {
         "id": "BIO_GATE_6_TACTICAL_SIZING_AND_TIMELINE",
         "name": "BIO_GATE_6",
-        "title": "$100k Tactical Lot (<0.5% NW Risk) & 7–20 Trading Day Schedule 14D-9 Clock",
+        "title": "$100k Tactical Lot (<0.5% NW Risk) & Bimodal 1–57 TD Clock (Hard Stop: Feb 1, 2027)",
         "description": (
-            "Hold $100,000 at $113.00 (~885 sh) in 0%-tax IRA: +$9,735 at $124 base (35% prob), "
-            "+$18,585 at $134 sweetened (40% prob), vs. -$18,585 max loss at $92 walk-away floor "
-            "(25% prob = -0.46% of $4M net worth). Hard time-stop: Dec 7 / Dec 14 (20–25 trading days)."
+            "Cap biotech rumor exposure at $100k (<0.5% NW walk-away hit) inside 0%-tax IRA. Exit immediately "
+            "on any 'talks ended' report; check $99.70 price floor after Day 13 TD (Nov 23); hold through JPM "
+            "Week (Jan 11–15, 2027) up to the 57-TD $RNA max (Hard Stop: Mon Feb 1, 2027 = 59 NYSE TDs)."
         ),
         "hard_fail": (
-            "Oversizing > $200k or holding past 25 trading days with zero follow-up headlines."
+            "Oversizing >$200k, holding through an explicit 'talks ended' leak, or holding past 59 NYSE TDs without a formal strategic review."
         ),
     },
 ]
 
 # ==============================================================================
-# RED-TEAM AUDIT: 4 PURGED UNTRADABLE WEEKEND / OVERNIGHT GAPS
+# RED-TEAM AUDIT: 9 PURGED UNTRADABLE WEEKEND / OVERNIGHT GAPS (0 REGULAR TDs)
 # ==============================================================================
 
 UNTRADABLE_WEEKEND_OVERNIGHT_GAPS: List[Dict[str, Any]] = [
     {
         "ticker": "KRTX",
         "company_name": "Karuna Therapeutics",
-        "buyer": "Bristol Myers Squibb ($330/sh)",
+        "buyer": "Bristol Myers Squibb ($330.00/sh)",
         "date": "2023-12-22",
         "script_claimed_entry_exit": "$282.50 -> $326.50 (+15.58%)",
         "actual_market_reality": (
             "Zero tradable press leak: Closed Thu Dec 21 at $215.19 before BMS announced "
-            "the $330/sh (53% premium) deal at 6:59 AM ET Fri Dec 22."
+            "the $330/sh (53% premium) buyout at 6:59 AM ET Fri Dec 22 (0 regular TDs)."
         ),
         "status": "PURGED_UNTRADABLE_GAP",
     },
     {
         "ticker": "ITCI",
         "company_name": "Intra-Cellular Therapies",
-        "buyer": "Johnson & Johnson ($132/sh)",
+        "buyer": "Johnson & Johnson ($132.00/sh)",
         "date": "2025-01-13",
         "script_claimed_entry_exit": "$114.50 -> $130.20 (+13.71%)",
         "actual_market_reality": (
             "Weekend gap: Closed Fri Jan 10 at $94.87, leaked Sunday Jan 12 while markets "
-            "were closed, and opened Mon Jan 13 at ~$128.72 after the $132/sh 8-K dropped."
+            "were closed, and opened Mon Jan 13 at ~$128.72 after the $132/sh 8-K (0 regular TDs)."
         ),
         "status": "PURGED_UNTRADABLE_GAP",
     },
     {
         "ticker": "BPMC",
         "company_name": "Blueprint Medicines",
-        "buyer": "Sanofi ($129/sh + $6 CVR)",
+        "buyer": "Sanofi ($129.00/sh + $6 CVR)",
         "date": "2025-06-02",
         "script_claimed_entry_exit": "$114.20 -> $128.10 (+12.17%)",
         "actual_market_reality": (
-            "Weekend gap: Last traded Fri May 30 (~$101.35, 27% below $129) before Sanofi "
-            "signed $129/sh + $6 CVR premarket Mon Jun 2."
+            "Weekend gap: Closed Fri May 30 at ~$101.35 (27% below $129) before Sanofi "
+            "signed $129/sh + $6 CVR premarket Mon Jun 2 (0 regular TDs)."
         ),
         "status": "PURGED_UNTRADABLE_GAP",
     },
     {
         "ticker": "VRNA",
         "company_name": "Verona Pharma",
-        "buyer": "Merck & Co. ($107/sh)",
+        "buyer": "Merck & Co. ($107.00/sh)",
         "date": "2025-07-09",
         "script_claimed_entry_exit": "$94.80 -> $105.60 (+11.39%)",
         "actual_market_reality": (
-            "Overnight gap: Closed Tue Jul 8 at ~$86.86 (23% below $107), leaked late "
-            "Tuesday night, and announced $107/sh premarket Wed Jul 9."
+            "Overnight gap: Closed Tue Jul 8 at ~$86.86, leaked late Tuesday night, "
+            "and announced $107/sh premarket Wed Jul 9 (0 regular TDs)."
+        ),
+        "status": "PURGED_UNTRADABLE_GAP",
+    },
+    {
+        "ticker": "RETA",
+        "company_name": "Reata Pharmaceuticals",
+        "buyer": "Biogen ($172.50/sh)",
+        "date": "2023-07-28",
+        "script_claimed_entry_exit": "$148.00 -> $171.00 (+15.54% in 2d)",
+        "actual_market_reality": (
+            "Overnight gap: Closed Thu Jul 27 at $108.55; WSJ leaked after the bell Thu night and "
+            "Biogen announced $172.50/sh (59% premium) premarket Fri Jul 28 (0 regular TDs)."
+        ),
+        "status": "PURGED_UNTRADABLE_GAP",
+    },
+    {
+        "ticker": "IMGN",
+        "company_name": "ImmunoGen Inc.",
+        "buyer": "AbbVie ($31.26/sh)",
+        "date": "2023-11-30",
+        "script_claimed_entry_exit": "$26.40 -> $30.90 (+17.05% in 3d)",
+        "actual_market_reality": (
+            "Unleaked 8-K gap: Closed Wed Nov 29 at $16.06 before AbbVie announced $31.26/sh "
+            "(95% premium) premarket Thu Nov 30 with zero prior press leak (0 regular TDs)."
+        ),
+        "status": "PURGED_UNTRADABLE_GAP",
+    },
+    {
+        "ticker": "CBAY",
+        "company_name": "CymaBay Therapeutics",
+        "buyer": "Gilead Sciences ($32.50/sh)",
+        "date": "2024-02-12",
+        "script_claimed_entry_exit": "$28.90 -> $32.20 (+11.42% in 2d)",
+        "actual_market_reality": (
+            "Weekend gap: Closed Fri Feb 9 at $25.69 (27% below $32.50) and Gilead announced "
+            "$32.50/sh premarket Mon Feb 12 with zero regular-session trading in between (0 regular TDs)."
+        ),
+        "status": "PURGED_UNTRADABLE_GAP",
+    },
+    {
+        "ticker": "DCPH",
+        "company_name": "Deciphera Pharmaceuticals",
+        "buyer": "ONO Pharmaceutical ($25.60/sh)",
+        "date": "2024-04-29",
+        "script_claimed_entry_exit": "$22.10 -> $25.30 (+14.48% in 2d)",
+        "actual_market_reality": (
+            "Weekend gap: Closed Fri Apr 26 at $14.65 (74.7% below $25.60) before ONO announced "
+            "$25.60/sh premarket Mon Apr 29 with zero pre-deal leak (0 regular TDs)."
+        ),
+        "status": "PURGED_UNTRADABLE_GAP",
+    },
+    {
+        "ticker": "CDTX",
+        "company_name": "Cidara Therapeutics",
+        "buyer": "Merck & Co. ($221.50/sh)",
+        "date": "2025-11-14",
+        "script_claimed_entry_exit": "$183.50 -> $219.50 (+19.62% in 8d)",
+        "actual_market_reality": (
+            "Overnight gap: Closed Thu Nov 13 at $105.99; FT broke talks after the close Thu Nov 13 "
+            "and Merck signed $221.50/sh (109% premium) premarket Fri Nov 14 (0 regular TDs)."
         ),
         "status": "PURGED_UNTRADABLE_GAP",
     },
 ]
 
 # ==============================================================================
-# REGIME B: PRE-RUMOR "WALK-AWAY LEVERAGE" RADAR (CATCHING WEEKEND GAPS EARLY)
+# REGIME B: PRE-RUMOR "WALK-AWAY LEVERAGE" RADAR (CATCHING OVERNIGHT GAPS EARLY)
 # ==============================================================================
 
 REGIME_B_PRE_LEAK_RADAR: List[Dict[str, Any]] = [
     {
         "ticker": "RYTM",
         "company_name": "Rhythm Pharmaceuticals ($100k Live Lot @ $113.00)",
-        "trigger_date": "2026-11-02 -> Nov 4 WSJ/Reuters Leak (Day 4 Today)",
+        "trigger_date": "2026-11-02 -> Nov 4 WSJ/Reuters Leak (Day 5 TD Today)",
         "regime_status": "LIVE_POSITION_885_SH_AT_113",
         "commercial_anchor": "Imcivree ($92.13M Q3 2026 rev, +79.6% YoY / +29% QoQ; Mar 2026 FDA aHO approval)",
         "walk_away_leverage_catalyst": (
-            "Nov 2 $750M KKR/Blackstone facility + 1% LG Chem bivamelagon royalty buydown raised fundamental "
-            "walk-away floor by +$6-$8/sh to $89-$95/sh (-16% to -21% max downside vs. $86.44 Nov 3 close). "
-            "Target Windows: Mon Nov 16 / Mon Nov 23 (55% prob) or Mon Nov 30 - Dec 14 (25% 2-bidder auction)."
+            "Nov 2 $750M KKR/Blackstone facility + 1% LG Chem royalty buydown cushions walk-away floor at "
+            "$89–$95/sh. Bimodal Clock: Fast Window Mon Nov 16 / Nov 23 (1–13 TDs) | JPM & $RNA Window "
+            "Jan 11 – Jan 28, 2027 (45–57 TDs) | Hard Stop: Mon Feb 1, 2027 (59 TDs). Add only <= $107.88 (87%)."
         ),
-        "pro_forma_cash_runway": "$750M Non-Dilutive Facility | Fundamental Floor: $89–$95/sh",
+        "pro_forma_cash_runway": "$750M Non-Dilutive Facility | Floor: $89–$95/sh | Add Zone: <=$107.88",
     },
     {
         "ticker": "SRRK",
         "company_name": "Scholar Rock Holding Corp.",
-        "trigger_date": "2026-11-10 (Triggered This Morning — Q3 2026 Release)",
+        "trigger_date": "2026-11-10 (Q3 2026 Release + $205M PRV Sale)",
         "regime_status": "REGIME_B_PRE_RUMOR_ACCUMULATION",
         "commercial_anchor": "ISEMBYLD (apitegromab) SMA Commercial Launch Underway",
         "walk_away_leverage_catalyst": (
-            "Paired freshly approved ISEMBYLD launch with a $205M Priority Review Voucher (PRV) sale "
-            "this morning, locking in $618.6M pro-forma cash runway to remove financing overhang."
+            "Paired freshly approved ISEMBYLD launch with a $205M Priority Review Voucher (PRV) sale, "
+            "locking in $618.6M pro-forma cash runway to capture an overnight M&A gap before any press leak."
         ),
         "pro_forma_cash_runway": "$618.6M Pro-Forma Cash (incl. $205M PRV Sale)",
     },
@@ -224,32 +284,31 @@ REGIME_B_PRE_LEAK_RADAR: List[Dict[str, Any]] = [
         "commercial_anchor": "Bezuclastinib (Non-AdvSM PDUFA Nov 30, 2026; GIST / AdvSM Dec 30, 2026)",
         "walk_away_leverage_catalyst": (
             "Locked in $791.1M standalone cash runway ahead of back-to-back Nov 30 & Dec 30 PDUFAs "
-            "(direct comp to Sanofi's $9.5B Blueprint / Ayvakit buyout)."
+            "(direct comp to Sanofi's $9.5B Blueprint / Ayvakit weekend buyout gap)."
         ),
         "pro_forma_cash_runway": "$791.1M Standalone Cash Balance",
     },
 ]
 
 # ==============================================================================
-# FULL 30-EVENT UN-BIASED TRADABLE BIOPHARMA M&A RUMOR DATASET (2022–2026)
+# AUDITED 25-EVENT TRADABLE REGULAR-SESSION BIOPHARMA M&A DATASET (2022–2026)
 # ==============================================================================
-# Breakdown of the 30 Tradable Regular-Session Events:
-# - Cohort 1: Named Buyer + Specific Leaked Dollar Bid + Entry <= 92% of Anchor (N = 16):
-#   * 12 Converted Winners (75.0% Conversion Rate):
-#     $GBT (+8.73%), $HZNP (+18.39%), $SGEN (+21.38%), $RETA (+15.54%), $IMGN (+17.05%),
-#     $CBAY (+11.42%), $DCPH (+14.48%), $SAGE (+19.86%), $RNA (+22.58%), $MTSR (+32.78%),
-#     $AVDL (+12.90%), $CDTX (+19.62%)
-#   * 4 Named-Buyer Walk-Aways / Stalls (25.0% Walk-Away Rate):
-#     $RVMD (-19.69% deal window -> +68.9% to $198.50 on Aug 2026 RASONQUE FDA approval),
-#     $CYTK (-16.69%), $MLTX (-11.64%), $PTGX (-5.27%)
-# - Cohort 2: Broad Commercial / Pivotal Rare-Disease Rumors incl. Unpriced Chatter (N = 20):
-#   * Adds $BMRN (-20.00%), $ALNY (-15.00%), $FOLD (-14.49%), $ACAD (-16.19%) -> 70.0% Conversion
-# - Cohort 3: All 30 Unfiltered Tradable Rumors (incl. >92% Anchor Chases & Early Clinical):
-#   * 14 Wins / 16 Losses = 46.7% Win Rate | -4.46% Strict Deal-Window Median
+# Breakdown of the 25 Tradable Regular-Session Events (9 Overnight Gaps Purged):
+# - Strict 6-Gate Pre-8K Qualified Setups (N = 9):
+#   * 5 Converted Winners (55.6% Conversion Rate):
+#     $GBT (+8.73% in 1 TD / 3 cal d), $HZNP (+18.39% in 9 TDs / 13 cal d),
+#     $SGEN (+21.38% in 11 TDs / 15 cal d), $RNA (+22.58% in 57 TDs / 82 cal d — longest press leak),
+#     $SAGE (+19.86% in 97 TDs / 140 cal d — public 13D + formal Board Strategic Review)
+#   * 4 Named-Buyer Walk-Aways / Stalls (44.4% Walk-Away Rate):
+#     $RVMD (-19.69% in 12 TDs), $CYTK (-16.69% in 3 TDs), $MLTX (-11.64% in 9 TDs), $PTGX (-5.27% in 10 TDs)
+# - Broad Commercial / Pivotal Pre-8K Rumors incl. Unpriced Chatter (N = 13):
+#   * Adds $BMRN (-20.00%), $ALNY (-15.00%), $FOLD (-14.49%), $ACAD (-16.19%) -> 38.5% Win Rate (5W / 8L)
+# - All 25 Unfiltered Tradable Events (incl. Post-8K Topping Wars $MTSR/$AVDL, >92% Chases & Clinical):
+#   * 9 Wins / 16 Losses = 36.0% Win Rate | -11.20% Median Return
 
 HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
     # ==========================================================================
-    # PART 1: 12 CONVERTED WINNERS WITH NAMED BUYER + DOLLAR ANCHOR (<= 92% CAP)
+    # PART 1: 5 GENUINE PRE-8K 6-GATE WINNERS (55.6% = 5W / 4L COHORT)
     # ==========================================================================
     {
         "ticker": "GBT",
@@ -259,16 +318,18 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "resolution_date": "2022-08-08",
         "leak_source": "Wall Street Journal",
         "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
-        "leak_headline": "WSJ: Pfizer in advanced talks to acquire sickle-cell drugmaker Global Blood Therapeutics for ~$5.4B ($68.50/sh)",
-        "unaffected_price": 48.00,
+        "leak_headline": "WSJ (Fri Aug 5 midday): Pfizer in advanced talks to acquire Global Blood Therapeutics for ~$5.4B ($68.50/sh)",
+        "unaffected_price": 47.99,
         "leaked_valuation_anchor": 70.00,
         "settled_post_leak_entry_price": 63.00,  # 90.0% of $70 anchor (<= 0.92)
-        "resolution_price": 68.50,  # +8.73% 3 days later on Mon Aug 8!
+        "resolution_price": 68.50,
         "final_deal_cash_per_share": 68.50,
         "cvr_per_share": 0.0,
         "deal_ev_billions": 5.4,
         "net_debt_billions": -0.2,
-        "hold_trading_days": 3,
+        "hold_trading_days": 1,
+        "calendar_days": 3,
+        "is_pre_8k_rumor": True,
         "outcome": "CONVERTED_8K",
         "fda_approved_commercial_anchor": True,
         "commercial_drug_note": "Oxbryta (voxelotor) FDA-approved commercial rare sickle-cell disease franchise",
@@ -278,9 +339,9 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "multi_bidder_scarcity": True,
         "bolt_on_size_3b_to_15b": True,
         "zero_moa_overlap": True,
-        "bid_sweetening_or_cvr": True,
+        "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "TEXTBOOK $RYTM MATCH (WIN 1/12): Commercial rare disease + Fri WSJ leak ($48->$63) -> Pfizer signed $68.50/sh (+8.73%) Mon morning!",
+        "disqualification_note": "QUALIFIED PRE-8K WINNER (1/5 | Regime-1 Fast): Midday Fri WSJ leak ($47.99->$63.00) -> Pfizer signed $68.50/sh Mon morning (1 NYSE TD / 3 cal days, +8.73%).",
     },
     {
         "ticker": "HZNP",
@@ -288,7 +349,7 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "buyer": "Amgen (Outbidding Sanofi & J&J)",
         "leak_date": "2022-11-29",
         "resolution_date": "2022-12-12",
-        "leak_source": "Wall Street Journal / Schedule 14D-9",
+        "leak_source": "Wall Street Journal / Irish Rule 2.4",
         "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
         "leak_headline": "WSJ: Amgen, Sanofi and J&J in buyout talks for rare-disease leader Horizon Therapeutics ($27.8B / $116.50/sh)",
         "unaffected_price": 78.76,
@@ -299,7 +360,9 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "cvr_per_share": 0.0,
         "deal_ev_billions": 27.8,
         "net_debt_billions": 1.2,
-        "hold_trading_days": 14,
+        "hold_trading_days": 9,
+        "calendar_days": 13,
+        "is_pre_8k_rumor": True,
         "outcome": "CONVERTED_8K",
         "fda_approved_commercial_anchor": True,
         "commercial_drug_note": "Tepezza & Krystexxa FDA-approved rare-disease commercial blockbusters",
@@ -311,17 +374,17 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": True,
         "standalone_recovery_note": None,
-        "disqualification_note": "QUALIFIED NAMED-BID WINNER (2/12): 3-way bidding war, entry 91.1% of anchor -> $116.50/sh (+18.39% in 14d).",
+        "disqualification_note": "QUALIFIED PRE-8K WINNER (2/5 | Regime-1 Fast): 3-suitor bidding war, entry 91.1% of $108 anchor -> Amgen $116.50/sh (9 NYSE TDs / 13 cal days, +18.39%).",
     },
     {
         "ticker": "SGEN",
         "company_name": "Seagen Inc.",
-        "buyer": "Pfizer (Following Earlier Merck Talks)",
+        "buyer": "Pfizer (Following Earlier Jun 2022 Merck Talks)",
         "leak_date": "2023-02-26",
         "resolution_date": "2023-03-13",
         "leak_source": "Wall Street Journal",
         "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
-        "leak_headline": "WSJ: Pfizer in talks to acquire ADC cancer leader Seagen for >$30B after earlier Merck discussions",
+        "leak_headline": "WSJ (Sun Feb 26): Pfizer in talks to acquire ADC cancer leader Seagen for >$30B -> $229/sh ($43B) Mon Mar 13 8-K",
         "unaffected_price": 161.37,
         "leaked_valuation_anchor": 200.00,
         "settled_post_leak_entry_price": 179.60,  # 89.8% of $200 anchor (<= 0.92)
@@ -330,7 +393,9 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "cvr_per_share": 0.0,
         "deal_ev_billions": 43.0,
         "net_debt_billions": -0.4,
-        "hold_trading_days": 15,
+        "hold_trading_days": 11,
+        "calendar_days": 15,
+        "is_pre_8k_rumor": True,
         "outcome": "CONVERTED_8K",
         "fda_approved_commercial_anchor": True,
         "commercial_drug_note": "Adcetris, Padcev, Tukysa FDA-approved commercial ADC portfolio",
@@ -342,29 +407,31 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": True,
         "standalone_recovery_note": None,
-        "disqualification_note": "QUALIFIED NAMED-BID WINNER (3/12): Entry 89.8% of anchor -> $229.00/sh cash 8-K (+21.38% in 15d).",
+        "disqualification_note": "QUALIFIED PRE-8K WINNER (3/5 | Regime-1 Fast): Pfizer leak resolved in 11 NYSE TDs / 15 cal days (+21.38%; earlier Jun 2022 Merck talks had stalled).",
     },
     {
-        "ticker": "RETA",
-        "company_name": "Reata Pharmaceuticals",
-        "buyer": "Biogen ($172.50/sh All-Cash Buyout)",
-        "leak_date": "2023-07-26",
-        "resolution_date": "2023-07-28",
-        "leak_source": "Wall Street Journal / Bloomberg",
+        "ticker": "RNA",
+        "company_name": "Avidity Biosciences",
+        "buyer": "Novartis ($72.00/sh Cash + SpinCo)",
+        "leak_date": "2025-08-06",
+        "resolution_date": "2025-10-27",
+        "leak_source": "Financial Times / SEC DEFM14A",
         "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
-        "leak_headline": "WSJ: Biogen nearing ~$7.3B ($172.50/sh) deal to acquire rare-disease drugmaker Reata Pharmaceuticals",
-        "unaffected_price": 111.71,
-        "leaked_valuation_anchor": 165.00,
-        "settled_post_leak_entry_price": 148.00,  # 89.7% of $165 anchor (<= 0.92)
-        "resolution_price": 171.00,
-        "final_deal_cash_per_share": 172.50,
+        "leak_headline": "FT (Aug 6): Novartis approaches Avidity; Avidity raises $600M in Sept to force $72/sh ($12B) + SpinCo on Oct 26/27",
+        "unaffected_price": 38.10,
+        "leaked_valuation_anchor": 64.00,
+        "settled_post_leak_entry_price": 57.80,  # 90.3% of $64 anchor (<= 0.92)
+        "resolution_price": 70.85,
+        "final_deal_cash_per_share": 72.00,
         "cvr_per_share": 0.0,
-        "deal_ev_billions": 7.3,
-        "net_debt_billions": -0.1,
-        "hold_trading_days": 2,
+        "deal_ev_billions": 12.0,
+        "net_debt_billions": -1.4,
+        "hold_trading_days": 57,
+        "calendar_days": 82,
+        "is_pre_8k_rumor": True,
         "outcome": "CONVERTED_8K",
         "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "Skyclarys (omaveloxolone) FDA-approved Friedreich's ataxia rare-disease monopoly",
+        "commercial_drug_note": "3 pivotal AOC RNA programs + $1.4B cash floor ('Walk-Away Leverage' comp for $RYTM)",
         "named_pharma_suitor": True,
         "specific_dollar_bid_leaked": True,
         "clean_cap_table": True,
@@ -373,110 +440,17 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": True,
         "standalone_recovery_note": None,
-        "disqualification_note": "QUALIFIED NAMED-BID WINNER (4/12): Commercial rare-disease launch -> Biogen $172.50/sh cash (+15.54%).",
-    },
-    {
-        "ticker": "IMGN",
-        "company_name": "ImmunoGen Inc.",
-        "buyer": "AbbVie ($31.26/sh All-Cash Buyout)",
-        "leak_date": "2023-11-27",
-        "resolution_date": "2023-11-30",
-        "leak_source": "Bloomberg / FT",
-        "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
-        "leak_headline": "Pre-deal strategic interest & AbbVie talks for ADC cancer drugmaker ImmunoGen ($10.1B / $31.26/sh)",
-        "unaffected_price": 16.06,
-        "leaked_valuation_anchor": 29.00,
-        "settled_post_leak_entry_price": 26.40,  # 91.0% of $29 anchor (<= 0.92)
-        "resolution_price": 30.90,
-        "final_deal_cash_per_share": 31.26,
-        "cvr_per_share": 0.0,
-        "deal_ev_billions": 10.1,
-        "net_debt_billions": -0.2,
-        "hold_trading_days": 3,
-        "outcome": "CONVERTED_8K",
-        "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "Elahere (mirvetuximab soravtansine) FDA-approved ovarian cancer ADC blockbuster",
-        "named_pharma_suitor": True,
-        "specific_dollar_bid_leaked": True,
-        "clean_cap_table": True,
-        "multi_bidder_scarcity": True,
-        "bolt_on_size_3b_to_15b": True,
-        "zero_moa_overlap": True,
-        "bid_sweetening_or_cvr": True,
-        "standalone_recovery_note": None,
-        "disqualification_note": "QUALIFIED NAMED-BID WINNER (5/12): Commercial ADC launch -> AbbVie $31.26/sh all-cash 8-K (+17.05%).",
-    },
-    {
-        "ticker": "CBAY",
-        "company_name": "CymaBay Therapeutics",
-        "buyer": "Gilead Sciences ($32.50/sh All-Cash Buyout)",
-        "leak_date": "2024-02-09",
-        "resolution_date": "2024-02-12",
-        "leak_source": "Wall Street Journal / Bloomberg",
-        "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
-        "leak_headline": "WSJ: Gilead in advanced talks for ~$4.3B ($32.50/sh) cash buyout of rare liver drugmaker CymaBay",
-        "unaffected_price": 25.69,
-        "leaked_valuation_anchor": 32.00,
-        "settled_post_leak_entry_price": 28.90,  # 90.3% of $32 anchor (<= 0.92)
-        "resolution_price": 32.20,
-        "final_deal_cash_per_share": 32.50,
-        "cvr_per_share": 0.0,
-        "deal_ev_billions": 4.3,
-        "net_debt_billions": -0.4,
-        "hold_trading_days": 2,
-        "outcome": "CONVERTED_8K",
-        "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "Livdelzi (seladelpar) rare liver PBC asset with NDA Priority Review & cash floor",
-        "named_pharma_suitor": True,
-        "specific_dollar_bid_leaked": True,
-        "clean_cap_table": True,
-        "multi_bidder_scarcity": True,
-        "bolt_on_size_3b_to_15b": True,
-        "zero_moa_overlap": True,
-        "bid_sweetening_or_cvr": True,
-        "standalone_recovery_note": None,
-        "disqualification_note": "QUALIFIED NAMED-BID WINNER (6/12): Rare liver disease bolt-on -> Gilead $32.50/sh cash (+11.42%).",
-    },
-    {
-        "ticker": "DCPH",
-        "company_name": "Deciphera Pharmaceuticals",
-        "buyer": "ONO Pharmaceutical ($25.60/sh All-Cash Buyout)",
-        "leak_date": "2024-04-26",
-        "resolution_date": "2024-04-30",
-        "leak_source": "Wall Street Journal / Reuters",
-        "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
-        "leak_headline": "ONO Pharmaceutical finalizing $2.4B ($25.60/sh) all-cash buyout of rare-oncology drugmaker Deciphera",
-        "unaffected_price": 14.65,
-        "leaked_valuation_anchor": 25.00,
-        "settled_post_leak_entry_price": 22.10,  # 88.4% of $25 anchor (<= 0.92)
-        "resolution_price": 25.30,
-        "final_deal_cash_per_share": 25.60,
-        "cvr_per_share": 0.0,
-        "deal_ev_billions": 2.4,
-        "net_debt_billions": -0.1,
-        "hold_trading_days": 2,
-        "outcome": "CONVERTED_8K",
-        "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "Qinlock (ripretinib) FDA-approved commercial rare GIST oncology franchise",
-        "named_pharma_suitor": True,
-        "specific_dollar_bid_leaked": True,
-        "clean_cap_table": True,
-        "multi_bidder_scarcity": True,
-        "bolt_on_size_3b_to_15b": True,
-        "zero_moa_overlap": True,
-        "bid_sweetening_or_cvr": True,
-        "standalone_recovery_note": None,
-        "disqualification_note": "QUALIFIED NAMED-BID WINNER (7/12): Commercial rare-oncology asset -> ONO $25.60/sh cash (+14.48%).",
+        "disqualification_note": "QUALIFIED PRE-8K WINNER (4/5 | LONGEST UNCONFIRMED PRESS LEAK): 57 NYSE TDs / 82 cal days from Aug 6 FT leak to Oct 26/27 Novartis 8-K (+22.58%).",
     },
     {
         "ticker": "SAGE",
         "company_name": "Sage Therapeutics",
-        "buyer": "Biogen ($7.22 Rejected) -> Supernus ($8.50 + $3.50 CVR)",
+        "buyer": "Biogen ($7.22 13D Rejected) -> Supernus ($8.50 + $3.50 CVR)",
         "leak_date": "2025-01-27",
         "resolution_date": "2025-06-16",
-        "leak_source": "SEC Schedule 13D / Bloomberg",
-        "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
-        "leak_headline": "Biogen files $7.22/sh unsolicited bid; Sage rejects & runs strategic review -> Supernus $8.50 + $3.50 CVR",
+        "leak_source": "SEC Schedule 13D / Board Press Release",
+        "leak_stage": "PUBLIC_13D_STRATEGIC_REVIEW",
+        "leak_headline": "Biogen files public $7.22/sh bid; Sage Board rejects & launches formal Strategic Review -> Supernus $8.50 + $3.50 CVR",
         "unaffected_price": 5.55,
         "leaked_valuation_anchor": 7.80,
         "settled_post_leak_entry_price": 7.0916,  # 90.9% of $7.80 floor (<= 0.92)
@@ -485,7 +459,9 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "cvr_per_share": 3.50,
         "deal_ev_billions": 0.8,
         "net_debt_billions": -0.5,
-        "hold_trading_days": 82,
+        "hold_trading_days": 97,
+        "calendar_days": 140,
+        "is_pre_8k_rumor": True,
         "outcome": "CONVERTED_8K",
         "fda_approved_commercial_anchor": True,
         "commercial_drug_note": "Zurzuvae FDA-approved commercial PPD drug + $500M+ cash floor",
@@ -497,156 +473,34 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": True,
         "standalone_recovery_note": None,
-        "disqualification_note": "QUALIFIED NAMED-BID WINNER (8/12): Rejected $7.22 opener -> Supernus $8.50 cash + $3.50 CVR (+19.86% in 82d).",
-    },
-    {
-        "ticker": "RNA",
-        "company_name": "Avidity Biosciences",
-        "buyer": "Novartis ($72.00/sh Cash + SpinCo)",
-        "leak_date": "2025-08-06",
-        "resolution_date": "2025-10-27",
-        "leak_source": "Financial Times / Bloomberg",
-        "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
-        "leak_headline": "FT: Novartis approaches Avidity; Avidity raises $600M cash runway to force $72/sh ($12B) + SpinCo buyout",
-        "unaffected_price": 38.10,
-        "leaked_valuation_anchor": 64.00,
-        "settled_post_leak_entry_price": 57.80,  # 90.3% of $64 anchor (<= 0.92)
-        "resolution_price": 70.85,
-        "final_deal_cash_per_share": 72.00,
-        "cvr_per_share": 0.0,
-        "deal_ev_billions": 12.0,
-        "net_debt_billions": -1.4,
-        "hold_trading_days": 56,
-        "outcome": "CONVERTED_8K",
-        "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "Pivotal AOC RNA data + $1.4B cash floor ('Walk-Away Leverage' playbook replicated by $RYTM)",
-        "named_pharma_suitor": True,
-        "specific_dollar_bid_leaked": True,
-        "clean_cap_table": True,
-        "multi_bidder_scarcity": True,
-        "bolt_on_size_3b_to_15b": True,
-        "zero_moa_overlap": True,
-        "bid_sweetening_or_cvr": True,
-        "standalone_recovery_note": None,
-        "disqualification_note": "QUALIFIED NAMED-BID WINNER (9/12): Hardball cash raise forced Novartis to $72/sh + SpinCo (+22.58% in 56d).",
-    },
-    {
-        "ticker": "MTSR",
-        "company_name": "Metsera Inc.",
-        "buyer": "Pfizer vs. Novo Nordisk ($10B Bidding War)",
-        "leak_date": "2025-09-21",
-        "resolution_date": "2025-11-08",
-        "leak_source": "Financial Times / Wall Street Journal",
-        "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
-        "leak_headline": "FT: Pfizer & Novo Nordisk clash in multi-week bidding war for obesity developer Metsera ($65/sh + CVR)",
-        "unaffected_price": 33.50,
-        "leaked_valuation_anchor": 54.00,
-        "settled_post_leak_entry_price": 48.20,  # 89.3% of $54 initial Pfizer anchor (<= 0.92)
-        "resolution_price": 64.00,
-        "final_deal_cash_per_share": 65.00,
-        "cvr_per_share": 20.65,
-        "deal_ev_billions": 10.0,
-        "net_debt_billions": -0.4,
-        "hold_trading_days": 34,
-        "outcome": "CONVERTED_8K",
-        "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "Differentiated monthly GLP-1/amylin portfolio + Novo Nordisk vs. Pfizer public bidding war",
-        "named_pharma_suitor": True,
-        "specific_dollar_bid_leaked": True,
-        "clean_cap_table": True,
-        "multi_bidder_scarcity": True,
-        "bolt_on_size_3b_to_15b": True,
-        "zero_moa_overlap": True,
-        "bid_sweetening_or_cvr": True,
-        "standalone_recovery_note": None,
-        "disqualification_note": "QUALIFIED NAMED-BID WINNER (10/12): Entry 89.3% of initial anchor -> Novo/Pfizer bidding war (+32.78% in 34d).",
-    },
-    {
-        "ticker": "AVDL",
-        "company_name": "Avadel Pharmaceuticals",
-        "buyer": "Alkermes ($18.50) -> Lundbeck ($21.00 Cash + $2.00 CVR)",
-        "leak_date": "2025-10-22",
-        "resolution_date": "2025-11-14",
-        "leak_source": "Bloomberg / Reuters",
-        "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
-        "leak_headline": "Alkermes bids $18.50/sh for Avadel; Lundbeck tops with $21.00 cash + $2.00 CVR ($2.4B)",
-        "unaffected_price": 14.80,
-        "leaked_valuation_anchor": 20.50,
-        "settled_post_leak_entry_price": 18.60,  # 90.7% of $20.50 contested anchor (<= 0.92)
-        "resolution_price": 21.00,
-        "final_deal_cash_per_share": 21.00,
-        "cvr_per_share": 2.00,
-        "deal_ev_billions": 2.4,
-        "net_debt_billions": 0.1,
-        "hold_trading_days": 16,
-        "outcome": "CONVERTED_8K",
-        "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "Lumryz FDA-approved commercial narcolepsy drug with 2-bidder white-knight bump",
-        "named_pharma_suitor": True,
-        "specific_dollar_bid_leaked": True,
-        "clean_cap_table": True,
-        "multi_bidder_scarcity": True,
-        "bolt_on_size_3b_to_15b": True,
-        "zero_moa_overlap": True,
-        "bid_sweetening_or_cvr": True,
-        "standalone_recovery_note": None,
-        "disqualification_note": "QUALIFIED NAMED-BID WINNER (11/12): Lundbeck topped Alkermes with $21.00 cash + $2 CVR (+12.90% in 16d).",
-    },
-    {
-        "ticker": "CDTX",
-        "company_name": "Cidara Therapeutics",
-        "buyer": "Merck & Co. (Outbidding 3 Competitors)",
-        "leak_date": "2025-11-05",
-        "resolution_date": "2025-11-14",
-        "leak_source": "Financial Times / SEC DEFM14A",
-        "leak_stage": "NAMED_BID_CONTESTED_AUCTION",
-        "leak_headline": "FT: Merck outbids three pharma rivals in $9.2B ($221.50/sh) all-cash buyout of Cidara Therapeutics",
-        "unaffected_price": 105.99,
-        "leaked_valuation_anchor": 202.00,
-        "settled_post_leak_entry_price": 183.50,  # 90.8% of $202 anchor (<= 0.92)
-        "resolution_price": 219.50,
-        "final_deal_cash_per_share": 221.50,
-        "cvr_per_share": 0.0,
-        "deal_ev_billions": 9.2,
-        "net_debt_billions": -0.2,
-        "hold_trading_days": 8,
-        "outcome": "CONVERTED_8K",
-        "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "FDA-approved Rezzayo + pivotal CD388 universal flu asset with 4-bidder auction",
-        "named_pharma_suitor": True,
-        "specific_dollar_bid_leaked": True,
-        "clean_cap_table": True,
-        "multi_bidder_scarcity": True,
-        "bolt_on_size_3b_to_15b": True,
-        "zero_moa_overlap": True,
-        "bid_sweetening_or_cvr": True,
-        "standalone_recovery_note": None,
-        "disqualification_note": "QUALIFIED NAMED-BID WINNER (12/12): 4-party competitive auction, entry 90.8% of anchor -> $221.50/sh (+19.62% in 8d).",
+        "disqualification_note": "QUALIFIED PRE-8K WINNER (5/5 | LONGEST PUBLIC STRATEGIC REVIEW): Formal Board process took 97 NYSE TDs / 140 cal days (+19.86%).",
     },
     # ==========================================================================
-    # PART 2: 4 NAMED-BUYER + DOLLAR-BID WALK-AWAYS (75.0% = 12W / 4L COHORT)
+    # PART 2: 4 NAMED-BUYER + DOLLAR-BID WALK-AWAYS (55.6% = 5W / 4L COHORT)
     # ==========================================================================
     {
         "ticker": "RVMD",
         "company_name": "Revolution Medicines",
-        "buyer": "Merck & Co. / AbbVie ($28B–$32B Walk-Away -> +68.9% FDA Surge)",
+        "buyer": "Merck & Co. ($28B–$32B Walk-Away -> +68.9% Standalone Surge)",
         "leak_date": "2026-01-08",
         "resolution_date": "2026-01-26",
-        "leak_source": "Wall Street Journal / Financial Times",
+        "leak_source": "Financial Times / Wall Street Journal",
         "leak_stage": "NAMED_BID_WALKAWAY",
-        "leak_headline": "WSJ/FT: Merck in talks for $28B–$32B buyout of Revolution Medicines; walked on price Jan 26 -> rallied +68.9% to $198.50 on Aug FDA approval",
+        "leak_headline": "FT/WSJ: Merck in talks for $28B–$32B buyout of Revolution Medicines; WSJ reported talks ended on price Jan 26 (-19.69%)",
         "unaffected_price": 79.85,
         "leaked_valuation_anchor": 120.00,
         "settled_post_leak_entry_price": 107.39,  # 89.5% of $120 anchor (<= 0.92)
-        "resolution_price": 86.24,  # -19.69% deal-window dip; then +68.9% to $198.50 in Aug 2026
+        "resolution_price": 86.24,
         "final_deal_cash_per_share": None,
         "cvr_per_share": 0.0,
         "deal_ev_billions": 28.0,
         "net_debt_billions": -1.5,
         "hold_trading_days": 12,
+        "calendar_days": 18,
+        "is_pre_8k_rumor": True,
         "outcome": "WALKAWAY_THEN_FDA_SURGE",
         "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "RASONQUE (daraxonrasib) + $1.5B cash floor (Dipped -19.7% on walk-away, then +68.9% to $198.50 on Aug FDA approval)",
+        "commercial_drug_note": "Late-stage daraxonrasib + $1.5B cash floor (Fell -19.7% on Jan 26 break headline; +68.9% 7mo standalone recovery)",
         "named_pharma_suitor": True,
         "specific_dollar_bid_leaked": True,
         "clean_cap_table": True,
@@ -654,8 +508,8 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "bolt_on_size_3b_to_15b": True,
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
-        "standalone_recovery_note": "Dipped -19.7% on Jan 26 walk-away, then rallied +68.9% to $198.50 over 8 months on RASONQUE FDA approval.",
-        "disqualification_note": "NAMED-BID WALK-AWAY (1/4 in 75% Cohort): -19.69% mark-to-market dip when Merck walked, then +68.9% ($198.50) standalone surge!",
+        "standalone_recovery_note": "Fell -19.7% when WSJ reported Merck walked Jan 26 (12 TDs); later rallied +68.9% standalone.",
+        "disqualification_note": "NAMED-BID WALK-AWAY (1/4 in 55.6% Cohort): Explicit WSJ 'talks ended' headline after 12 NYSE TDs (-19.69% deal-window loss).",
     },
     {
         "ticker": "CYTK",
@@ -665,16 +519,18 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "resolution_date": "2024-01-11",
         "leak_source": "Wall Street Journal",
         "leak_stage": "NAMED_BID_WALKAWAY",
-        "leak_headline": "WSJ: Novartis in advanced talks to acquire Cytokinetics for >$10B (Walked away at JPM)",
+        "leak_headline": "WSJ: Novartis in advanced talks to acquire Cytokinetics for >$10B; walked away at JPM 3 days later (-16.69%)",
         "unaffected_price": 89.30,
         "leaked_valuation_anchor": 112.00,
-        "settled_post_leak_entry_price": 101.97,  # 91.0% of $112 implied >$10B anchor
+        "settled_post_leak_entry_price": 101.97,  # 91.0% of $112 anchor
         "resolution_price": 84.95,
         "final_deal_cash_per_share": None,
         "cvr_per_share": 0.0,
         "deal_ev_billions": 10.5,
         "net_debt_billions": 0.1,
         "hold_trading_days": 3,
+        "calendar_days": 3,
+        "is_pre_8k_rumor": True,
         "outcome": "WALKAWAY_COLLAPSE",
         "fda_approved_commercial_anchor": True,
         "commercial_drug_note": "Pivotal Phase 3 SEQUOIA-HCM complete, but Novartis walked over REMS/valuation (-16.69%)",
@@ -686,7 +542,7 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "NAMED-BID WALK-AWAY (2/4 in 75% Cohort): Novartis walked away from >$10B talks -> -16.69% drop back to $84.95.",
+        "disqualification_note": "NAMED-BID WALK-AWAY (2/4 in 55.6% Cohort): Explicit Novartis walk-away headline in 3 NYSE TDs (-16.69%).",
     },
     {
         "ticker": "MLTX",
@@ -696,7 +552,7 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "resolution_date": "2025-06-16",
         "leak_source": "Financial Times / Reuters",
         "leak_stage": "NAMED_BID_WALKAWAY",
-        "leak_headline": "FT: Merck submitted >$3B non-binding offer for MoonLake; rejected & faded -11.64%",
+        "leak_headline": "FT: Merck submitted >$3B non-binding offer for MoonLake; rejected with no rival bid & faded -11.64%",
         "unaffected_price": 41.16,
         "leaked_valuation_anchor": 54.00,
         "settled_post_leak_entry_price": 48.55,  # 89.9% of $54 implied anchor
@@ -705,10 +561,12 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "cvr_per_share": 0.0,
         "deal_ev_billions": 3.2,
         "net_debt_billions": -0.4,
-        "hold_trading_days": 10,
+        "hold_trading_days": 9,
+        "calendar_days": 13,
+        "is_pre_8k_rumor": True,
         "outcome": "STALLED_WALKAWAY",
         "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "Late-stage sonelokimab immunology asset; Merck walked after initial >$3B bid rejected (-11.64%)",
+        "commercial_drug_note": "Late-stage sonelokimab asset; Merck walked after initial >$3B non-binding bid rejected (-11.64%)",
         "named_pharma_suitor": True,
         "specific_dollar_bid_leaked": True,
         "clean_cap_table": True,
@@ -717,7 +575,7 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "NAMED-BID WALK-AWAY (3/4 in 75% Cohort): Merck >$3B non-binding offer rejected with no immediate 2nd bidder (-11.64%).",
+        "disqualification_note": "NAMED-BID WALK-AWAY (3/4 in 55.6% Cohort): Rejected >$3B non-binding offer faded -11.64% in 9 NYSE TDs without 2nd bidder.",
     },
     {
         "ticker": "PTGX",
@@ -737,9 +595,11 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "deal_ev_billions": 4.5,
         "net_debt_billions": -0.5,
         "hold_trading_days": 10,
+        "calendar_days": 14,
+        "is_pre_8k_rumor": True,
         "outcome": "STALLED_WALKAWAY",
         "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "Pivotal icotrokinra + rusfertide NDA franchise; talks stalled after initial WSJ leak (-5.27%)",
+        "commercial_drug_note": "Pivotal icotrokinra (J&J partnered) + rusfertide (Takeda partnered); talks stalled (-5.27%)",
         "named_pharma_suitor": True,
         "specific_dollar_bid_leaked": True,
         "clean_cap_table": True,
@@ -748,11 +608,79 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "NAMED-BID WALK-AWAY (4/4 in 75% Cohort): J&J talks stalled without a signed 8-K inside the 20-day window (-5.27%).",
+        "disqualification_note": "NAMED-BID WALK-AWAY (4/4 in 55.6% Cohort): J&J partner talks stalled (J&J/Takeda rights deterred rival bidders; -5.27% in 10 TDs).",
     },
     # ==========================================================================
-    # PART 3: OMITTED COMMERCIAL RARE-DISEASE RUMORS WITH NO LEAKED DOLLAR BID
-    # (Demonstrates why requiring a Specific Dollar Bid raises WR from ~67% to 75%)
+    # PART 3: 2 POST-8K MERGER-ARB TOPPING WARS (EXCLUDED FROM PRE-8K RUMOR GATE)
+    # ==========================================================================
+    {
+        "ticker": "MTSR",
+        "company_name": "Metsera Inc.",
+        "buyer": "Pfizer Sep 22 8-K ($47.50+CVR) -> Novo Topping War ($65+CVR Nov 8)",
+        "leak_date": "2025-09-21",
+        "resolution_date": "2025-11-08",
+        "leak_source": "Financial Times / Merger Proxy",
+        "leak_stage": "POST_8K_TOPPING_WAR",
+        "leak_headline": "FT Sun Sep 21 leak -> Pfizer signed initial 8-K Mon Sep 22 (0 pre-8K TDs); Novo Nordisk post-8K topping war ran 35 TDs to Nov 8",
+        "unaffected_price": 33.50,
+        "leaked_valuation_anchor": 54.00,
+        "settled_post_leak_entry_price": 48.20,
+        "resolution_price": 64.00,
+        "final_deal_cash_per_share": 65.00,
+        "cvr_per_share": 20.65,
+        "deal_ev_billions": 10.0,
+        "net_debt_billions": -0.4,
+        "hold_trading_days": 35,
+        "calendar_days": 48,
+        "is_pre_8k_rumor": False,
+        "outcome": "CONVERTED_8K",
+        "fda_approved_commercial_anchor": False,
+        "commercial_drug_note": "Phase 2b clinical obesity asset (no FDA-approved drug); post-signing topping war after Sep 22 8-K",
+        "named_pharma_suitor": True,
+        "specific_dollar_bid_leaked": True,
+        "clean_cap_table": True,
+        "multi_bidder_scarcity": True,
+        "bolt_on_size_3b_to_15b": True,
+        "zero_moa_overlap": True,
+        "bid_sweetening_or_cvr": True,
+        "standalone_recovery_note": None,
+        "disqualification_note": "EXCLUDED FROM PRE-8K 6-GATE COHORT: Initial Pfizer 8-K was a weekend gap (Sun Sep 21 -> Mon Sep 22); 35-TD gain was post-8K merger arb on Phase 2b clinical asset.",
+    },
+    {
+        "ticker": "AVDL",
+        "company_name": "Avadel Pharmaceuticals",
+        "buyer": "Alkermes Oct 22 8-K ($18.50+CVR) -> Lundbeck Top -> Alkermes $21.00+$1.50 CVR",
+        "leak_date": "2025-10-22",
+        "resolution_date": "2025-11-19",
+        "leak_source": "Form 8-K / GlobeNewswire",
+        "leak_stage": "POST_8K_TOPPING_WAR",
+        "leak_headline": "Alkermes signed definitive 8-K Oct 22 ($18.50+$1.50 CVR); Lundbeck topped Nov 13 -> Alkermes matched $21.00+$1.50 CVR Nov 19",
+        "unaffected_price": 14.80,
+        "leaked_valuation_anchor": 20.50,
+        "settled_post_leak_entry_price": 18.60,
+        "resolution_price": 21.00,
+        "final_deal_cash_per_share": 21.00,
+        "cvr_per_share": 1.50,
+        "deal_ev_billions": 2.4,
+        "net_debt_billions": 0.1,
+        "hold_trading_days": 20,
+        "calendar_days": 28,
+        "is_pre_8k_rumor": False,
+        "outcome": "CONVERTED_8K",
+        "fda_approved_commercial_anchor": True,
+        "commercial_drug_note": "Lumryz FDA-approved narcolepsy drug, but Oct 22 was already a signed definitive merger 8-K",
+        "named_pharma_suitor": True,
+        "specific_dollar_bid_leaked": True,
+        "clean_cap_table": True,
+        "multi_bidder_scarcity": True,
+        "bolt_on_size_3b_to_15b": True,
+        "zero_moa_overlap": True,
+        "bid_sweetening_or_cvr": True,
+        "standalone_recovery_note": None,
+        "disqualification_note": "EXCLUDED FROM PRE-8K 6-GATE COHORT: Oct 22 was Alkermes' signed merger 8-K, not an unconfirmed rumor (20-TD post-signing topping war).",
+    },
+    # ==========================================================================
+    # PART 4: 4 COMMERCIAL RARE-DISEASE RUMORS WITH NO LEAKED DOLLAR BID
     # ==========================================================================
     {
         "ticker": "BMRN",
@@ -766,12 +694,14 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "unaffected_price": 88.00,
         "leaked_valuation_anchor": 0.0,
         "settled_post_leak_entry_price": 96.00,
-        "resolution_price": 76.80,  # -20.00% drift
+        "resolution_price": 76.80,
         "final_deal_cash_per_share": None,
         "cvr_per_share": 0.0,
         "deal_ev_billions": 15.0,
         "net_debt_billions": 0.4,
         "hold_trading_days": 40,
+        "calendar_days": 61,
+        "is_pre_8k_rumor": True,
         "outcome": "NO_DEAL_DRIFT",
         "fda_approved_commercial_anchor": True,
         "commercial_drug_note": "Voxzogo (achondroplasia) commercial rare-disease leader, clean cap table ($15B cap)",
@@ -783,7 +713,7 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "OMITTED COMMERCIAL WALK-AWAY (-20.00%): Commercial rare disease (Voxzogo), but NO specific buyer or dollar bid leaked!",
+        "disqualification_note": "Blocked by BIO_GATE_1: Commercial rare disease (Voxzogo), but NO named buyer or specific dollar bid leaked (-20.00%).",
     },
     {
         "ticker": "ALNY",
@@ -797,12 +727,14 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "unaffected_price": 195.00,
         "leaked_valuation_anchor": 0.0,
         "settled_post_leak_entry_price": 210.00,
-        "resolution_price": 178.50,  # -15.00% fade
+        "resolution_price": 178.50,
         "final_deal_cash_per_share": None,
         "cvr_per_share": 0.0,
         "deal_ev_billions": 24.0,
         "net_debt_billions": 0.2,
-        "hold_trading_days": 30,
+        "hold_trading_days": 31,
+        "calendar_days": 46,
+        "is_pre_8k_rumor": True,
         "outcome": "NO_DEAL_DRIFT",
         "fda_approved_commercial_anchor": True,
         "commercial_drug_note": "Amvuttra & Onpattro commercial rare ATTR amyloidosis franchise",
@@ -814,7 +746,7 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "OMITTED COMMERCIAL WALK-AWAY (-15.00%): Commercial Amvuttra, but unpriced approach rumor with no dollar bid anchor.",
+        "disqualification_note": "Blocked by BIO_GATE_1: Unpriced approach rumor with no dollar valuation anchor (-15.00%).",
     },
     {
         "ticker": "FOLD",
@@ -828,12 +760,14 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "unaffected_price": 12.60,
         "leaked_valuation_anchor": 0.0,
         "settled_post_leak_entry_price": 13.80,
-        "resolution_price": 11.80,  # -14.49% fade
+        "resolution_price": 11.80,
         "final_deal_cash_per_share": None,
         "cvr_per_share": 0.0,
         "deal_ev_billions": 4.1,
         "net_debt_billions": 0.2,
-        "hold_trading_days": 30,
+        "hold_trading_days": 32,
+        "calendar_days": 45,
+        "is_pre_8k_rumor": True,
         "outcome": "NO_DEAL_DRIFT",
         "fda_approved_commercial_anchor": True,
         "commercial_drug_note": "Galafold & Pombiliti/Opfolda FDA-approved commercial rare-disease drugs",
@@ -845,7 +779,7 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "OMITTED COMMERCIAL WALK-AWAY (-14.49%): Blocked by BIO_GATE_1 (no named suitor or specific dollar bid leaked).",
+        "disqualification_note": "Blocked by BIO_GATE_1: No named suitor or specific dollar bid leaked (-14.49%).",
     },
     {
         "ticker": "ACAD",
@@ -859,12 +793,14 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "unaffected_price": 24.10,
         "leaked_valuation_anchor": 0.0,
         "settled_post_leak_entry_price": 26.50,
-        "resolution_price": 22.21,  # -16.19% fade
+        "resolution_price": 22.21,
         "final_deal_cash_per_share": None,
         "cvr_per_share": 0.0,
         "deal_ev_billions": 4.4,
         "net_debt_billions": -0.4,
         "hold_trading_days": 30,
+        "calendar_days": 44,
+        "is_pre_8k_rumor": True,
         "outcome": "NO_DEAL_DRIFT",
         "fda_approved_commercial_anchor": True,
         "commercial_drug_note": "Daybue (Rett syndrome) & Nuplazid FDA-approved commercial rare/CNS franchise",
@@ -876,29 +812,31 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "OMITTED COMMERCIAL WALK-AWAY (-16.19%): Blocked by BIO_GATE_1 (no named suitor or specific dollar bid leaked).",
+        "disqualification_note": "Blocked by BIO_GATE_1: No named suitor or specific dollar bid leaked (-16.19%).",
     },
     # ==========================================================================
-    # PART 4: 10 OTHER DISQUALIFIED RUMORS (>92% CHASES, CLINICAL BLEEDS, UNNAMED)
+    # PART 5: 10 OTHER DISQUALIFIED RUMORS (>92% CHASES, CLINICAL BLEEDS, UNNAMED)
     # ==========================================================================
     {
         "ticker": "VKTX",
         "company_name": "Viking Therapeutics",
-        "buyer": "Pfizer / Eli Lilly Obesity Approach Rumors (Bought Private Peers Instead)",
+        "buyer": "Pfizer / Eli Lilly Obesity Rumors (Bought Peers Instead)",
         "leak_date": "2024-07-15",
         "resolution_date": "2025-01-15",
         "leak_source": "Financial Press / Street Rumors",
         "leak_stage": "UNPRICED_CLINICAL_BLEED",
-        "leak_headline": "Widespread Pfizer/Lilly obesity buyout rumors on Viking ($VKTX); no deal signed as pharma bought private peers (-45.0% bleed)",
+        "leak_headline": "Widespread Pfizer/Lilly obesity buyout rumors on Viking ($VKTX); no deal signed as pharma bought peers (-45.0% bleed)",
         "unaffected_price": 62.00,
         "leaked_valuation_anchor": 0.0,
         "settled_post_leak_entry_price": 72.00,
-        "resolution_price": 39.60,  # -45.00% 6-month bleed
+        "resolution_price": 39.60,
         "final_deal_cash_per_share": None,
         "cvr_per_share": 0.0,
         "deal_ev_billions": 8.0,
         "net_debt_billions": -0.9,
-        "hold_trading_days": 120,
+        "hold_trading_days": 126,
+        "calendar_days": 184,
+        "is_pre_8k_rumor": True,
         "outcome": "NO_DEAL_BLEED",
         "fda_approved_commercial_anchor": False,
         "commercial_drug_note": "VK2735 pre-commercial Phase 2 obesity asset (zero commercial revenue floor)",
@@ -910,18 +848,18 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "OMITTED OBESITY RUMOR BLEED (-45.00%): Blocked by BIO_GATE_1 (no concrete bid) & BIO_GATE_2 (pre-commercial clinical).",
+        "disqualification_note": "Blocked by BIO_GATE_1 (no concrete bid) & BIO_GATE_2 (pre-commercial Phase 2 -> -45.00% 6mo bleed).",
     },
     {
         "ticker": "VTYX",
         "company_name": "Ventyx Biosciences",
         "buyer": "Eli Lilly ($14.00/sh Take-Under vs. Premarket Chase)",
-        "leak_date": "2025-09-15",
-        "resolution_date": "2025-09-16",
-        "leak_source": "Reuters / Press Leak",
+        "leak_date": "2026-01-06",
+        "resolution_date": "2026-01-07",
+        "leak_source": "Wall Street Journal",
         "leak_stage": "OVERPAID_HEADLINE_CHASE",
-        "leak_headline": "Retail chased Ventyx premarket rumor to $17.02 before Eli Lilly signed buyout at $14.00/sh (-17.74% loss)",
-        "unaffected_price": 10.50,
+        "leak_headline": "Traders chased WSJ leak on Ventyx to $17.02 before Eli Lilly signed buyout next day at $14.00/sh (-17.74% take-under)",
+        "unaffected_price": 7.82,
         "leaked_valuation_anchor": 14.00,
         "settled_post_leak_entry_price": 17.02,  # 121.6% of $14.00 anchor (FAILS BIO_GATE_5 <= 0.92!)
         "resolution_price": 14.00,
@@ -929,29 +867,31 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "cvr_per_share": 0.0,
         "deal_ev_billions": 1.2,
         "net_debt_billions": -0.2,
-        "hold_trading_days": 2,
+        "hold_trading_days": 1,
+        "calendar_days": 1,
+        "is_pre_8k_rumor": True,
         "outcome": "TAKE_UNDER_LOSS",
         "fda_approved_commercial_anchor": False,
         "commercial_drug_note": "Pre-commercial NLRP3 clinical pipeline (no FDA commercial anchor)",
         "named_pharma_suitor": True,
-        "specific_dollar_bid_leaked": False,
+        "specific_dollar_bid_leaked": True,
         "clean_cap_table": True,
         "multi_bidder_scarcity": False,
         "bolt_on_size_3b_to_15b": False,
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "Blocked by BIO_GATE_5 (Entry $17.02 = 121.6% of $14.00 anchor -> -17.74% take-under loss) & BIO_GATE_2.",
+        "disqualification_note": "Blocked by BIO_GATE_5 (Entry $17.02 = 121.6% of $14.00 anchor -> -17.74% take-under) & BIO_GATE_2.",
     },
     {
         "ticker": "SWTX",
-        "company_name": "SpringWorks Therapeutics (Feb 10 First Leak -> 77-Day Bleed)",
-        "buyer": "Merck KGaA ($47.00/sh Lowered Final Price)",
+        "company_name": "SpringWorks Therapeutics",
+        "buyer": "Merck KGaA ($47.00/sh Final Deal After 53-TD / 77-Cal-Day Process)",
         "leak_date": "2025-02-10",
         "resolution_date": "2025-04-28",
         "leak_source": "Reuters",
-        "leak_stage": "SOLO_BIDDER_77D_BLEED",
-        "leak_headline": "Reuters Feb 10 leak spiked $SWTX from $40.28 to $54.00, followed by 77-day bleed to Merck KGaA's lowered $47.00/sh buyout",
+        "leak_stage": "SOLO_BIDDER_53TD_BLEED",
+        "leak_headline": "Reuters Feb 10 leak spiked $SWTX from $40.28 to $54.00; Merck KGaA signed 53 NYSE TDs (77 cal days) later at $47.00/sh",
         "unaffected_price": 40.28,
         "leaked_valuation_anchor": 50.00,
         "settled_post_leak_entry_price": 54.00,  # 108.0% of $50 anchor (FAILS BIO_GATE_5 <= 0.92!)
@@ -960,10 +900,12 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "cvr_per_share": 0.0,
         "deal_ev_billions": 3.4,
         "net_debt_billions": -0.5,
-        "hold_trading_days": 54,
+        "hold_trading_days": 53,
+        "calendar_days": 77,
+        "is_pre_8k_rumor": True,
         "outcome": "TAKE_UNDER_LOSS",
         "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "Ogsiveo & Gomekli FDA-approved, but solo-bidder Merck KGaA walked price down to $47",
+        "commercial_drug_note": "Ogsiveo & Gomekli FDA-approved; converted after 53 NYSE TDs / 77 cal days, but solo-bidder price walked down to $47",
         "named_pharma_suitor": True,
         "specific_dollar_bid_leaked": False,
         "clean_cap_table": True,
@@ -972,17 +914,17 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "Blocked by BIO_GATE_5 (Entry $54.00 = 108.0% of anchor > 92% cap) & solo-bidder 77d bleed (-12.96%).",
+        "disqualification_note": "Blocked by BIO_GATE_5 ($54.00 = 108.0% > 92% cap) & solo-bidder cut (-12.96%). Key timeline comp: 53 NYSE TDs / 77 cal days to 8-K.",
     },
     {
         "ticker": "MRTX",
-        "company_name": "Mirati Therapeutics (Oct 5 Sanofi Rumor Spike -> $58 BMS Take-Under)",
+        "company_name": "Mirati Therapeutics",
         "buyer": "Bristol Myers Squibb ($58.00 Cash + $12 CVR)",
         "leak_date": "2023-10-05",
         "resolution_date": "2023-10-09",
         "leak_source": "Bloomberg",
         "leak_stage": "OVERPAID_HEADLINE_CHASE",
-        "leak_headline": "Bloomberg's Oct 5 Sanofi rumor sent $MRTX to $60.20 close before solo bidder BMS signed Sunday Oct 8 at $58.00 cash (-3.65%) + $12 CVR",
+        "leak_headline": "Bloomberg Oct 5 Sanofi rumor sent $MRTX to $60.20 close before solo bidder BMS signed Sun Oct 8 at $58.00 cash (-3.65%) + $12 CVR",
         "unaffected_price": 42.50,
         "leaked_valuation_anchor": 60.00,
         "settled_post_leak_entry_price": 60.20,  # 100.3% of $60 anchor (FAILS BIO_GATE_5 <= 0.92!)
@@ -992,9 +934,11 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "deal_ev_billions": 4.8,
         "net_debt_billions": -0.6,
         "hold_trading_days": 2,
+        "calendar_days": 4,
+        "is_pre_8k_rumor": True,
         "outcome": "TAKE_UNDER_LOSS",
         "fda_approved_commercial_anchor": True,
-        "commercial_drug_note": "Krazati FDA-approved, but Sanofi walked and BMS cut upfront cash to $58.00",
+        "commercial_drug_note": "Krazati FDA-approved, but Sanofi stayed sidelined and BMS cut upfront cash to $58.00",
         "named_pharma_suitor": True,
         "specific_dollar_bid_leaked": False,
         "clean_cap_table": True,
@@ -1003,7 +947,7 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": True,
         "standalone_recovery_note": None,
-        "disqualification_note": "Blocked by BIO_GATE_5 (Oct 5 close $60.20 = 100.3% of anchor > 92% cap -> -3.65% upfront take-under at $58.00).",
+        "disqualification_note": "Blocked by BIO_GATE_5 ($60.20 = 100.3% > 92% cap -> -3.65% upfront take-under in 2 NYSE TDs).",
     },
     {
         "ticker": "BBIO",
@@ -1022,7 +966,9 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "cvr_per_share": 0.0,
         "deal_ev_billions": 4.2,
         "net_debt_billions": 1.1,
-        "hold_trading_days": 10,
+        "hold_trading_days": 9,
+        "calendar_days": 14,
+        "is_pre_8k_rumor": True,
         "outcome": "STALLED_WALKAWAY",
         "fda_approved_commercial_anchor": False,
         "commercial_drug_note": "Awaiting binary Phase 3 ATTR-CM readout + heavy debt load in Mar 2023",
@@ -1053,7 +999,9 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "cvr_per_share": 0.0,
         "deal_ev_billions": 9.5,
         "net_debt_billions": 0.3,
-        "hold_trading_days": 10,
+        "hold_trading_days": 9,
+        "calendar_days": 14,
+        "is_pre_8k_rumor": True,
         "outcome": "STALLED_WALKAWAY",
         "fda_approved_commercial_anchor": True,
         "commercial_drug_note": "Syfovre FDA-approved, but unnamed 'weighing options' rumor with no bid anchor",
@@ -1085,6 +1033,8 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "deal_ev_billions": 2.6,
         "net_debt_billions": -0.6,
         "hold_trading_days": 10,
+        "calendar_days": 14,
+        "is_pre_8k_rumor": True,
         "outcome": "STALLED_WALKAWAY",
         "fda_approved_commercial_anchor": False,
         "commercial_drug_note": "Phase 1b clinical prostate cancer asset (no commercial anchor)",
@@ -1116,6 +1066,8 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "deal_ev_billions": 13.1,
         "net_debt_billions": -0.3,
         "hold_trading_days": 7,
+        "calendar_days": 10,
+        "is_pre_8k_rumor": True,
         "outcome": "CONVERTED_8K",
         "fda_approved_commercial_anchor": True,
         "commercial_drug_note": "FDA-approved IVL cardiovascular devices, but entry at 93.9% of anchor (>92% cap)",
@@ -1127,7 +1079,7 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "Converted (+6.04%), but excluded by BIO_GATE_5 (Entry 93.9% > 92.0% anchor cap).",
+        "disqualification_note": "Converted in 7 NYSE TDs / 10 cal days (+6.04%), but excluded by BIO_GATE_5 (Entry 93.9% > 92.0% cap).",
     },
     {
         "ticker": "ALPN",
@@ -1137,7 +1089,7 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "resolution_date": "2024-04-11",
         "leak_source": "Bloomberg",
         "leak_stage": "PRE_COMMERCIAL_SPRINT",
-        "leak_headline": "Bloomberg: Alpine Immune Sciences weighing options after takeover interest -> Vertex $65/sh 8-K",
+        "leak_headline": "Bloomberg (Apr 10 intraday): Alpine weighing options after takeover interest -> Vertex $65/sh 8-K after hours",
         "unaffected_price": 38.94,
         "leaked_valuation_anchor": 50.00,
         "settled_post_leak_entry_price": 47.03,
@@ -1147,6 +1099,8 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "deal_ev_billions": 4.9,
         "net_debt_billions": -0.3,
         "hold_trading_days": 1,
+        "calendar_days": 1,
+        "is_pre_8k_rumor": True,
         "outcome": "CONVERTED_8K",
         "fda_approved_commercial_anchor": False,
         "commercial_drug_note": "Povetacicept Phase 2 clinical IgAN asset (no FDA-approved commercial anchor)",
@@ -1158,7 +1112,7 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "zero_moa_overlap": True,
         "bid_sweetening_or_cvr": False,
         "standalone_recovery_note": None,
-        "disqualification_note": "Converted (+36.30%), but excluded by BIO_GATE_1 (no named suitor in leak) & BIO_GATE_2 (Phase 2 clinical).",
+        "disqualification_note": "Converted same day (+36.30%), but excluded by BIO_GATE_1 (no named suitor in leak) & BIO_GATE_2 (Phase 2 clinical).",
     },
     {
         "ticker": "KD",
@@ -1178,6 +1132,8 @@ HISTORICAL_BIOPHARMA_LEAKS: List[Dict[str, Any]] = [
         "deal_ev_billions": 2.8,
         "net_debt_billions": -0.7,
         "hold_trading_days": 20,
+        "calendar_days": 28,
+        "is_pre_8k_rumor": True,
         "outcome": "STALLED_WALKAWAY",
         "fda_approved_commercial_anchor": False,
         "commercial_drug_note": "Early clinical protein degrader pipeline (Sanofi partnered; no FDA-approved commercial drug)",
@@ -1205,16 +1161,20 @@ def compute_entry_pct_of_anchor(event: Dict[str, Any]) -> float:
 
 def passes_all_6_biopharma_gates(event: Dict[str, Any]) -> bool:
     """
-    Return True only if a tradable biopharma leak event clears the 6-Gate Named-Buyer +
-    Specific Leaked Dollar Bid + Commercial/Pivotal + Entry <= 92% Anchor Criteria.
-    Across the 30-event 2022–2026 dataset, N = 16 events qualify:
-      - 12 Converted Winners ($GBT, $HZNP, $SGEN, $RETA, $IMGN, $CBAY, $DCPH, $SAGE, $RNA, $MTSR, $AVDL, $CDTX)
+    Return True only if a tradable regular-session PRE-8K biopharma leak clears all 6 gates:
+      - Pre-8K unannounced rumor (`is_pre_8k_rumor=True`, excluding post-8K topping wars $MTSR/$AVDL)
+      - Commercial / pivotal rare-disease floor (`fda_approved_commercial_anchor=True`)
+      - Named Big Pharma suitor + specific leaked dollar bid
+      - Clean cap table & `entry_pct_of_anchor <= 0.92`
+    Across the audited 25-event 2022–2026 tradable dataset, N = 9 pre-8K events qualify:
+      - 5 Converted Winners ($GBT, $HZNP, $SGEN, $RNA, $SAGE)
       - 4 Named-Bid Walk-Aways ($RVMD, $CYTK, $MLTX, $PTGX)
-      => True Un-Biased Conversion Rate = 75.0% (12W / 4L)!
+      => True Audited Pre-8K Conversion Rate = 55.6% (5W / 4L).
     """
     entry_pct = compute_entry_pct_of_anchor(event)
     return bool(
-        event.get("fda_approved_commercial_anchor")
+        event.get("is_pre_8k_rumor", True)
+        and event.get("fda_approved_commercial_anchor")
         and event.get("named_pharma_suitor")
         and event.get("specific_dollar_bid_leaked", True)
         and event.get("clean_cap_table", True)
@@ -1224,11 +1184,12 @@ def passes_all_6_biopharma_gates(event: Dict[str, Any]) -> bool:
 
 def passes_broad_commercial_cohort(event: Dict[str, Any]) -> bool:
     """
-    Return True for the broader N = 20 Commercial/Pivotal cohort that includes unpriced
-    commercial rumors ($BMRN, $ALNY, $FOLD, $ACAD) where no dollar bid was leaked (70.0% = 14W/6L or 60%-70%).
+    Return True for the broader N = 13 Pre-8K Commercial/Pivotal cohort that includes unpriced
+    commercial rumors ($BMRN, $ALNY, $FOLD, $ACAD) where no dollar bid was leaked (38.5% = 5W / 8L).
     """
     return bool(
-        event.get("fda_approved_commercial_anchor")
+        event.get("is_pre_8k_rumor", True)
+        and event.get("fda_approved_commercial_anchor")
         and (
             passes_all_6_biopharma_gates(event)
             or event.get("ticker") in ("BMRN", "ALNY", "FOLD", "ACAD")
@@ -1241,8 +1202,8 @@ def run_biopharma_backtest(
     nyc_short_term_tax_rate: float = 0.545,
 ) -> Dict[str, Any]:
     """
-    Execute the Full 30-Event Un-Biased Biopharma M&A Backtest (2022–2026) and
-    evaluate the User's Live $100,000 @ $113.00 (~885 Shares) $RYTM Position.
+    Execute the Forensically Audited 25-Event Biopharma M&A Backtest (2022–2026, 9 overnight gaps purged)
+    and evaluate the User's Live $100,000 @ $113.00 (~885 Shares) $RYTM Position.
     """
     enriched_events: List[Dict[str, Any]] = []
     unfiltered_returns: List[float] = []
@@ -1257,6 +1218,13 @@ def run_biopharma_backtest(
         exit_px = float(ev["resolution_price"])
         realized_pct = ((exit_px - entry) / entry) * 100.0
         entry_pct_anchor = compute_entry_pct_of_anchor(ev)
+        cal_days = int(
+            ev.get("calendar_days")
+            or (
+                dt.date.fromisoformat(ev["resolution_date"])
+                - dt.date.fromisoformat(ev["leak_date"])
+            ).days
+        )
 
         deal_cash = ev.get("final_deal_cash_per_share")
         gross_spread_to_deal_pct = (
@@ -1278,6 +1246,7 @@ def run_biopharma_backtest(
 
         row = {
             **ev,
+            "calendar_days": cal_days,
             "entry_pct_of_anchor": entry_pct_anchor,
             "entry_pct_of_anchor_display": (
                 round(entry_pct_anchor * 100.0, 1)
@@ -1320,12 +1289,16 @@ def run_biopharma_backtest(
     filtered_win_rate = round((filtered_wins / len(filtered_returns)) * 100.0, 1)
 
     unfiltered_median_ret = round(statistics.median(unfiltered_returns), 2)
+    broad_median_ret = round(statistics.median(broad_commercial_returns), 2)
     filtered_median_ret = round(statistics.median(filtered_returns), 2)
     winner_returns = [r for r in filtered_returns if r > 0]
     winner_median_ret = round(statistics.median(winner_returns), 2)
 
     unfiltered_avg_ret = round(
         sum(unfiltered_returns) / len(unfiltered_returns), 2
+    )
+    broad_avg_ret = round(
+        sum(broad_commercial_returns) / len(broad_commercial_returns), 2
     )
     filtered_avg_ret = round(sum(filtered_returns) / len(filtered_returns), 2)
 
@@ -1363,10 +1336,23 @@ def run_biopharma_backtest(
         nyc_tax_rate=nyc_short_term_tax_rate,
     )
 
+    broad_obj = {
+        "total_events": len(broad_commercial_returns),
+        "wins": broad_wins,
+        "losses_or_walkaways": len(broad_commercial_returns) - broad_wins,
+        "win_rate_pct": broad_win_rate,
+        "median_return_per_trade_pct": broad_median_ret,
+        "avg_return_per_trade_pct": broad_avg_ret,
+        "note": (
+            "Pre-8K commercial/pivotal rumors including unpriced street chatter ($BMRN -20%, $ALNY -15%, "
+            "$FOLD -14.5%, $ACAD -16.2%) where no specific dollar bid was leaked."
+        ),
+    }
+
     summary = {
-        "strategy_name": "Arb Cannon Full 30-Event Un-Biased Biopharma M&A Engine & $100k $RYTM Position Tracker (Nov 2026)",
-        "period_covered": "2022–2026 (29 Tradable Regular-Session Leaks incl. Omitted Winners $GBT/$RETA/$IMGN/$CBAY/$DCPH & Omitted Walk-Aways $BMRN/$ALNY/$VKTX/$FOLD/$ACAD)",
-        "expected_hold_clock_label": "7–20 Trading Days Schedule 14D-9 Confirmatory Window (Hard Time-Stop: Dec 7 / Dec 14)",
+        "strategy_name": "Arb Cannon Audited 25-Event Biopharma M&A Engine & $100k $RYTM Position Tracker (Nov 2026)",
+        "period_covered": "2022–2026 (25 Tradable Regular-Session Events | 9 Overnight/Weekend Gaps Purged)",
+        "expected_hold_clock_label": "Bimodal 1–57 NYSE TDs (Fast: 1–11 TDs | Contested: 53–57 TDs | Hard Stop: Mon Feb 1, 2027)",
         "standard_biopharma_clip_usd": standard_biopharma_clip_usd,
         "unfiltered_metrics": {
             "total_events": len(enriched_events),
@@ -1378,20 +1364,8 @@ def run_biopharma_backtest(
             "worst_walkaway_loss_pct": worst_walkaway_pct,
             "cumulative_ira_pnl_usd": round(unfiltered_ira_pnl_total, 2),
         },
-        "broad_commercial_cohort_metrics": {
-            "total_events": len(broad_commercial_returns),
-            "wins": broad_wins,
-            "losses_or_walkaways": len(broad_commercial_returns) - broad_wins,
-            "win_rate_pct": broad_win_rate,
-            "note": "Includes unpriced commercial rumors ($BMRN -20%, $ALNY -15%, $FOLD -14.5%, $ACAD -16.2%) where no dollar bid was leaked.",
-        },
-        "broad_commercial_metrics": {
-            "total_events": len(broad_commercial_returns),
-            "wins": broad_wins,
-            "losses_or_walkaways": len(broad_commercial_returns) - broad_wins,
-            "win_rate_pct": broad_win_rate,
-            "note": "Includes unpriced commercial rumors ($BMRN -20%, $ALNY -15%, $FOLD -14.5%, $ACAD -16.2%) where no dollar bid was leaked.",
-        },
+        "broad_commercial_cohort_metrics": broad_obj,
+        "broad_commercial_metrics": dict(broad_obj),
         "filtered_6_gate_metrics": {
             "qualified_events": len(filtered_returns),
             "wins": filtered_wins,
@@ -1402,9 +1376,13 @@ def run_biopharma_backtest(
             "avg_return_per_trade_pct": filtered_avg_ret,
             "worst_loss_pct": filtered_max_drawdown_pct,
             "lone_break_standalone_recovery_pct": 68.9,
-            "lone_break_standalone_note": "$RVMD (-19.69% on Jan 2026 Merck walk-away) rallied +68.9% to $198.50 over 8 months on RASONQUE FDA approval",
-            "hold_days_range": f"{min_hold_days}–{max_hold_days} days",
-            "expected_hold_clock": "7–20 trading days (10–45d auction window)",
+            "lone_break_standalone_note": "$RVMD (-19.69% on Jan 26 Merck walk-away) rallied +68.9% standalone over 7 months",
+            "hold_days_range": f"{min_hold_days}–{max_hold_days} NYSE TDs (1–57 TDs press leaks; 97 TDs public 13D review)",
+            "expected_hold_clock": "1–57 trading days (Bimodal: 1–11d fast | 53–57d contested)",
+            "max_press_leak_hold_trading_days": 57,
+            "max_press_leak_calendar_days": 82,
+            "max_public_review_hold_trading_days": 97,
+            "max_public_review_calendar_days": 140,
             "avg_hold_trading_days": avg_filtered_hold_days,
             "avg_ira_profit_per_trade_usd": round(
                 filtered_ira_pnl_total / len(filtered_returns), 2
@@ -1448,15 +1426,17 @@ def evaluate_biopharma_bolt_on_candidate(
     nyc_tax_rate: float = 0.545,
 ) -> Dict[str, Any]:
     """
-    Evaluate a Biopharma Contested Auction / Bolt-On candidate (such as the User's
-    $100,000 position at $113.00 = 885 shares on $RYTM) against the 6-Gate Framework:
-      - Enforces `entry_pct_of_anchor <= 0.92` ($114.08 hard ceiling on $RYTM's $124 floor)
-      - Computes the 3-Scenario Probability-Weighted Payoff Matrix:
-        * Scenario 1 ($124.00 Base Cash, 35% Prob): +$9,735 (+9.7%)
-        * Scenario 2 ($134.00 Sweetened 2-Bidder, 40% Prob): +$18,585 (+18.6%)
-        * Scenario 3 ($92.00 Fundamental Walk-Away Floor [$89-$95], 25% Prob): -$18,585 (-0.46% of $4M NW)
-      - Tracks the Schedule 14D-9 Expected Formalization Calendar (Nov 16 / Nov 23 Primary Window,
-        Nov 30 – Dec 14 2-Bidder Window, Dec 7 / Dec 14 Hard Time-Stop).
+    Evaluate a Biopharma Pre-8K Contested Auction candidate (such as the User's
+    $100,000 position at $113.00 = 885 shares on $RYTM) under the Audited 55.6% (5W/4L) Base Rate:
+      - Enforces `entry_pct_of_anchor <= 0.92` ($114.08 hard ceiling on $RYTM) while flagging
+        `<= 0.87` ($107.88) as the Positive-EV Add Zone (+5.0%+ EV).
+      - Computes the Audited 3-Scenario Payoff Matrix (55.6% Conversion = 20.0% Base + 35.6% Sweetened):
+        * Scenario 1 ($124.00 Base Cash, 20.0% Prob): +$9,735.00 (+9.73%)
+        * Scenario 2 ($134.00 Sweetened 2-Bidder, 35.6% Prob): +$18,585.00 (+18.58%)
+        * Scenario 3 ($92.00 Fundamental Walk-Away Floor [$89–$95], 44.4% Prob): -$18,585.00 (-0.46% of $4M NW)
+        * Audited Probability-Weighted EV at $113.00: +$311.52 (+0.31% — hold existing lot, add only <= $107.88)
+      - Tracks the Bimodal Rumor-to-Acquisition Exit Policy (Nov 16/23 Fast Window, Jan 11–28 JPM/$RNA Window,
+        Mon Feb 1, 2027 [59 NYSE TDs] Hard Time-Stop + Immediate Break-Headline Rule).
     """
     tkr = ticker.upper().strip()
     eff_walkaway_floor = (
@@ -1488,6 +1468,7 @@ def evaluate_biopharma_bolt_on_candidate(
         else 1.0
     )
     hard_ceiling_92pct = round(base_cash_bid_per_share * 0.92, 2)
+    positive_ev_87pct = round(base_cash_bid_per_share * 0.87, 2)
     passes_anchor_92pct = entry_pct_of_anchor <= 0.92
 
     upside_downside_ratio_base = (
@@ -1507,9 +1488,22 @@ def evaluate_biopharma_bolt_on_candidate(
         and base_cash_bid_per_share > 0
     )
 
-    # Exact share math for the live single lot (default $100,000 / $113.00 = 885 shares)
-    eff_lot_usd = float(live_position_usd if live_position_usd and live_position_usd > 0 else 100000.0)
-    eff_lot_entry = float(live_position_entry_price if live_position_entry_price and live_position_entry_price > 0 else current_price)
+    # Audited empirical probabilities from the N=9 pre-8K 6-gate cohort (5W / 4L = 55.6% conversion):
+    # When sweetening/2nd bidder is present: 20.0% Base + 35.6% Sweetened = 55.6% Deal vs. 44.4% Walk-Away
+    # When solo bidder (no sweetening): 55.6% Base + 0.0% Sweetened vs. 44.4% Walk-Away
+    has_bump = sweetened_ceiling_per_share > base_cash_bid_per_share and bid_sweetening_or_cvr
+    prob_base = 0.200 if has_bump else 0.556
+    prob_sweet = 0.356 if has_bump else 0.000
+    prob_walk = 0.444
+
+    eff_lot_usd = float(
+        live_position_usd if live_position_usd and live_position_usd > 0 else 100000.0
+    )
+    eff_lot_entry = float(
+        live_position_entry_price
+        if live_position_entry_price and live_position_entry_price > 0
+        else current_price
+    )
     lot_shares = round(eff_lot_usd / eff_lot_entry) if eff_lot_entry > 0 else 0
     lot_deployed_usd = round(lot_shares * eff_lot_entry, 2)
     lot_base_profit_usd = round(
@@ -1525,25 +1519,25 @@ def evaluate_biopharma_bolt_on_candidate(
         lot_shares * (unaffected_price - eff_lot_entry), 2
     )
     expected_value_usd = round(
-        0.35 * lot_base_profit_usd
-        + 0.40 * lot_sweetened_profit_usd
-        + 0.25 * lot_fundamental_walkaway_loss_usd,
+        prob_base * lot_base_profit_usd
+        + prob_sweet * lot_sweetened_profit_usd
+        + prob_walk * lot_fundamental_walkaway_loss_usd,
         2,
     )
 
     gate_checks = [
         {
             "id": "BIO_GATE_1_NAMED_BUYER_AND_DOLLAR_BID",
-            "title": "Named Big Pharma Suitor + Specific Leaked Dollar Bid (75.0% Base Rate)",
+            "title": "Named Big Pharma Suitor + Specific Leaked Dollar Bid (55.6% Audited Base Rate)",
             "passed": suitor_ok,
             "detail": f"{named_pharma_suitor} (${base_cash_bid_per_share:.2f}/sh base -> ${sweetened_ceiling_per_share:.2f}/sh 2-bidder target)",
         },
         {
             "id": "BIO_GATE_2_COMMERCIAL_OR_PIVOTAL_FLOOR",
-            "title": "Commercial Rare-Disease Anchor + Upgraded Fundamental Walk-Away Floor",
+            "title": "Commercial Rare-Disease Anchor + Standalone Fundamental Floor",
             "passed": bool(fda_approved_commercial_anchor),
             "detail": (
-                f"{commercial_drug_name} | Walk-Away Floor: ${eff_walkaway_floor:.2f} ({downside_to_fundamental_floor_pct:.1f}% vs. ${unaffected_price:.2f} Nov 3 close)"
+                f"{commercial_drug_name} | Walk-Away Floor: ${eff_walkaway_floor:.2f} ({downside_to_fundamental_floor_pct:.1f}% vs. ${unaffected_price:.2f} pre-leak)"
                 if fda_approved_commercial_anchor
                 else "FAIL: Unapproved binary trial risk / no standalone cash floor"
             ),
@@ -1558,30 +1552,30 @@ def evaluate_biopharma_bolt_on_candidate(
         },
         {
             "id": "BIO_GATE_4_SECOND_BIDDER_OR_SWEETENING",
-            "title": "Rejected Opening Bid / 2-Bidder Sweetening Tension",
+            "title": "Rejected Opening Bid / 2-Bidder Sweetening Tension (4 of 5 Wins Sweetened)",
             "passed": bool(bid_sweetening_or_cvr),
             "detail": (
-                f"75.0% Conversion Cohort (35% @ ${base_cash_bid_per_share:.2f} Base + 40% @ ${sweetened_ceiling_per_share:.2f} Sweetened vs. 25% Walk-Away)"
+                f"55.6% Audited Conversion (20.0% @ ${base_cash_bid_per_share:.2f} Base + 35.6% @ ${sweetened_ceiling_per_share:.2f} Sweetened vs. 44.4% Walk-Away)"
                 if bid_sweetening_or_cvr
-                else "FAIL: Uncontested solo-bidder drift risk (e.g., $SWTX 77-day bleed)"
+                else "FAIL: Uncontested solo-bidder drift risk (e.g., $SWTX 53-TD walk-down to $47)"
             ),
         },
         {
             "id": "BIO_GATE_5_ENTRY_LE_92PCT_OF_ANCHOR",
-            "title": "Hard Anchor Ceiling: entry_pct_of_anchor <= 0.92 ($114.08 Max)",
+            "title": f"Hard Anchor Ceiling <= 92% (${hard_ceiling_92pct:.2f}) | Add Zone <= 87% (${positive_ev_87pct:.2f})",
             "passed": passes_anchor_92pct,
             "detail": (
                 f"Entry ${current_price:.2f} = {entry_pct_of_anchor * 100:.1f}% of ${base_cash_bid_per_share:.2f} Anchor "
-                f"(Hard 92% Ceiling: ${hard_ceiling_92pct:.2f} — Hold $113.00 Lot, Do Not Add > ${hard_ceiling_92pct:.2f})"
+                f"(Hard 92% Cap: ${hard_ceiling_92pct:.2f}; +5% EV Add Zone: <= ${positive_ev_87pct:.2f})"
             ),
         },
         {
             "id": "BIO_GATE_6_TACTICAL_SIZING_AND_TIMELINE",
-            "title": "$100k Tactical Lot (<0.5% NW Risk) & 7–20 Trading Day Clock",
+            "title": "$100k Tactical Lot (<0.5% NW Risk) & Bimodal 1–57 TD Exit Policy",
             "passed": clip_usd <= 225000.0,
             "detail": (
-                f"Lot: ${clip_usd:,.0f} ({lot_shares:,} sh @ ${current_price:.2f}) | Max Walk-Away Hit: "
-                f"${lot_fundamental_walkaway_loss_usd:,.0f} (-0.46% of $4M NW) | Hard Stop: Dec 7 / Dec 14"
+                f"Lot: ${eff_lot_usd:,.0f} ({lot_shares:,} sh @ ${eff_lot_entry:.2f}) | Walk-Away Hit: "
+                f"${lot_fundamental_walkaway_loss_usd:,.0f} (-0.46% of $4M NW) | Hard Stop: Mon Feb 1, 2027 (59 TDs)"
             ),
         },
     ]
@@ -1591,16 +1585,11 @@ def evaluate_biopharma_bolt_on_candidate(
 
     # 3-Tranche Biopharma Limit Ladder (10.0%, 12.5%, 15.0% discount to Base Cash Bid)
     tranche_specs = [
-        ("Tranche 1 (Filled / Hold @ $113.00; Ceiling $114.08)", 0.40, 0.100),
-        ("Tranche 2 (Multi-Week Consolidation Dip Bid)", 0.35, 0.125),
-        ("Tranche 3 (Deep Auction Pullback Bid)", 0.25, 0.150),
+        (f"Tranche 1 (Starter / Held @ $113.00; Hard Cap ${hard_ceiling_92pct:.2f})", 0.40, 0.100),
+        ("Tranche 2 (Dead-Zone Consolidation Dip Bid <= 89% Anchor)", 0.35, 0.125),
+        (f"Tranche 3 (Positive-EV Deep Pullback Bid <= ${positive_ev_87pct:.2f})", 0.25, 0.150),
     ]
     tranches: List[Dict[str, Any]] = []
-    total_shares = 0
-    total_deployed = 0.0
-    base_gross_profit = 0.0
-    sweetened_gross_profit = 0.0
-
     for idx, (label, weight, disc) in enumerate(tranche_specs, start=1):
         alloc_usd = round(clip_usd * weight, 2)
         limit_px = round(base_cash_bid_per_share / (1.0 + disc), 2)
@@ -1610,12 +1599,6 @@ def evaluate_biopharma_bolt_on_candidate(
         prof_sweet = round(
             shares * (sweetened_ceiling_per_share - limit_px), 2
         )
-
-        total_shares += shares
-        total_deployed += deployed
-        base_gross_profit += prof_base
-        sweetened_gross_profit += prof_sweet
-
         tranches.append(
             {
                 "tranche_number": idx,
@@ -1636,46 +1619,45 @@ def evaluate_biopharma_bolt_on_candidate(
 
     deal_timeline_windows = [
         {
-            "window": "Window 1 — Primary Target Window (55% of Completed Deals)",
-            "window_name": "Window 1 — Primary Target Window (55% of Completed Deals)",
-            "target_dates": "Monday, Nov 16 or Monday, Nov 23, 2026 (1–2 Weeks From Today)",
+            "window": "Window 1 — Regime-1 Fast Confirmatory Window (60% of Wins: 1–11 TDs)",
+            "window_name": "Window 1 — Regime-1 Fast Confirmatory Window (60% of Wins: 1–11 TDs)",
+            "target_dates": "Monday, Nov 16 – Monday, Nov 23, 2026 (Days 8–13 NYSE TDs)",
             "catalysts_and_mechanics": (
-                "Pre-Thanksgiving 8-K push if AstraZeneca (Alexion) locks out rivals. Watch Thu–Sun afternoon "
-                "for the Stage-2 WSJ/Bloomberg scoop ('AstraZeneca nearing deal... as soon as Monday'), which "
-                "gaps $RYTM to $120–$126 immediately before the Monday 6:30 AM 8-K."
+                "All fast press-leak buyouts ($GBT 1d, $SWAV 7d, $HZNP 9d, $SGEN 11d) signed within 11 NYSE TDs. "
+                "Checkpoint Mon Nov 23 (13 TDs): if no 8-K, hold into Regime 2 ONLY if $RYTM holds >= $99.70 "
+                "(>50% of rumor gap preserved); exit early if price bleeds below $99.70 on zero news."
             ),
             "catalyst_note": (
-                "Pre-Thanksgiving 8-K push if AstraZeneca (Alexion) locks out rivals. Watch Thu–Sun afternoon "
-                "for the Stage-2 WSJ/Bloomberg scoop ('AstraZeneca nearing deal... as soon as Monday'), which "
-                "gaps $RYTM to $120–$126 immediately before the Monday 6:30 AM 8-K."
+                "All fast press-leak buyouts ($GBT 1d, $SWAV 7d, $HZNP 9d, $SGEN 11d) signed within 11 NYSE TDs. "
+                "Checkpoint Mon Nov 23 (13 TDs): hold into Regime 2 only if $RYTM holds >= $99.70 (>50% of rumor gap)."
             ),
         },
         {
-            "window": "Window 2 — Contested 2-Bidder Auction Window (25% of Deals)",
-            "window_name": "Window 2 — Contested 2-Bidder Auction Window (25% of Deals)",
-            "target_dates": "Monday, Nov 30 to Monday, Dec 14, 2026 (3–5 Weeks From Today)",
+            "window": "Window 2 — Regime-2 Contested Diligence & JPM Window (40% of Wins: 45–57 TDs)",
+            "window_name": "Window 2 — Regime-2 Contested Diligence & JPM Window (40% of Wins: 45–57 TDs)",
+            "target_dates": "Monday, Jan 11 – Thursday, Jan 28, 2027 (JPM Conf = 45 TDs | $RNA Max = 57 TDs)",
             "catalysts_and_mechanics": (
-                "If Rhythm's bankers give the reported 2nd suitor 2 weeks in the data room (like $RNA or $CDTX), "
-                "signing shifts to the first two Mondays of December (ahead of Christmas & Jan 11 JPM) — unlocking "
-                "$134–$140+ (+$18,585 to +$24,000 tax-free profit on $100k)."
+                "Zero unconfirmed press leaks signed in the Day 12–52 'dead zone'. Contested non-binding approaches "
+                "($SWTX 53 TDs / 77 cal d; $RNA 57 TDs / 82 cal d) require 11–12 weeks of data-room diligence — "
+                "aligning directly with J.P. Morgan Healthcare Conf (Jan 11–14, 2027 = 45–48 TDs) & late Jan."
             ),
             "catalyst_note": (
-                "If Rhythm's bankers give the reported 2nd suitor 2 weeks in the data room (like $RNA or $CDTX), "
-                "signing shifts to the first two Mondays of December (ahead of Christmas & Jan 11 JPM) — unlocking "
-                "$134–$140+ (+$18,585 to +$24,000 tax-free profit on $100k)."
+                "Contested non-binding approaches ($SWTX 53 TDs, $RNA 57 TDs / 82 cal d) skip the Day 12–52 dead zone "
+                "and resolve around J.P. Morgan Healthcare Week (Jan 11–14, 2027) through Jan 28, 2027."
             ),
         },
         {
-            "window": "Hard Time-Stop Rule (20% Stalled / No-Deal Protection)",
-            "window_name": "Hard Time-Stop Rule (20% Stalled / No-Deal Protection)",
-            "target_dates": "Monday, Dec 7 / Monday, Dec 14, 2026 (20–25 Trading Days Post-Leak)",
+            "window": "Hard Time-Stop & Break-Headline Exit (44% Walk-Away Protection)",
+            "window_name": "Hard Time-Stop & Break-Headline Exit (44% Walk-Away Protection)",
+            "target_dates": "Monday, Feb 1, 2027 (59 NYSE TDs / 89 Cal Days) — OR Immediate on 'Talks Ended' Leak",
             "catalysts_and_mechanics": (
-                "If 20–25 trading days pass with zero follow-up headlines and no Form 8-K, exit the $100k position "
-                "and rotate principal back into $SGOV."
+                "1) Exit 100% IMMEDIATELY on any Tier-1 'talks ended / walked on price' report ($CYTK Day 3, $RVMD Day 12). "
+                "2) Hard unconfirmed-rumor cutoff: Mon Feb 1, 2027 (59 NYSE TDs = $RNA 57-TD max + Mon premarket buffer) -> "
+                "rotate back to $SGOV unless $RYTM formally announces a Board Strategic Review ($SAGE 97-TD regime)."
             ),
             "catalyst_note": (
-                "If 20–25 trading days pass with zero follow-up headlines and no Form 8-K, exit the $100k position "
-                "and rotate principal back into $SGOV."
+                "Exit immediately on any Tier-1 'talks ended' headline; otherwise liquidate 100% on Mon Feb 1, 2027 "
+                "(59 NYSE TDs = $RNA 57-TD max + Monday buffer) and rotate back to $SGOV."
             ),
         },
     ]
@@ -1683,25 +1665,25 @@ def evaluate_biopharma_bolt_on_candidate(
     lot_scenarios_list = [
         {
             "scenario": f"Scenario 1: Base Cash Buyout (${base_cash_bid_per_share:.2f}/sh)",
-            "probability_pct": 35.0,
+            "probability_pct": round(prob_base * 100.0, 1),
             "exit_price": round(base_cash_bid_per_share, 2),
             "return_pct": round(base_spread_pct, 2),
             "ira_0pct_tax_pnl_usd": lot_base_profit_usd,
             "nyc_taxable_pnl_usd": round(lot_base_profit_usd * (1.0 - nyc_tax_rate), 2),
-            "notes": f"AstraZeneca initial ${base_cash_bid_per_share:.2f}/sh (~$10B) all-cash offer closes without rival bump.",
+            "notes": f"1 of 5 historical wins ($GBT) closed at initial ${base_cash_bid_per_share:.2f}/sh cash anchor without rival bump.",
         },
         {
             "scenario": f"Scenario 2: Sweetened 2-Bidder Deal (${sweetened_ceiling_per_share:.2f}/sh + CVR)",
-            "probability_pct": 40.0,
+            "probability_pct": round(prob_sweet * 100.0, 1),
             "exit_price": round(sweetened_ceiling_per_share, 2),
             "return_pct": round(sweetened_spread_pct, 2),
             "ira_0pct_tax_pnl_usd": lot_sweetened_profit_usd,
             "nyc_taxable_pnl_usd": round(lot_sweetened_profit_usd * (1.0 - nyc_tax_rate), 2),
-            "notes": "Reported 2nd suitor forces AstraZeneca/Alexion to sweeten to $134.00/sh (+CVR).",
+            "notes": "4 of 5 historical wins ($HZNP, $SGEN, $SAGE, $RNA) forced a sweetened multi-bidder / walk-away-leverage bump.",
         },
         {
             "scenario": f"Scenario 3: Walk-Away Fundamental Floor (~${eff_walkaway_floor:.2f}/sh [$89–$95 Range])",
-            "probability_pct": 25.0,
+            "probability_pct": round(prob_walk * 100.0, 1),
             "exit_price": round(eff_walkaway_floor, 2),
             "return_pct": round(downside_to_fundamental_floor_pct, 2),
             "ira_0pct_tax_pnl_usd": lot_fundamental_walkaway_loss_usd,
@@ -1710,8 +1692,8 @@ def evaluate_biopharma_bolt_on_candidate(
                 (lot_fundamental_walkaway_loss_usd / 4_000_000.0) * 100.0, 2
             ),
             "notes": (
-                f"Cushioned +$6 to +$8/sh above Nov 3 ${unaffected_price:.2f} unaffected close (-23.5%) by Nov 2–3 Q3 blowout "
-                "($92.1M rev, +79.6% YoY), $750M facility & 1% LG Chem royalty buydown ($RVMD precedent: -19.7% -> +68.9%)."
+                f"44.4% (4/9) audited walk-away rate ($RVMD, $CYTK, $MLTX, $PTGX avg -13.3%; modeled conservatively at "
+                f"${eff_walkaway_floor:.2f} = -18.6% vs. ${unaffected_price:.2f} Nov 3 close)."
             ),
         },
     ]
@@ -1725,10 +1707,11 @@ def evaluate_biopharma_bolt_on_candidate(
         "base_cash_bid_per_share": round(base_cash_bid_per_share, 2),
         "sweetened_ceiling_per_share": round(sweetened_ceiling_per_share, 2),
         "hard_ceiling_92pct": hard_ceiling_92pct,
+        "positive_ev_87pct_ceiling": positive_ev_87pct,
         "entry_pct_of_anchor": entry_pct_of_anchor,
         "entry_pct_of_anchor_display": round(entry_pct_of_anchor * 100.0, 1),
         "passes_anchor_92pct_gate": passes_anchor_92pct,
-        "expected_hold_clock": "7–20 Trading Days (Mon Nov 16 / Nov 23 Primary | Hard Stop Dec 7–14)",
+        "expected_hold_clock": "1–57 Trading Days (Nov 16–23 Fast | Jan 11–28 JPM/$RNA | Hard Stop Feb 1, 2027)",
         "deal_ev_billions": round(deal_ev_billions, 2),
         "base_spread_pct": round(base_spread_pct, 2),
         "sweetened_spread_pct": round(sweetened_spread_pct, 2),
@@ -1760,17 +1743,17 @@ def evaluate_biopharma_bolt_on_candidate(
         "tranche_ladder": tranches,
         "deal_timeline_windows": deal_timeline_windows,
         "live_100k_lot_scenarios": {
-            "entry_price": round(current_price, 2),
-            "position_usd": round(clip_usd, 2),
+            "entry_price": round(eff_lot_entry, 2),
+            "position_usd": round(eff_lot_usd, 2),
             "shares": lot_shares,
-            "conversion_probability_pct": 75.0,
-            "base_case_124_prob_pct": 35.0,
+            "conversion_probability_pct": round((prob_base + prob_sweet) * 100.0, 1),
+            "base_case_124_prob_pct": round(prob_base * 100.0, 1),
             "base_case_124_profit_usd": lot_base_profit_usd,
             "base_case_124_return_pct": round(base_spread_pct, 2),
-            "sweetened_case_134_prob_pct": 40.0,
+            "sweetened_case_134_prob_pct": round(prob_sweet * 100.0, 1),
             "sweetened_case_134_profit_usd": lot_sweetened_profit_usd,
             "sweetened_case_134_return_pct": round(sweetened_spread_pct, 2),
-            "walkaway_case_92_prob_pct": 25.0,
+            "walkaway_case_92_prob_pct": round(prob_walk * 100.0, 1),
             "walkaway_case_92_floor_price": round(eff_walkaway_floor, 2),
             "walkaway_case_92_loss_usd": lot_fundamental_walkaway_loss_usd,
             "walkaway_case_92_return_pct": round(
@@ -1785,14 +1768,14 @@ def evaluate_biopharma_bolt_on_candidate(
                 (expected_value_usd / eff_lot_usd) * 100.0, 2
             ),
             "sizing_rule_verdict": (
-                f"HOLD $100K LOT AT ${eff_lot_entry:.2f} (91.1% <= ${hard_ceiling_92pct:.2f} 92% CEILING) — DO NOT ADD ABOVE ${hard_ceiling_92pct:.2f}"
+                f"HOLD $100K LOT AT ${eff_lot_entry:.2f} (NEAR-BREAKEVEN +0.3% EV AT 55.6% WR) — ADD ONLY <= ${positive_ev_87pct:.2f} (87%)"
                 if passes_anchor_92pct
                 else f"ABOVE ${hard_ceiling_92pct:.2f} 92% CEILING — DO NOT CHASE"
             ),
             "scenarios": lot_scenarios_list,
         },
         "pnl_summary": {
-            "clip_usd": round(clip_usd, 2),
+            "clip_usd": round(eff_lot_usd, 2),
             "total_shares": lot_shares,
             "total_deployed_usd": lot_deployed_usd,
             "ira_base_bid_net_profit_usd": lot_base_profit_usd,
@@ -1822,61 +1805,55 @@ def main() -> int:
     scen = rytm["live_100k_lot_scenarios"]
 
     print("=" * 100)
-    print("ARB CANNON // FULL 30-EVENT UN-BIASED BIOPHARMA M&A BACKTEST & $100K $RYTM AUDIT (2022–2026)")
+    print("ARB CANNON // FORENSICALLY AUDITED 25-EVENT BIOPHARMA BACKTEST & $RYTM EXIT POLICY (2022–2026)")
     print("=" * 100)
     print(
-        f"1. UNFILTERED TRADABLE BIOTECH RUMORS (N = {uf['total_events']} Regular-Session Events, 2022–2026):"
+        f"1. UNFILTERED TRADABLE BIOTECH RUMORS (N = {uf['total_events']} Regular-Session Events | 9 Gaps Purged):"
     )
     print(
         f"   - Win Rate                        : {uf['win_rate_pct']}% ({uf['wins']}W / {uf['losses_or_walkaways']}L)"
     )
     print(
-        f"   - Strict Deal-Window Median       : {uf['median_return_per_trade_pct']:+.2f}% (Avg: {uf['avg_return_per_trade_pct']:+.2f}%)"
-    )
-    print(
-        f"   - Worst Rumor Bleed               : {uf['worst_walkaway_loss_pct']:+.2f}% ($VKTX -45.0% bleed / $BMRN -20.0% drift / $RVMD -19.7%)"
+        f"   - Deal-Window Median / Mean       : {uf['median_return_per_trade_pct']:+.2f}% Median | {uf['avg_return_per_trade_pct']:+.2f}% Mean"
     )
     print("-" * 100)
     print(
-        f"2A. BROAD COMMERCIAL / PIVOTAL RUMORS INCL. UNPRICED CHATTER (N = {bc['total_events']} Events):"
+        f"2A. BROAD COMMERCIAL / PIVOTAL PRE-8K RUMORS INCL. UNPRICED CHATTER (N = {bc['total_events']} Events):"
     )
     print(
-        f"   - Conversion Rate                 : {bc['win_rate_pct']}% ({bc['wins']}W / {bc['losses_or_walkaways']}L — includes $BMRN, $ALNY, $FOLD, $ACAD no-bid drifts)"
+        f"   - Conversion Rate                 : {bc['win_rate_pct']}% ({bc['wins']}W / {bc['losses_or_walkaways']}L | {bc['median_return_per_trade_pct']:+.2f}% Median)"
     )
     print("-" * 100)
     print(
-        f"2B. NAMED PHARMA SUITOR + SPECIFIC LEAKED DOLLAR BID + ENTRY <= 92% ANCHOR (N = {fg['qualified_events']} Events):"
+        f"2B. STRICT 6-GATE PRE-8K NAMED SUITOR + LEAKED DOLLAR BID + <=92% ANCHOR (N = {fg['qualified_events']} Events):"
     )
     print(
-        f"   - True Un-Biased Conversion Rate  : {fg['win_rate_pct']}% ({fg['wins']}W / {fg['losses_or_walkaways']}L — 12 Converted vs. 4 Walk-Aways: $RVMD, $CYTK, $MLTX, $PTGX)"
+        f"   - True Audited Conversion Rate    : {fg['win_rate_pct']}% ({fg['wins']}W / {fg['losses_or_walkaways']}L — $GBT, $HZNP, $SGEN, $RNA, $SAGE vs. $RVMD, $CYTK, $MLTX, $PTGX)"
     )
     print(
-        f"   - Median Spread (Winners / All)   : {fg['winner_median_spread_pct']:+.2f}% on Winners | {fg['median_return_per_trade_pct']:+.2f}% Overall Median"
+        f"   - Spreads (Winners / Median / Avg): {fg['winner_median_spread_pct']:+.2f}% Winner Med | {fg['median_return_per_trade_pct']:+.2f}% All Med | {fg['avg_return_per_trade_pct']:+.2f}% Mean"
     )
     print(
-        f"   - Schedule 14D-9 Hold Clock       : {fg['expected_hold_clock']} (Range: {fg['hold_days_range']})"
-    )
-    print(
-        f"   - Lone Break Standalone Recovery  : {fg['lone_break_standalone_note']}"
+        f"   - Bimodal Rumor-to-8K Clock       : {fg['hold_days_range']}"
     )
     print("-" * 100)
-    print("3. LIVE $100,000 POSITION AT $113.00 (~885 SHARES) ON $RYTM (DAY 4 POST-LEAK = TUE NOV 10, 2026):")
+    print("3. LIVE $100,000 POSITION AT $113.00 (~885 SHARES) ON $RYTM (DAY 5 TD = WED NOV 11, 2026):")
     print(
-        f"   - Entry vs. Hard 92% Ceiling      : ${scen['entry_price']:.2f} = {rytm['entry_pct_of_anchor_display']}% of $124.00 Floor (<= ${rytm['hard_ceiling_92pct']:.2f} Hard Ceiling -> HOLD, DO NOT ADD > $114.08)"
+        f"   - Entry vs. Ceilings              : ${scen['entry_price']:.2f} = {rytm['entry_pct_of_anchor_display']}% of $124.00 (Hard 92% Cap: ${rytm['hard_ceiling_92pct']:.2f} | +5% EV Add Zone: <= ${rytm['positive_ev_87pct_ceiling']:.2f})"
     )
     print(
-        f"   - Scenario 1 ($124 Base, 35% Prob): +${scen['base_case_124_profit_usd']:,.2f} ({scen['base_case_124_return_pct']:+.2f}%) Tax-Free in IRA"
+        f"   - Scenario 1 ($124 Base, {scen['base_case_124_prob_pct']}% Prb): +${scen['base_case_124_profit_usd']:,.2f} ({scen['base_case_124_return_pct']:+.2f}%)"
     )
     print(
-        f"   - Scenario 2 ($134 2-Bid, 40% Prb): +${scen['sweetened_case_134_profit_usd']:,.2f} ({scen['sweetened_case_134_return_pct']:+.2f}%) Tax-Free in IRA"
+        f"   - Scenario 2 ($134 2-Bid, {scen['sweetened_case_134_prob_pct']}% Prb): +${scen['sweetened_case_134_profit_usd']:,.2f} ({scen['sweetened_case_134_return_pct']:+.2f}%)"
     )
     print(
-        f"   - Scenario 3 ($92 Walk, 25% Prob) : ${scen['walkaway_case_92_loss_usd']:,.2f} ({scen['walkaway_case_92_return_pct']:+.2f}% = -{scen['walkaway_pct_of_4m_net_worth']:.2f}% of $4M Net Worth)"
+        f"   - Scenario 3 ($92 Walk, {scen['walkaway_case_92_prob_pct']}% Prb) : ${scen['walkaway_case_92_loss_usd']:,.2f} ({scen['walkaway_case_92_return_pct']:+.2f}% = -{scen['walkaway_pct_of_4m_net_worth']:.2f}% of $4M NW)"
     )
     print(
-        f"   - Probability-Weighted EV         : +${scen['probability_weighted_ev_usd']:,.2f} (+{(scen['probability_weighted_ev_usd']/scen['position_usd'])*100:.2f}% Expected Value)"
+        f"   - Audited Probability-Weighted EV : ${scen['probability_weighted_ev_usd']:+,.2f} ({scen['probability_weighted_ev_pct']:+.2f}%)"
     )
-    print("   - Expected Formalization Windows  :")
+    print("   - Time-Based Exit Windows         :")
     for w in rytm["deal_timeline_windows"]:
         print(f"     * {w['window_name']}: {w['target_dates']}")
     print("=" * 100)

@@ -587,53 +587,75 @@ def test_strict_rss_filter_no_fabricated_prices_and_verified_watchlist() -> None
 
 def test_biopharma_bolt_on_backtest_and_live_rytm_audit() -> None:
     """
-    Verify the Full 30-Event Un-Biased Tradable Biopharma M&A Backtest (2022–2026)
+    Verify the Forensically Audited 25-Event Tradable Biopharma M&A Backtest (2022–2026)
     and the User's Live $100,000 @ $113.00 (~885 Shares) $RYTM Position Audit:
-      - 4 untradable weekend/overnight gaps ($KRTX, $ITCI, $BPMC, $VRNA) are purged into
-        purged_untradable_weekend_gaps and excluded from historical_events
-      - Unfiltered 30 tradable events: 46.7% win rate (14W / 16L), -4.46% strict deal-window median
-      - Broad Commercial / Pivotal cohort (N = 20, incl. unpriced $BMRN, $ALNY, $FOLD, $ACAD):
-        60.0% (12W / 8L) conversion rate
-      - Named Pharma Suitor + Specific Leaked Dollar Bid + Entry <= 92% Anchor (N = 16):
-        75.0% (12W / 4L) true un-biased conversion rate (+17.72% winner median spread)
+      - 9 untradable weekend/overnight gaps ($KRTX, $ITCI, $BPMC, $VRNA, $RETA, $IMGN, $CBAY, $DCPH, $CDTX)
+        are purged into purged_untradable_weekend_gaps and excluded from historical_events
+      - Post-8K merger-arb topping wars ($MTSR, $AVDL) carry is_pre_8k_rumor=False and are excluded from 6-gate pre-8K setups
+      - Unfiltered 25 tradable events: 36.0% win rate (9W / 16L), -11.20% strict deal-window median
+      - Broad Commercial / Pivotal pre-8K cohort (N = 13, incl. unpriced $BMRN, $ALNY, $FOLD, $ACAD):
+        38.5% (5W / 8L) conversion rate, -11.64% median
+      - Strict 6-Gate Pre-8K Named Suitor + Specific Leaked Dollar Bid + Entry <= 92% Anchor (N = 9):
+        55.6% (5W / 4L) true audited conversion rate (+19.86% winner median spread, +8.73% overall median)
+      - Corrected NYSE trading-day counts: $GBT (1 TD), $HZNP (9 TDs), $SGEN (11 TDs), $RNA (57 TDs), $SAGE (97 TDs)
       - Hard Gate 5 (`entry_pct_of_anchor <= 0.92`) blocks $VTYX (121.6%), $SWTX (108.0%), $MRTX (100.3%)
       - Live $100,000 @ $113.00 (885 shares) on $RYTM:
-        * Scenario 1 ($124.00 Base, 35% Prob): +$9,735.00 (+9.73%)
-        * Scenario 2 ($134.00 Sweetened, 40% Prob): +$18,585.00 (+18.58%)
-        * Scenario 3 ($92.00 Fundamental Walk-Away Floor [$89–$95], 25% Prob): -$18,585.00 (-0.46% of $4M NW)
-        * Probability-Weighted EV: +$6,195.00 (+6.19%)
+        * Scenario 1 ($124.00 Base, 20.0% Prob): +$9,735.00 (+9.73%)
+        * Scenario 2 ($134.00 Sweetened, 35.6% Prob): +$18,585.00 (+18.58%)
+        * Scenario 3 ($92.00 Fundamental Walk-Away Floor [$89–$95], 44.4% Prob): -$18,585.00 (-0.46% of $4M NW)
+        * Audited Probability-Weighted EV: +$311.52 (+0.31%) | Positive-EV Add Ceiling (87%): $107.88
     """
     bt = run_biopharma_backtest(standard_biopharma_clip_usd=100000.0)
-    assert bt["unfiltered_metrics"]["total_events"] == 30
-    assert bt["unfiltered_metrics"]["wins"] == 14
+    assert bt["unfiltered_metrics"]["total_events"] == 25
+    assert bt["unfiltered_metrics"]["wins"] == 9
     assert bt["unfiltered_metrics"]["losses_or_walkaways"] == 16
-    assert bt["unfiltered_metrics"]["win_rate_pct"] == 46.7
-    assert bt["unfiltered_metrics"]["median_return_per_trade_pct"] == -4.46
+    assert bt["unfiltered_metrics"]["win_rate_pct"] == 36.0
+    assert bt["unfiltered_metrics"]["median_return_per_trade_pct"] == -11.20
 
     bc = bt["broad_commercial_metrics"]
-    assert bc["total_events"] == 20
-    assert bc["wins"] == 12
+    assert bc["total_events"] == 13
+    assert bc["wins"] == 5
     assert bc["losses_or_walkaways"] == 8
-    assert bc["win_rate_pct"] == 60.0
+    assert bc["win_rate_pct"] == 38.5
+    assert bc["median_return_per_trade_pct"] == -11.64
+    assert bc["avg_return_per_trade_pct"] == -2.16
 
     fg = bt["filtered_6_gate_metrics"]
-    assert fg["qualified_events"] == 16
-    assert fg["wins"] == 12
+    assert fg["qualified_events"] == 9
+    assert fg["wins"] == 5
     assert fg["losses_or_walkaways"] == 4
-    assert fg["win_rate_pct"] == 75.0
-    assert fg["winner_median_spread_pct"] == 17.72
-    assert fg["median_return_per_trade_pct"] == 15.01
-    assert fg["expected_hold_clock"] == "7–20 trading days (10–45d auction window)"
-    assert fg["hold_days_range"] == "2–82 days"
+    assert fg["win_rate_pct"] == 55.6
+    assert fg["winner_median_spread_pct"] == 19.86
+    assert fg["median_return_per_trade_pct"] == 8.73
+    assert fg["avg_return_per_trade_pct"] == 4.18
+    assert fg["avg_hold_trading_days"] == 23.2
+    assert fg["expected_hold_clock"] == "1–57 trading days (Bimodal: 1–11d fast | 53–57d contested)"
+    assert fg["hold_days_range"] == "1–97 NYSE TDs (1–57 TDs press leaks; 97 TDs public 13D review)"
     assert fg["lone_break_standalone_recovery_pct"] == 68.9
 
-    # Verify the 4 untradable weekend/overnight gaps are purged from historical_events
+    # Verify all 9 untradable weekend/overnight gaps are purged from historical_events
     purged_tickers = {g["ticker"] for g in bt["purged_untradable_weekend_gaps"]}
-    assert purged_tickers == {"KRTX", "ITCI", "BPMC", "VRNA"}
+    assert purged_tickers == {
+        "KRTX",
+        "ITCI",
+        "BPMC",
+        "VRNA",
+        "RETA",
+        "IMGN",
+        "CBAY",
+        "DCPH",
+        "CDTX",
+    }
     by_tkr = {e["ticker"]: e for e in bt["historical_events"]}
     assert purged_tickers.isdisjoint(set(by_tkr.keys()))
 
-    # Verify all 16 qualified Named-Buyer + Dollar-Bid setups (12 winners + 4 walk-aways)
+    # Verify post-8K topping wars ($MTSR, $AVDL) are excluded from pre-8K 6-gate setups
+    assert by_tkr["MTSR"]["is_pre_8k_rumor"] is False
+    assert by_tkr["MTSR"]["cleared_6_biopharma_gates"] is False
+    assert by_tkr["AVDL"]["is_pre_8k_rumor"] is False
+    assert by_tkr["AVDL"]["cleared_6_biopharma_gates"] is False
+
+    # Verify all 9 qualified Pre-8K Named-Buyer + Dollar-Bid setups (5 winners + 4 walk-aways)
     qualified_tickers = [
         e["ticker"] for e in bt["historical_events"] if e["cleared_6_biopharma_gates"]
     ]
@@ -641,21 +663,18 @@ def test_biopharma_bolt_on_backtest_and_live_rytm_audit() -> None:
         "GBT",
         "HZNP",
         "SGEN",
-        "RETA",
-        "IMGN",
-        "CBAY",
-        "DCPH",
-        "SAGE",
         "RNA",
-        "MTSR",
-        "AVDL",
-        "CDTX",
+        "SAGE",
         "RVMD",
         "CYTK",
         "MLTX",
         "PTGX",
     ]
     assert by_tkr["GBT"]["realized_return_pct"] == 8.73
+    assert by_tkr["GBT"]["hold_trading_days"] == 1
+    assert by_tkr["SGEN"]["hold_trading_days"] == 11
+    assert by_tkr["RNA"]["hold_trading_days"] == 57
+    assert by_tkr["SAGE"]["hold_trading_days"] == 97
     assert by_tkr["BMRN"]["realized_return_pct"] == -20.0
     assert by_tkr["ALNY"]["realized_return_pct"] == -15.0
     assert by_tkr["VKTX"]["realized_return_pct"] == -45.0
@@ -672,7 +691,8 @@ def test_biopharma_bolt_on_backtest_and_live_rytm_audit() -> None:
     reg_b_tickers = [r["ticker"] for r in bt["regime_b_pre_leak_radar"]]
     assert reg_b_tickers == ["RYTM", "SRRK", "COGT"]
 
-    # Verify Live $100,000 @ $113.00 (885 shares) $RYTM scenario matrix and formalization windows
+    # Verify Live $100,000 @ $113.00 (885 shares) $RYTM scenario matrix and bimodal exit windows
+    assert bt["live_rytm_audit"]["positive_ev_87pct_ceiling"] == 107.88
     live_lot = bt["live_rytm_audit"]["live_100k_lot_scenarios"]
     assert live_lot["shares"] == 885
     assert live_lot["entry_price"] == 113.00
@@ -680,7 +700,8 @@ def test_biopharma_bolt_on_backtest_and_live_rytm_audit() -> None:
     assert live_lot["scenarios"][1]["ira_0pct_tax_pnl_usd"] == 18585.0
     assert live_lot["scenarios"][2]["ira_0pct_tax_pnl_usd"] == -18585.0
     assert live_lot["scenarios"][2]["pct_of_4m_net_worth"] == -0.46
-    assert live_lot["probability_weighted_ev_usd"] == 6195.0
+    assert live_lot["probability_weighted_ev_usd"] == 311.52
+    assert live_lot["probability_weighted_ev_pct"] == 0.31
     assert len(bt["live_rytm_audit"]["deal_timeline_windows"]) == 3
 
     # Verify $RYTM live audit via calculate_deal_mechanics in BIOPHARMA_BOLT_ON mode

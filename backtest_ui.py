@@ -2,7 +2,8 @@
 Arb Cannon: Strategy Backtests UI (backtest_ui.py)
 
 Light backtest page served at GET /backtest. Reads GET /api/backtest for the
-30-event biopharma 6-gate backtest and the PE all-cash leak strategy benchmarks.
+forensically audited 25-event biopharma 6-gate backtest (9 overnight gaps purged)
+and the PE all-cash leak strategy benchmarks.
 """
 
 from ui_shell import render_page
@@ -162,6 +163,7 @@ _SCRIPT = r"""
   }
 
   const GATE_CHECKS = [
+    ['is_pre_8k_rumor', 'Pre-8K unannounced rumor'],
     ['named_pharma_suitor', 'Named pharma suitor'],
     ['specific_dollar_bid_leaked', 'Specific dollar bid leaked'],
     ['fda_approved_commercial_anchor', 'FDA-approved commercial drug'],
@@ -323,7 +325,7 @@ _SCRIPT = r"""
       <div class="det-text">${esc(e.leak_headline)}<br><span class="muted">${esc(e.leak_source)} · ${esc(fmtDate(e.leak_date))} → ${esc(fmtDate(e.resolution_date))}</span></div>
       <div class="metrics">
         <div class="metric"><div class="metric-label">Return</div><div class="metric-value ${signClass(e.realized_return_pct)}">${fmtPct(e.realized_return_pct, 2)}</div></div>
-        <div class="metric"><div class="metric-label">Hold</div><div class="metric-value">${isNum(e.hold_trading_days) ? e.hold_trading_days + ' days' : '—'}</div></div>
+        <div class="metric"><div class="metric-label">Hold</div><div class="metric-value">${isNum(e.hold_trading_days) ? `${e.hold_trading_days} TDs${isNum(e.calendar_days) ? ` (${e.calendar_days} cal d)` : ''}` : '—'}</div></div>
         <div class="metric"><div class="metric-label">Entry vs Leak</div><div class="metric-value">${isNum(e.entry_pct_of_anchor_display) ? e.entry_pct_of_anchor_display.toFixed(1) + '%' : '—'}</div></div>
         <div class="metric"><div class="metric-label">Deal EV</div><div class="metric-value">${isNum(e.deal_ev_billions) ? '$' + e.deal_ev_billions + 'B' : '—'}</div></div>
       </div>

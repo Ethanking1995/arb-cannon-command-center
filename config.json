@@ -43,7 +43,7 @@
       "input_mode": "PER_SHARE",
       "rumored_value": 124.0,
       "buyer_type": "AstraZeneca + Reported 2nd Bidder",
-      "gate_notes": "WSJ/Reuters (Nov 4, 2026): AstraZeneca approached Rhythm around ~$124/sh (~$10B) + reported 2nd bidder ($134/sh target). Live $100k lot @ $113.00 (885 sh, 91.1% <= $114.08 92% cap): +$9,735 @ $124 (35%) | +$18,585 @ $134 (40%) | -$18,585 @ $92 walk-away floor ($89\u2013$95, 25% = -0.46% of $4M NW). Primary 8-K Window (55%): Mon Nov 16 or Mon Nov 23."
+      "gate_notes": "WSJ/Reuters (Nov 4, 2026): AstraZeneca approached Rhythm around ~$124/sh (~$10B) + reported 2nd bidder ($134/sh target). Audited 6-Gate pre-8K base rate = 55.6% (5W/4L). Live $100k lot @ $113.00 (885 sh, 91.1% <= $114.08 92% cap | add only <= $107.88 87% zone): +$9,735 @ $124 (20.0%) | +$18,585 @ $134 (35.6%) | -$18,585 @ $92 walk-away floor (44.4% = -0.46% of $4M NW) -> +$312 (+0.31%) EV. Fast Window: Nov 16\u201323 | JPM/$RNA Window: Jan 11\u201328, 2027 | Hard Time-Stop: Mon Feb 1, 2027 (59 NYSE TDs)."
     },
     {
       "ticker": "GPN",
