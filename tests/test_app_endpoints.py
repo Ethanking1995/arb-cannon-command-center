@@ -43,8 +43,8 @@ def test_get_api_scanner() -> None:
     assert kpis["active_candidates"] == 5
     assert kpis["actionable_setups"] == 1
     assert kpis["actionable_biotech"] == 1
-    assert kpis["backtest_win_rate_pct"] == 84.2
-    assert kpis["avg_overnight_move_pct"] == 5.8
+    assert kpis["backtest_win_rate_pct"] == 100.0
+    assert kpis["avg_overnight_move_pct"] == 11.78
 
     top = data["opportunities"][0]
     assert top["ticker"] == "RYTM"
@@ -80,7 +80,20 @@ def test_get_api_scanner() -> None:
     assert gpn["decision_label"] == "Wait"
     assert gpn["biotech_signal"] is None
     assert len(data["wire_items"]) >= 4
-    assert len(data["performance"]["annual_pnl_table"]) == 3
+    perf = data["performance"]
+    assert len(perf["annual_pnl_table"]) == 3
+    assert len(perf["yearly_breakdown"]) == 3
+    assert perf["total_ma_events_audited"] == 223
+    assert perf["qualified_passed_count"] == 15
+    yr_2026 = next(b for b in perf["yearly_breakdown"] if b["year"] == "2026 YTD")
+    opch = next(d for d in yr_2026["deals"] if d["ticker"] == "OPCH")
+    assert opch["ticker"] == "OPCH"
+    assert opch["passed_all_gates"] is True
+    assert opch["overnight_entry_price"] == 28.29
+    assert opch["overnight_share_volume"] == 1520000
+    assert opch["deployment_clip_usd"] == 379991.28
+    assert opch["da_premarket_price"] == 31.16
+    assert opch["da_open_price"] == 31.04
 
 
 def test_get_api_price_history() -> None:
@@ -145,7 +158,9 @@ def test_get_api_backtest() -> None:
     assert bio["filtered_6_gate_metrics"]["win_rate_pct"] == 55.6
     assert len(bio["purged_untradable_weekend_gaps"]) == 9
     assert len(bio["gatekeeper_rules"]) == 6
-    assert data["pe"]["benchmarks"]["filtered_win_rate_pct"] == 84.2
+    assert data["pe"]["benchmarks"]["filtered_win_rate_pct"] == 100.0
+    assert data["pe"]["benchmarks"]["total_ma_events_audited"] == 223
+    assert len(data["pe"]["benchmarks"]["yearly_breakdown"]) == 3
     assert len(data["pe"]["gatekeeper_rules"]) == 8
     assert "alpha_window" in data["pe"]["thesis"]
 
@@ -172,10 +187,9 @@ def test_get_terminal_html() -> None:
     assert "SEPARATED STALE / EXPIRED WIRE RUMORS" in html
     assert "SEPARATED STALE RUMORS &amp; HISTORICAL BENCHMARKS" in html
     assert "calc-freshness-banner" in html
-    assert "84.2%" in html
-    assert "+$313,656" in html
-    assert "+$332,649" in html
-    assert "+$191,627" in html
+    assert "219 EVENTS AUDITED" in html
+    assert "+$36,938" in html
+    assert "+9.72%" in html
 
 
 def test_get_api_dashboard() -> None:
@@ -185,7 +199,8 @@ def test_get_api_dashboard() -> None:
     payload = resp.json()
     assert payload["telemetry"]["dry_powder_usd"] == 400000
     assert payload["telemetry"]["default_clip_usd"] == 380000
-    assert payload["benchmarks"]["filtered_win_rate_pct"] == 84.2
+    assert payload["benchmarks"]["filtered_win_rate_pct"] == 100.0
+    assert payload["benchmarks"]["total_ma_events_audited"] == 223
     assert len(payload["gatekeeper_rules"]) == 8
     assert len(payload["wire_items"]) >= 4
     assert len(payload["watchlist"]) >= 4
@@ -391,4 +406,21 @@ def test_biopharma_bolt_on_endpoints() -> None:
         107.83,
     ]
     assert calc_data["biopharma_bolt_on_audit"]["all_biopharma_gates_passed"] is True
+
+
+def test_start_script_configuration() -> None:
+    """Verify start.sh is executable, valid bash, defaults to port 8088, and opens the M&A dashboard."""
+    import os
+    import pathlib
+    import subprocess
+
+    script_path = pathlib.Path(__file__).resolve().parent.parent / "start.sh"
+    assert script_path.exists()
+    assert os.access(script_path, os.X_OK)
+    subprocess.run(["bash", "-n", str(script_path)], check=True)
+    content = script_path.read_text(encoding="utf-8")
+    assert "8088" in content
+    assert "uvicorn" in content
+    assert "app:app" in content
+
 

@@ -30,6 +30,7 @@ from biopharma_leak_backtest import (
     evaluate_biopharma_bolt_on_candidate,
     run_biopharma_backtest,
 )
+from pe_leak_backtest import run_pe_leak_backtest
 
 try:
     import yfinance as yf
@@ -92,44 +93,10 @@ STRATEGY_THESIS: Dict[str, Any] = {
     ),
 }
 
-STRATEGY_BENCHMARKS: Dict[str, Any] = {
-    "period_label": "2024–2026 YTD (46 Leak Events)",
-    "total_leak_events": 46,
-    "idle_parking_vehicle": "$SGOV (0–3 Month US Treasury ETF, 4.3%–5.0% annualized risk-free yield)",
-    "target_capital_pool_usd": 400000,
-    "clip_sizing_rule": "<= 10% of settled extended-hours dollar volume ($300,000 to $450,000 clips)",
-    "historical_avg_clip_usd": 383000,
-    "normalized_backtest_clip_usd": 500000,
-    "qualified_trade_frequency": "5 to 7 qualified trades per year (out of ~15–20 raw leaks/yr)",
-    "filtered_win_rate_pct": 84.2,
-    "sun_mon_tue_named_buyer_win_rate_pct": 93.1,
-    "avg_net_spread_captured_pct": 5.8,
-    "avg_hold_time": "48–72 Hours",
-    "realized_annual_net_dollar_expectation": "$75,000 to $95,000+ / yr (on $383k avg clip)",
-    "annual_pnl_table": [
-        {
-            "year": "2024",
-            "filtered_strategy_usd": 313656,
-            "unfiltered_all_leaks_usd": 71590,
-            "idle_sgov_usd": 26000,
-        },
-        {
-            "year": "2025",
-            "filtered_strategy_usd": 332649,
-            "unfiltered_all_leaks_usd": 68564,
-            "idle_sgov_usd": 22000,
-        },
-        {
-            "year": "2026 YTD",
-            "filtered_strategy_usd": 191627,
-            "unfiltered_all_leaks_usd": 45003,
-            "idle_sgov_usd": 15721,
-        },
-    ],
-    "cumulative_3yr_filtered_usd": 837932,
-    "cumulative_3yr_unfiltered_usd": 185157,
-    "cumulative_3yr_sgov_usd": 63721,
-}
+STRATEGY_BENCHMARKS: Dict[str, Any] = run_pe_leak_backtest(
+    default_clip_usd=380000.0,
+    capital_pool_usd=400000.0,
+)
 
 GATEKEEPER_RULES: List[Dict[str, str]] = [
     {
@@ -2811,7 +2778,14 @@ def get_scanner_payload(use_live_network: bool = True) -> Dict[str, Any]:
         "wire_items": wires,
         "performance": {
             "period_label": STRATEGY_BENCHMARKS["period_label"],
+            "total_ma_events_audited": STRATEGY_BENCHMARKS["total_ma_events_audited"],
+            "total_signed_das": STRATEGY_BENCHMARKS["total_signed_das"],
+            "total_busted_pe_leaks": STRATEGY_BENCHMARKS["total_busted_pe_leaks"],
+            "qualified_passed_count": STRATEGY_BENCHMARKS["qualified_passed_count"],
+            "overall_gate_failure_counts": STRATEGY_BENCHMARKS["overall_gate_failure_counts"],
             "annual_pnl_table": STRATEGY_BENCHMARKS["annual_pnl_table"],
+            "yearly_breakdown": STRATEGY_BENCHMARKS["yearly_breakdown"],
+            "cumulative_deployed_capital_usd": STRATEGY_BENCHMARKS["cumulative_deployed_capital_usd"],
             "cumulative_3yr_filtered_usd": STRATEGY_BENCHMARKS["cumulative_3yr_filtered_usd"],
             "cumulative_3yr_unfiltered_usd": STRATEGY_BENCHMARKS["cumulative_3yr_unfiltered_usd"],
             "cumulative_3yr_sgov_usd": STRATEGY_BENCHMARKS["cumulative_3yr_sgov_usd"],

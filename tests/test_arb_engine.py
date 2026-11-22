@@ -32,28 +32,68 @@ from nightly_mailer import build_subject_line, generate_and_send_nightly_report
 
 
 def test_strategy_benchmarks_and_gatekeeper_constants() -> None:
-    """Verify hardcoded 3-year historical backtest benchmarks and 8-Point Gatekeeper rules."""
-    assert STRATEGY_BENCHMARKS["total_leak_events"] == 46
-    assert STRATEGY_BENCHMARKS["filtered_win_rate_pct"] == 84.2
-    assert STRATEGY_BENCHMARKS["sun_mon_tue_named_buyer_win_rate_pct"] == 93.1
-    assert STRATEGY_BENCHMARKS["avg_net_spread_captured_pct"] == 5.8
+    """Verify forensically audited 3-year US M&A deal ledger, reconciled annual P&L, and 8-Point Gatekeeper rules."""
+    assert STRATEGY_BENCHMARKS["total_ma_events_audited"] == 223
+    assert STRATEGY_BENCHMARKS["total_signed_das"] == 209
+    assert STRATEGY_BENCHMARKS["total_busted_pe_leaks"] == 14
+    assert STRATEGY_BENCHMARKS["qualified_passed_count"] == 15
+    assert STRATEGY_BENCHMARKS["filtered_win_rate_pct"] == 100.0
+    assert STRATEGY_BENCHMARKS["avg_net_spread_captured_pct"] == 11.78
     assert STRATEGY_BENCHMARKS["target_capital_pool_usd"] == 400000
-    assert STRATEGY_BENCHMARKS["historical_avg_clip_usd"] == 383000
+    assert STRATEGY_BENCHMARKS["historical_avg_clip_usd"] == 279637
 
     pnl_by_year = {
         row["year"]: row for row in STRATEGY_BENCHMARKS["annual_pnl_table"]
     }
-    assert pnl_by_year["2024"]["filtered_strategy_usd"] == 313656
-    assert pnl_by_year["2024"]["unfiltered_all_leaks_usd"] == 71590
-    assert pnl_by_year["2024"]["idle_sgov_usd"] == 26000
+    assert pnl_by_year["2024"]["total_deals"] == 76
+    assert pnl_by_year["2024"]["passed_count"] == 4
+    assert pnl_by_year["2024"]["failed_count"] == 72
+    assert pnl_by_year["2024"]["filtered_strategy_usd"] == 207349
+    assert pnl_by_year["2024"]["idle_sgov_usd"] == 20600
 
-    assert pnl_by_year["2025"]["filtered_strategy_usd"] == 332649
-    assert pnl_by_year["2025"]["unfiltered_all_leaks_usd"] == 68564
-    assert pnl_by_year["2025"]["idle_sgov_usd"] == 22000
+    assert pnl_by_year["2025"]["total_deals"] == 78
+    assert pnl_by_year["2025"]["passed_count"] == 5
+    assert pnl_by_year["2025"]["failed_count"] == 73
+    assert pnl_by_year["2025"]["filtered_strategy_usd"] == 52201
+    assert pnl_by_year["2025"]["idle_sgov_usd"] == 17800
 
-    assert pnl_by_year["2026 YTD"]["filtered_strategy_usd"] == 191627
-    assert pnl_by_year["2026 YTD"]["unfiltered_all_leaks_usd"] == 45003
-    assert pnl_by_year["2026 YTD"]["idle_sgov_usd"] == 15721
+    assert pnl_by_year["2026 YTD"]["total_deals"] == 69
+    assert pnl_by_year["2026 YTD"]["passed_count"] == 6
+    assert pnl_by_year["2026 YTD"]["failed_count"] == 63
+    assert pnl_by_year["2026 YTD"]["filtered_strategy_usd"] == 161989
+    assert pnl_by_year["2026 YTD"]["idle_sgov_usd"] == 15045
+
+    # Verify 100% dollar reconciliation between annual_pnl_table and individual deals in yearly_breakdown
+    passed_tickers = set()
+    for yr_block in STRATEGY_BENCHMARKS["yearly_breakdown"]:
+        yr = yr_block["year"]
+        deals = yr_block["deals"]
+        assert len(deals) == pnl_by_year[yr]["total_deals"]
+        assert round(sum(d["realized_pnl_usd"] for d in deals)) == pnl_by_year[yr]["filtered_strategy_usd"]
+        assert round(sum(d["unfiltered_leak_pnl_usd"] for d in deals)) == pnl_by_year[yr]["unfiltered_all_leaks_usd"]
+        for d in deals:
+            if d["passed_all_gates"]:
+                passed_tickers.add(d["ticker"])
+                assert d["primary_failed_gate"] is None
+                assert d["overnight_entry_price"] > 0
+                assert d["overnight_share_volume"] > 0
+                assert d["overnight_dollar_volume"] > 0
+                assert d["deployment_clip_usd"] > 0
+                assert d["deployed_shares"] > 0
+                assert d["da_premarket_price"] is not None
+                assert d["da_open_price"] > 0
+                assert d["realized_pnl_usd"] > 0
+            else:
+                assert d["primary_failed_gate"] is not None
+                assert d["primary_failed_gate"].startswith("GATE_")
+                assert len(d["failed_gates"]) >= 1
+                assert d["deployment_clip_usd"] == 0.0
+                assert d["realized_pnl_usd"] == 0.0
+    assert passed_tickers == {
+        "PTVE", "ROIC", "B", "PRFT",
+        "EA", "DNB", "HI", "GTLS", "CDTX",
+        "SLAB", "ITGR", "OPCH", "BMBL", "CCC", "QGEN",
+    }
 
     assert len(GATEKEEPER_RULES) == 8
     expected_ids = [

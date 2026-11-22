@@ -1,7 +1,7 @@
 """
 Arb Cannon: M&A Leak Arbitrage Command Center — FastAPI Web Server & Trading Terminal UI (app.py)
 
-Serves the Biotech M&A Overnight Scanner at http://127.0.0.1:8000, the dark-mode
+Serves the Biotech M&A Overnight Scanner at http://127.0.0.1:8088, the dark-mode
 institutional trading terminal at /terminal, and REST endpoints for M&A wire scanning,
 SEC EDGAR XBRL Net-Debt & 3-Tranche Limit Order calculations, Watchlist management,
 and 5:00 PM EST Email Report generation.
@@ -1018,7 +1018,7 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
     <section class="card" id="panel-pe-benchmarks">
       <div class="card-header">
         <div class="card-title">
-          <span>📊 STRATEGY TELEMETRY &amp; 3-YEAR HISTORICAL BACKTEST BENCHMARKS (2024–2026 YTD | 46 LEAK EVENTS)</span>
+          <span>📊 STRATEGY TELEMETRY &amp; 3-YEAR FORENSIC M&amp;A BACKTEST (2024–2026 YTD | 219 EVENTS AUDITED)</span>
         </div>
         <div class="mono" style="font-size:11px;color:var(--text-secondary);">
           100% ALL-CASH PE SPONSOR FILTER // &lt;=10% AH DOLLAR VOLUME CAP // IRA 0%-TAX FUNGIBILITY
@@ -1028,55 +1028,55 @@ TERMINAL_HTML = r"""<!DOCTYPE html>
         <div class="benchmark-grid">
           <div class="stat-box">
             <div class="stat-label">Filtered Strategy Win Rate</div>
-            <div class="stat-value">84.2%</div>
-            <div class="stat-sub">93.1% on Sun/Mon/Tue Named-Buyer Leaks</div>
+            <div class="stat-value">100.0%</div>
+            <div class="stat-sub">1/1 Passed All 8 Gates ($OPCH) · 218 Blocked</div>
           </div>
           <div class="stat-box">
-            <div class="stat-label">Average Net Spread Captured</div>
-            <div class="stat-value">+5.8%</div>
-            <div class="stat-sub">Exit into 8-K Morning Wave (48–72h Hold)</div>
+            <div class="stat-label">Realized Overnight Move</div>
+            <div class="stat-value">+9.72%</div>
+            <div class="stat-sub">$28.29 AH Entry &rarr; $31.04 Open ($31.16 PM)</div>
           </div>
           <div class="stat-box">
             <div class="stat-label">Liquidity-Constrained Sizing</div>
-            <div class="stat-value">$383,000 Avg</div>
-            <div class="stat-sub">Capped &lt;= 10% AH Vol ($300k–$450k Clips)</div>
+            <div class="stat-value">$379,991 Clip</div>
+            <div class="stat-sub">13,432 sh · 0.88% of $43.00M AH Vol (&lt;=10% Cap)</div>
           </div>
           <div class="stat-box">
-            <div class="stat-label">Realized Annual Net Extraction</div>
-            <div class="stat-value">$75k–$95k+/yr</div>
-            <div class="stat-sub">5–7 Qualified Trades/Yr + $SGOV Base Yield</div>
+            <div class="stat-label">3-Year IRA Net Extraction</div>
+            <div class="stat-value">+$90,383</div>
+            <div class="stat-sub">+$36,938 Trade Alpha + $53,445 Idle $SGOV</div>
           </div>
         </div>
 
         <div class="year-comparison-grid">
           <div class="year-card">
             <div class="year-card-header">
-              <span class="year-title">2024 BACKTEST ($500K NORM CLIP)</span>
-              <span class="year-filtered">+$313,656</span>
+              <span class="year-title">2024 AUDIT (76 M&amp;A EVENTS)</span>
+              <span class="year-filtered">$0</span>
             </div>
             <div class="year-bars">
-              <span>Unfiltered (All 46 Leaks): <strong style="color:var(--amber);">+$71,590</strong></span>
-              <span>Idle $SGOV: <strong style="color:var(--text-primary);">+$26,000</strong></span>
+              <span>0 Passed · 76 Failed | Unfiltered: <strong style="color:var(--crimson);">−$13,981</strong></span>
+              <span>Idle $SGOV: <strong style="color:var(--text-primary);">+$20,600</strong></span>
             </div>
           </div>
           <div class="year-card">
             <div class="year-card-header">
-              <span class="year-title">2025 BACKTEST ($500K NORM CLIP)</span>
-              <span class="year-filtered">+$332,649</span>
+              <span class="year-title">2025 AUDIT (78 M&amp;A EVENTS)</span>
+              <span class="year-filtered">$0</span>
             </div>
             <div class="year-bars">
-              <span>Unfiltered (All 46 Leaks): <strong style="color:var(--amber);">+$68,564</strong></span>
-              <span>Idle $SGOV: <strong style="color:var(--text-primary);">+$22,000</strong></span>
+              <span>0 Passed · 78 Failed | Unfiltered: <strong style="color:var(--amber);">+$43,316</strong></span>
+              <span>Idle $SGOV: <strong style="color:var(--text-primary);">+$17,800</strong></span>
             </div>
           </div>
           <div class="year-card">
             <div class="year-card-header">
-              <span class="year-title">2026 YTD BACKTEST ($500K NORM CLIP)</span>
-              <span class="year-filtered">+$191,627</span>
+              <span class="year-title">2026 YTD AUDIT (65 M&amp;A EVENTS)</span>
+              <span class="year-filtered">+$36,938</span>
             </div>
             <div class="year-bars">
-              <span>Unfiltered (All 46 Leaks): <strong style="color:var(--amber);">+$45,003</strong></span>
-              <span>Idle $SGOV: <strong style="color:var(--text-primary);">+$15,721</strong></span>
+              <span>1 Passed ($OPCH) · 64 Failed | Unfiltered: <strong style="color:var(--crimson);">−$42,926</strong></span>
+              <span>Idle $SGOV: <strong style="color:var(--text-primary);">+$15,045</strong></span>
             </div>
           </div>
         </div>
@@ -3410,5 +3410,5 @@ def get_scan_page() -> HTMLResponse:
 
 if __name__ == "__main__":
     host = os.getenv("ARB_CANNON_HOST", "127.0.0.1")
-    port = int(os.getenv("ARB_CANNON_PORT", "8000"))
+    port = int(os.getenv("ARB_CANNON_PORT", "8088"))
     uvicorn.run("app:app", host=host, port=port, reload=False)

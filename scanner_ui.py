@@ -84,6 +84,62 @@ _STYLES = r"""
     .list-table a { color: var(--blue); }
     .list-table a:hover { text-decoration: underline; }
     .wire-reason { color: var(--text-3); font-size: 11.5px; margin-top: 3px; }
+
+    /* YEARLY ACQUISITION LEDGER */
+    .perf-summary-row { cursor: pointer; }
+    .perf-summary-row:hover { background: var(--bg-hover); }
+    .perf-summary-row.active { background: var(--bg-selected); }
+    .ledger-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; padding: 10px 12px; background: var(--bg-subtle); border: 1px solid var(--line); border-radius: 8px; }
+    .ledger-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .filter-chip { padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 500; color: var(--text-2); background: #fff; border: 1px solid var(--line); transition: all 0.12s ease; }
+    .filter-chip:hover { border-color: var(--blue-line); color: var(--text); }
+    .filter-chip.active { background: var(--blue-soft); border-color: var(--blue); color: var(--blue); font-weight: 600; }
+    .filter-chip.pass-chip.active { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+    .ledger-search { min-width: 220px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: #fff; font: inherit; font-size: 12px; color: var(--text); }
+    .ledger-search:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+
+    .year-ledger { margin-top: 14px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+    .year-ledger > summary { list-style: none; cursor: pointer; padding: 11px 14px; background: var(--bg-sidebar); border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; user-select: none; }
+    .year-ledger > summary::-webkit-details-marker { display: none; }
+    .year-ledger:not([open]) > summary { border-bottom: none; }
+    .year-head-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .year-caret { font-size: 11px; color: var(--text-2); transition: transform 0.15s ease; display: inline-block; }
+    .year-ledger[open] .year-caret { transform: rotate(90deg); }
+    .year-head-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .year-head-meta { font-size: 12px; color: var(--text-2); }
+    .year-head-right { display: flex; align-items: center; gap: 14px; font-size: 12px; flex-wrap: wrap; }
+
+    .ledger-scroll { overflow-x: auto; }
+    .deal-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .deal-table th { text-align: left; font-weight: 600; color: var(--text-2); font-size: 11.5px; padding: 8px 10px; border-bottom: 1px solid var(--line); background: #FAFBFD; white-space: nowrap; }
+    .deal-table th.num, .deal-table td.num { text-align: right; white-space: nowrap; }
+    .deal-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .deal-row { cursor: pointer; transition: background 0.1s ease; }
+    .deal-row:hover { background: var(--bg-hover); }
+    .deal-row.passed { background: #F2FBF5; }
+    .deal-row.passed:hover { background: #E7F6EC; }
+    .deal-row.passed td:first-child { box-shadow: inset 3px 0 0 var(--green); }
+    .deal-row.expanded { background: var(--bg-selected); }
+    .deal-sub { color: var(--text-3); font-size: 11px; margin-top: 2px; line-height: 1.35; }
+    .deal-reason { color: var(--text-2); font-size: 11.5px; margin-top: 4px; line-height: 1.38; max-width: 390px; }
+    .cat-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 6px; background: var(--bg-subtle); color: var(--text-2); vertical-align: 1px; }
+    .cat-tag.pe { background: var(--blue-soft); color: var(--blue); }
+    .cat-tag.busted { background: var(--amber-soft); color: var(--amber); }
+    .sec-gate-chip { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; background: var(--bg-subtle); color: var(--text-2); margin-left: 4px; }
+
+    .drawer-row td { background: #F9FAFC; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+    .drawer-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; }
+    .drawer-gates { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px 14px; list-style: none; margin-top: 6px; }
+    .drawer-gates li { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-2); }
+    .g-dot { width: 15px; height: 15px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 9.5px; font-weight: 700; color: #fff; }
+    .g-dot.pass { background: var(--green); }
+    .g-dot.fail { background: var(--red); }
+    .g-dot.na { background: #C5CBD5; }
+    .drawer-kvs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 18px; margin-top: 6px; font-size: 11.5px; }
+    .drawer-kv { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dashed var(--line); }
+    .drawer-kv span:first-child { color: var(--text-2); }
+    .drawer-kv span:last-child { font-weight: 600; text-align: right; }
+    @media (max-width: 1000px) { .drawer-grid, .drawer-gates, .drawer-kvs { grid-template-columns: 1fr; } }
 """
 
 _BODY = r"""
@@ -198,14 +254,39 @@ _BODY = r"""
     <!-- PERFORMANCE -->
     <section id="pane-performance" class="tab-pane">
       <div class="pane-section">
-        <h2 class="section-title">PE All-Cash Leak Strategy</h2>
-        <p class="pane-note" id="perf-period"></p>
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">PE All-Cash Leak Strategy — Yearly Acquisition Breakdown</h2>
+            <p class="pane-note" id="perf-period"></p>
+          </div>
+          <div class="seg" id="perf-year-seg">
+            <button class="active" data-yr="ALL" onclick="setPerfYear('ALL')">All Years</button>
+            <button data-yr="2026 YTD" onclick="setPerfYear('2026 YTD')">2026 YTD</button>
+            <button data-yr="2025" onclick="setPerfYear('2025')">2025</button>
+            <button data-yr="2024" onclick="setPerfYear('2024')">2024</button>
+          </div>
+        </div>
         <table class="list-table">
           <thead>
-            <tr><th>Year</th><th class="num">Filtered Strategy</th><th class="num">Unfiltered (All Leaks)</th><th class="num">Idle $SGOV</th></tr>
+            <tr>
+              <th>Year</th>
+              <th class="num">Deals Audited</th>
+              <th>Gate Outcomes</th>
+              <th class="num">Capital Deployed</th>
+              <th class="num">Filtered Strategy</th>
+              <th class="num">Unfiltered (72h Leaks)</th>
+              <th class="num">Idle $SGOV</th>
+            </tr>
           </thead>
           <tbody id="perf-body"></tbody>
         </table>
+
+        <div class="ledger-toolbar">
+          <div class="ledger-filters" id="perf-gate-filters"></div>
+          <input type="search" id="perf-search" class="ledger-search" placeholder="Filter ticker, target, or buyer…" oninput="setPerfSearch(this.value)" />
+        </div>
+
+        <div id="perf-yearly-ledgers"></div>
       </div>
       <div class="pane-section">
         <h2 class="section-title">Biopharma 6-Gate Backtest</h2>
@@ -226,6 +307,10 @@ _SCRIPT = r"""
     lastUpdate: null,
     historyToken: 0,
     history: null,
+    perfYear: 'ALL',
+    perfGate: 'ALL',
+    perfSearch: '',
+    expandedDeal: 'OPCH|2026 YTD',
   };
 
   const BIO_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5L4.6 18.6A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.4L14 9.5V3"/><path d="M7.5 15h9"/></svg>';
@@ -500,20 +585,327 @@ _SCRIPT = r"""
     }).join('');
   }
 
+  const GATE_SHORT_MAP = {
+    GATE_2_TIER1_SOURCE: 'Gate 2 · No Leak',
+    GATE_3_TIMING_AND_PRICE: 'Gate 3 · Timing / Session',
+    GATE_4_ALL_CASH: 'Gate 4 · Stock / CVR',
+    GATE_5_CLEAN_BUYER: 'Gate 5 · Strategic / CFIUS',
+    GATE_6_NET_DEBT_AUDIT: 'Gate 6 · Take-Under',
+    GATE_7_LIQUIDITY_AND_TRANCHES: 'Gate 7 · Spread <5.5%',
+    GATE_8_EXIT_PROTOCOL: 'Gate 8 · >72h / Busted',
+  };
+
+  function fmtSharesCompact(v) {
+    if (!isNum(v)) return '—';
+    if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M sh';
+    if (v >= 1e3) return Math.round(v / 1e3).toLocaleString('en-US') + 'k sh';
+    return v.toLocaleString('en-US') + ' sh';
+  }
+
+  function fmtAhVolUsd(v) {
+    if (!isNum(v)) return '—';
+    if (v >= 1e6) return '$' + (v / 1e6).toFixed(2) + 'M';
+    return fmtUsdPlain(v);
+  }
+
+  function setPerfYear(yr) {
+    STATE.perfYear = yr;
+    document.querySelectorAll('#perf-year-seg button').forEach((b) => b.classList.toggle('active', b.dataset.yr === yr));
+    renderPerformance();
+  }
+
+  function setPerfGate(gate) {
+    STATE.perfGate = gate;
+    renderPerformance();
+  }
+
+  function setPerfSearch(q) {
+    STATE.perfSearch = String(q || '');
+    renderYearlyLedgers();
+  }
+
+  function toggleDealDrawer(key) {
+    STATE.expandedDeal = STATE.expandedDeal === key ? null : key;
+    renderYearlyLedgers();
+  }
+
+  function dealMatchesFilters(d) {
+    if (STATE.perfGate === 'PASSED' && !d.passed_all_gates) return false;
+    if (STATE.perfGate === 'LEAKED' && !d.had_pre_da_leak) return false;
+    if (STATE.perfGate.startsWith('GATE_') && !d.passed_all_gates) {
+      if (d.primary_failed_gate !== STATE.perfGate && !(d.failed_gates || []).includes(STATE.perfGate)) return false;
+    } else if (STATE.perfGate.startsWith('GATE_') && d.passed_all_gates) {
+      return false;
+    }
+    const q = STATE.perfSearch.trim().toLowerCase();
+    if (q) {
+      const hay = `${d.ticker} ${d.company_name} ${d.buyer} ${d.category} ${d.primary_failed_gate_label || ''}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }
+
+  function renderDealRow(d) {
+    const key = `${d.ticker}|${d.year}`;
+    const isExp = STATE.expandedDeal === key;
+    const catCls = d.category === 'PE Take-Private' ? 'pe' : d.category === 'Busted PE Leak' ? 'busted' : '';
+    const daMeta = d.da_date
+      ? `DA: ${fmtDate(d.da_date)}${d.da_timing ? ' (' + d.da_timing + ')' : ''}`
+      : 'No DA signed (Busted / Rejected)';
+    const evMeta = isNum(d.deal_ev_billions) && d.deal_ev_billions > 0 ? `$${d.deal_ev_billions.toFixed(2).replace(/\.00$/, '.0')}B EV` : '';
+    const termsMeta = isNum(d.deal_price_per_share)
+      ? `${fmtPx(d.deal_price_per_share)}/sh · ${d.consideration}`
+      : d.consideration;
+
+    // 2. Gate Verdict / Exact Gate Failed
+    let gateCell = '';
+    if (d.passed_all_gates) {
+      gateCell = `
+        <span class="pill open">&#10003; Passed All 8 Gates</span>
+        <div class="deal-reason">${esc(d.gate_fail_reason)}</div>`;
+    } else {
+      const otherFailed = (d.failed_gates || [])
+        .filter((g) => g !== d.primary_failed_gate)
+        .slice(0, 2)
+        .map((g) => `<span class="sec-gate-chip">+ ${esc((GATE_SHORT_MAP[g] || g).split(' · ')[0])}</span>`)
+        .join('');
+      gateCell = `
+        <div><span class="pill avoid">&#10005; ${esc(d.primary_failed_gate_label)}</span>${otherFailed}</div>
+        <div class="deal-reason">${esc(d.gate_fail_reason)}</div>`;
+    }
+
+    // 3. Overnight Entry
+    let entryCell = '<span class="muted">—</span>';
+    if (d.passed_all_gates && isNum(d.overnight_entry_price)) {
+      entryCell = `
+        <strong>${fmtPx(d.overnight_entry_price)}</strong>
+        <div class="deal-sub">Pre-leak: ${fmtPx(d.unaffected_close_price)}${isNum(d.gross_discount_to_deal_pct) ? ` · ${fmtPct(d.gross_discount_to_deal_pct, 1)} to DA` : ''}</div>`;
+    } else if (isNum(d.overnight_entry_price)) {
+      entryCell = `
+        <span class="muted" title="Observed post-leak price (blocked by gates)">Obs: ${fmtPx(d.overnight_entry_price)}</span>
+        <div class="deal-sub">Pre-leak: ${fmtPx(d.unaffected_close_price)}</div>`;
+    } else if (isNum(d.unaffected_close_price)) {
+      entryCell = `<span class="muted">—</span><div class="deal-sub">Unaff: ${fmtPx(d.unaffected_close_price)}</div>`;
+    }
+
+    // 4. Overnight Volume
+    let volCell = '<span class="muted">—</span>';
+    if (isNum(d.overnight_share_volume) && d.overnight_share_volume > 0) {
+      volCell = `
+        <span>${esc(fmtSharesCompact(d.overnight_share_volume))}</span>
+        <div class="deal-sub">${esc(fmtAhVolUsd(d.overnight_dollar_volume))} AH vol</div>`;
+    } else if (d.had_pre_da_leak && (d.leak_session === 'Weekend' || d.ticker === 'VRNA')) {
+      volCell = `<span class="muted">0 sh</span><div class="deal-sub">Markets closed</div>`;
+    }
+
+    // 5. Deployment Clip
+    let clipCell = `<span class="muted">$0</span><div class="deal-sub">Blocked</div>`;
+    if (d.passed_all_gates && d.deployment_clip_usd > 0) {
+      clipCell = `
+        <strong>${fmtUsdPlain(d.deployment_clip_usd)}</strong>
+        <div class="deal-sub">${d.deployed_shares.toLocaleString('en-US')} sh${isNum(d.clip_pct_of_ah_volume) ? ` · ${d.clip_pct_of_ah_volume}% AH vol` : ''}</div>`;
+    }
+
+    // 6. DA Premarket / Open
+    let openCell = '<span class="muted">—</span>';
+    if (isNum(d.da_premarket_price) && isNum(d.da_open_price) && d.da_premarket_price !== d.da_open_price) {
+      openCell = `
+        <strong>${fmtPx(d.da_premarket_price)} PM / ${fmtPx(d.da_open_price)} Open</strong>
+        <div class="deal-sub">DA Offer: ${fmtPx(d.deal_price_per_share)}</div>`;
+    } else if (isNum(d.da_open_price)) {
+      const lbl = d.da_date === '2026-11-19' && d.da_timing === 'After-Hours' ? 'Post-DA AH' : 'Open';
+      openCell = `
+        <strong>${fmtPx(d.da_open_price)} ${lbl}</strong>
+        <div class="deal-sub">DA Offer: ${fmtPx(d.deal_price_per_share)}</div>`;
+    } else if (!d.da_date && isNum(d.observed_exit_price)) {
+      openCell = `
+        <span class="muted">${fmtPx(d.observed_exit_price)} (72h stop)</span>
+        <div class="deal-sub">No DA signed</div>`;
+    } else if (isNum(d.deal_price_per_share) && d.da_date) {
+      openCell = `
+        <span class="muted">—</span>
+        <div class="deal-sub">DA Offer: ${fmtPx(d.deal_price_per_share)}</div>`;
+    }
+
+    // 7. Realized P&L
+    let pnlCell = '<span class="muted">$0</span>';
+    if (d.passed_all_gates) {
+      pnlCell = `
+        <strong class="${signClass(d.realized_pnl_usd)}">${fmtUsd(d.realized_pnl_usd)}</strong>
+        <div class="deal-sub ${signClass(d.realized_return_pct)}">${fmtPct(d.realized_return_pct, 2)} at open${isNum(d.premarket_return_pct) ? ` (${fmtPct(d.premarket_return_pct, 2)} PM)` : ''}</div>`;
+    } else if (isNum(d.unfiltered_leak_pnl_usd) && d.unfiltered_leak_pnl_usd < 0) {
+      pnlCell = `
+        <span class="pill open" style="font-size:10.5px;" title="Loss avoided by Gatekeeper filter">Avoided ${fmtUsd(d.unfiltered_leak_pnl_usd)}</span>
+        <div class="deal-sub neg">Unfiltered: ${fmtPct(d.observed_leak_return_pct, 1)}</div>`;
+    } else if (isNum(d.unfiltered_leak_pnl_usd) && d.unfiltered_leak_pnl_usd > 0) {
+      pnlCell = `
+        <span class="muted">$0</span>
+        <div class="deal-sub">Obs: ${fmtPct(d.observed_leak_return_pct, 1)} (${fmtUsd(d.unfiltered_leak_pnl_usd)})</div>`;
+    }
+
+    let drawerHtml = '';
+    if (isExp) {
+      const gatesHtml = (d.gate_checks || []).map((g) => {
+        const cls = g.status === 'PASS' ? 'pass' : g.status === 'FAIL' ? 'fail' : 'na';
+        const sym = g.status === 'PASS' ? '&#10003;' : g.status === 'FAIL' ? '&#10005;' : '—';
+        return `<li><span class="g-dot ${cls}">${sym}</span><span><strong>Gate ${esc(g.number)}:</strong> ${esc(g.title)} (${esc(g.status)})</span></li>`;
+      }).join('');
+      const kvs = [
+        ['Pre-Leak Close', fmtPx(d.unaffected_close_price)],
+        ['Overnight Settled Entry', fmtPx(d.overnight_entry_price)],
+        ['Overnight Share Vol', fmtSharesCompact(d.overnight_share_volume)],
+        ['Overnight Dollar Vol', fmtAhVolUsd(d.overnight_dollar_volume)],
+        ['10% AH Liquidity Cap', fmtUsdPlain(d.max_10pct_ah_clip_usd)],
+        ['Deployment Clip', d.passed_all_gates ? `${fmtUsdPlain(d.deployment_clip_usd)} (${d.deployed_shares.toLocaleString('en-US')} sh)` : '$0 (Blocked by gates)'],
+        ['DA Premarket Print', fmtPx(d.da_premarket_price)],
+        ['DA Day 9:30 AM Open', fmtPx(d.da_open_price)],
+        ['Signed DA Deal Price', d.da_date ? `${fmtPx(d.deal_price_per_share)} (${d.consideration})` : 'No DA signed'],
+        ['Filtered vs Unfiltered P&L', `${fmtUsd(d.realized_pnl_usd)} vs ${fmtUsd(d.unfiltered_leak_pnl_usd)}`],
+      ].map(([k, v]) => `<div class="drawer-kv"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
+
+      drawerHtml = `
+        <tr class="drawer-row">
+          <td colspan="7">
+            <div class="drawer-grid">
+              <div>
+                <div style="font-weight:700;font-size:12px;color:var(--text);">8-Gate Audit (${d.passed_gates_count}/${d.total_gates_count} Passed) &amp; Leak Chronology</div>
+                <div class="deal-sub" style="color:var(--text-2);margin-top:4px;font-size:11.5px;">${esc(d.leak_summary)}</div>
+                <ul class="drawer-gates">${gatesHtml}</ul>
+              </div>
+              <div>
+                <div style="font-weight:700;font-size:12px;color:var(--text);">Overnight Sizing &amp; DA Convergence Telemetry</div>
+                <div class="drawer-kvs">${kvs}</div>
+              </div>
+            </div>
+          </td>
+        </tr>`;
+    }
+
+    return `
+      <tr class="deal-row${d.passed_all_gates ? ' passed' : ''}${isExp ? ' expanded' : ''}" data-dealkey="${esc(key)}">
+        <td>
+          <div><span class="tkr">$${esc(d.ticker)}</span> <span>${esc(d.company_name)}</span><span class="cat-tag ${catCls}">${esc(d.category)}</span></div>
+          <div class="deal-sub"><strong>${esc(d.buyer)}</strong> · ${esc(daMeta)}${evMeta ? ' · ' + esc(evMeta) : ''} · ${esc(termsMeta)}</div>
+        </td>
+        <td>${gateCell}</td>
+        <td class="num">${entryCell}</td>
+        <td class="num">${volCell}</td>
+        <td class="num">${clipCell}</td>
+        <td class="num">${openCell}</td>
+        <td class="num">${pnlCell}</td>
+      </tr>${drawerHtml}`;
+  }
+
+  function renderYearlyLedgers() {
+    const p = STATE.data?.performance || {};
+    const blocks = (p.yearly_breakdown || []).slice().reverse(); // 2026 YTD -> 2025 -> 2024
+    const container = document.getElementById('perf-yearly-ledgers');
+    if (!container) return;
+
+    const visibleBlocks = STATE.perfYear === 'ALL' ? blocks : blocks.filter((b) => b.year === STATE.perfYear);
+    container.innerHTML = visibleBlocks.map((yrBlock) => {
+      const deals = (yrBlock.deals || []).filter(dealMatchesFilters);
+      const rowsHtml = deals.length
+        ? deals.map(renderDealRow).join('')
+        : `<tr><td colspan="7" class="table-empty">No ${esc(yrBlock.year)} acquisitions match the active filter.</td></tr>`;
+
+      const passBadge = yrBlock.passed_count > 0
+        ? `<span class="pill open">${yrBlock.passed_count} Passed</span>`
+        : `<span class="pill">${yrBlock.passed_count} Passed</span>`;
+
+      return `
+        <details class="year-ledger" open>
+          <summary>
+            <div class="year-head-left">
+              <span class="year-caret">&#9654;</span>
+              <span class="year-head-title">${esc(yrBlock.year)} Acquisitions (${deals.length}${deals.length !== yrBlock.total_deals ? ' of ' + yrBlock.total_deals : ''})</span>
+              ${passBadge}
+              <span class="pill avoid">${yrBlock.failed_count} Failed Gates</span>
+              <span class="year-head-meta">${yrBlock.signed_da_count} signed DAs + ${yrBlock.busted_leak_count} busted PE leaks · ${yrBlock.pre_da_leak_count} had pre-DA leak</span>
+            </div>
+            <div class="year-head-right">
+              <span>Deployed: <strong>${fmtUsdPlain(yrBlock.deployed_capital_usd)}</strong></span>
+              <span>Filtered P&amp;L: <strong class="${signClass(yrBlock.filtered_strategy_usd)}">${fmtUsd(yrBlock.filtered_strategy_usd)}</strong></span>
+              <span>Unfiltered: <strong class="${signClass(yrBlock.unfiltered_all_leaks_usd)}">${fmtUsd(yrBlock.unfiltered_all_leaks_usd)}</strong></span>
+            </div>
+          </summary>
+          <div class="ledger-scroll">
+            <table class="deal-table">
+              <thead>
+                <tr>
+                  <th>Acquisition / Buyer &amp; Terms</th>
+                  <th>Gate Verdict / Exact Gate Failed</th>
+                  <th class="num">Overnight Entry</th>
+                  <th class="num">Overnight Volume</th>
+                  <th class="num">Deployment Clip</th>
+                  <th class="num">DA Premarket / Open</th>
+                  <th class="num">Strategy P&amp;L</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        </details>`;
+    }).join('');
+
+    container.querySelectorAll('tr.deal-row[data-dealkey]').forEach((tr) => {
+      tr.addEventListener('click', () => toggleDealDrawer(tr.dataset.dealkey));
+    });
+  }
+
   function renderPerformance() {
     const p = STATE.data.performance || {};
     document.getElementById('perf-period').textContent = p.period_label || '';
+
     const rows = (p.annual_pnl_table || []).map((r) => `
-      <tr><td>${esc(r.year)}</td>
-        <td class="num pos">${fmtUsd(r.filtered_strategy_usd)}</td>
-        <td class="num">${fmtUsd(r.unfiltered_all_leaks_usd)}</td>
-        <td class="num">${fmtUsd(r.idle_sgov_usd)}</td></tr>`);
+      <tr class="perf-summary-row${STATE.perfYear === r.year ? ' active' : ''}" onclick="setPerfYear('${esc(r.year)}')" title="Click to filter ${esc(r.year)} deals">
+        <td><strong>${esc(r.year)}</strong></td>
+        <td class="num">${r.total_deals ?? '—'} <span class="muted" style="font-size:11px;">(${r.signed_da_count ?? 0} DA + ${r.busted_leak_count ?? 0} bust)</span></td>
+        <td>
+          ${(r.passed_count || 0) > 0 ? `<span class="pill open">${r.passed_count} passed</span>` : `<span class="pill">0 passed</span>`}
+          <span class="pill avoid" style="margin-left:4px;">${r.failed_count ?? 0} failed</span>
+        </td>
+        <td class="num">${fmtUsdPlain(r.deployed_capital_usd || 0)}</td>
+        <td class="num ${signClass(r.filtered_strategy_usd)}"><strong>${fmtUsd(r.filtered_strategy_usd)}</strong></td>
+        <td class="num ${signClass(r.unfiltered_all_leaks_usd)}">${fmtUsd(r.unfiltered_all_leaks_usd)}</td>
+        <td class="num pos">${fmtUsd(r.idle_sgov_usd)}</td>
+      </tr>`);
+    const totPassed = p.qualified_passed_count ?? 0;
+    const totAudited = p.total_ma_events_audited ?? 0;
     rows.push(`
-      <tr><td><strong>3-Year Total</strong></td>
-        <td class="num pos"><strong>${fmtUsd(p.cumulative_3yr_filtered_usd)}</strong></td>
-        <td class="num"><strong>${fmtUsd(p.cumulative_3yr_unfiltered_usd)}</strong></td>
-        <td class="num"><strong>${fmtUsd(p.cumulative_3yr_sgov_usd)}</strong></td></tr>`);
+      <tr class="perf-summary-row${STATE.perfYear === 'ALL' ? ' active' : ''}" onclick="setPerfYear('ALL')" title="Click to show all years">
+        <td><strong>3-Year Total</strong></td>
+        <td class="num"><strong>${totAudited}</strong> <span class="muted" style="font-size:11px;">(${p.total_signed_das ?? 0} DA + ${p.total_busted_pe_leaks ?? 0} bust)</span></td>
+        <td>
+          <span class="pill open">${totPassed} passed</span>
+          <span class="pill avoid" style="margin-left:4px;">${Math.max(0, totAudited - totPassed)} failed</span>
+        </td>
+        <td class="num"><strong>${fmtUsdPlain(p.cumulative_deployed_capital_usd || 0)}</strong></td>
+        <td class="num ${signClass(p.cumulative_3yr_filtered_usd)}"><strong>${fmtUsd(p.cumulative_3yr_filtered_usd)}</strong></td>
+        <td class="num ${signClass(p.cumulative_3yr_unfiltered_usd)}"><strong>${fmtUsd(p.cumulative_3yr_unfiltered_usd)}</strong></td>
+        <td class="num pos"><strong>${fmtUsd(p.cumulative_3yr_sgov_usd)}</strong></td>
+      </tr>`);
     document.getElementById('perf-body').innerHTML = rows.join('');
+
+    // Build Gate Filter Chips with exact counts for selected year(s)
+    const activeDeals = (p.yearly_breakdown || [])
+      .filter((b) => STATE.perfYear === 'ALL' || b.year === STATE.perfYear)
+      .flatMap((b) => b.deals || []);
+    const passCnt = activeDeals.filter((d) => d.passed_all_gates).length;
+    const leakCnt = activeDeals.filter((d) => d.had_pre_da_leak).length;
+    const countGate = (gid) => activeDeals.filter((d) => !d.passed_all_gates && (d.primary_failed_gate === gid || (d.failed_gates || []).includes(gid))).length;
+
+    const chipDefs = [
+      ['ALL', `All Deals (${activeDeals.length})`, ''],
+      ['PASSED', `Passed All Gates (${passCnt})`, 'pass-chip'],
+      ['LEAKED', `Had Pre-DA Leak (${leakCnt})`, ''],
+      ...Object.entries(GATE_SHORT_MAP).map(([gid, lbl]) => [gid, `${lbl} (${countGate(gid)})`, '']),
+    ];
+    document.getElementById('perf-gate-filters').innerHTML = chipDefs.map(([id, label, extraCls]) =>
+      `<button class="filter-chip ${extraCls}${STATE.perfGate === id ? ' active' : ''}" onclick="setPerfGate('${id}')">${esc(label)}</button>`
+    ).join('');
+
+    renderYearlyLedgers();
 
     const b = p.biopharma_filtered || {};
     document.getElementById('bio-period').textContent = p.biopharma_period || '';

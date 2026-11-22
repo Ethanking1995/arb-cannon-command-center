@@ -14,6 +14,13 @@ Local, self-hosted quantitative Python web application and automated 5:00 PM EST
 ## Quick Start
 
 ```bash
+# One-command launch: bootstraps .venv if needed, serves http://127.0.0.1:8088/, and opens the browser
+./start.sh
+```
+
+Or run individual commands manually:
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -24,7 +31,7 @@ pytest -v
 # Generate 5:00 PM EST HTML briefing (dry-run)
 python nightly_mailer.py --dry-run
 
-# Launch FastAPI Command Center on http://127.0.0.1:8088
+# Launch M&A Overnight Scanner & Rumor Dashboard on http://127.0.0.1:8088
 uvicorn app:app --host 127.0.0.1 --port 8088 --reload
 
 # Launch NVDA Intraday Signal Monitor on http://127.0.0.1:9879
